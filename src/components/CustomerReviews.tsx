@@ -6,7 +6,7 @@ const reviews = [
     name: "Sarah Johnson",
     rating: 5,
     review: "Absolutely stunning jewelry! The craftsmanship is exceptional and the customer service was wonderful.",
-    image: "https://images.unsplash.com/photo-1494790108755-2616b612b5bb?w=80&q=80"
+    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&q=80"
   },
   {
     name: "Michael Chen",
@@ -55,7 +55,7 @@ const CustomerReviews = () => {
                   <h4 className="font-semibold text-black">{review.name}</h4>
                   <div className="flex">
                     {[...Array(review.rating)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-black text-black" />
+                      <Star key={i} className="h-4 w-4 text-brandgold fill-brandgold" />
                     ))}
                   </div>
                 </div>

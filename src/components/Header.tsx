@@ -1,525 +1,686 @@
-
 import { useState, useEffect } from "react";
-import { Menu, X, Search, ShoppingBag, User, ChevronDown, LogOut, LogIn } from "lucide-react";
+import { Menu, X, Search, User, LogOut, ShoppingCart, Heart, Mail, ContactIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogOverlay } from "@/components/ui/dialog"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
 
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [isScrolled, setIsScrolled] = useState(false);
-  const { user, logout, isAuthenticated } = useAuth();
-  const { getTotalItems } = useCart();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const isHomePage = location.pathname === '/';
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const [isSearchOpen, setIsSearchOpen] = useState(false);
+	const [searchQuery, setSearchQuery] = useState("");
+	const [isScrolled, setIsScrolled] = useState(false);
+	const { user, logout, isAuthenticated } = useAuth();
+	const { getTotalItems } = useCart();
+	const navigate = useNavigate();
+	const location = useLocation();
+	const isHomePage = location.pathname === '/';
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
+	useEffect(() => {
+		const handleScroll = () => {
+			setIsScrolled(window.scrollY > 100);
+		};
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+		window.addEventListener("scroll", handleScroll);
+		return () => window.removeEventListener("scroll", handleScroll);
+	}, []);
 
-  const collections = [
-    { name: "Engagement Collection", href: "/collections/engagement" },
-    { name: "Vintage Collection", href: "/collections/vintage" },
-    { name: "Anniversary Collection", href: "/collections/anniversary" },
-    { name: "Bridal Collection", href: "/collections/bridal" }
-  ];
+	const collections = [
+		{ name: "Engagement Collection", href: "/collections/engagement" },
+		{ name: "Vintage Collection", href: "/collections/vintage" },
+		{ name: "Anniversary Collection", href: "/collections/anniversary" },
+		{ name: "Bridal Collection", href: "/collections/bridal" }
+	];
 
-  const categories = [
-    { name: "Rings", href: "/products/rings" },
-    { name: "Necklaces", href: "/products/necklaces" },
-    { name: "Earrings", href: "/products/earrings" },
-    { name: "Bracelets", href: "/products/bracelets" }
-  ];
+	const categories = [
+		{ name: "Rings", href: "/products/rings" },
+		{ name: "Necklaces", href: "/products/necklaces" },
+		{ name: "Earrings", href: "/products/earrings" },
+		{ name: "Bracelets", href: "/products/bracelets" }
+	];
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery("");
-      setIsSearchOpen(false);
-    }
-  };
+	const handleSearch = (e: React.FormEvent) => {
+		e.preventDefault();
+		if (searchQuery.trim()) {
+			navigate(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+			setSearchQuery("");
+			setIsSearchOpen(false);
+		}
+	};
 
-  const toggleSearch = () => {
-    setIsSearchOpen(!isSearchOpen);
-    if (!isSearchOpen) {
-      setSearchQuery("");
-    }
-  };
+	// const toggleSearch = () => {
+	// 	setIsSearchOpen(!isSearchOpen);
+	// 	if (!isSearchOpen) {
+	// 		setSearchQuery("");
+	// 	}
+	// };
 
-  // Determine text color based on scroll state and page type
-  const getTextColor = () => {
-    if (isScrolled) return 'text-gray-900';
-    return isHomePage ? 'text-white' : 'text-gray-900';
-  };
+	// Determine text color based on scroll state and page type
+	const getTextColor = () => {
+		if (isScrolled) return 'text-gray-900';
+		return isHomePage ? 'text-white' : 'text-gray-900';
+	};
 
-  const getHoverColor = () => {
-    if (isScrolled) return 'hover:text-primary';
-    return isHomePage ? 'hover:text-primary-light' : 'hover:text-primary';
-  };
+	const getHoverColor = () => {
+		if (isScrolled) return 'hover:text-primary';
+		return isHomePage ? 'hover:text-primary-light' : 'hover:text-primary';
+	};
 
-  const getBorderColor = () => {
-    if (isScrolled) return 'border-gray-200/50';
-    return isHomePage ? 'border-white/30' : 'border-gray-200/50';
-  };
+	const getBorderColor = () => {
+		if (isScrolled) return 'border-gray-200/50';
+		return isHomePage ? 'border-white/30' : 'border-gray-200/50';
+	};
 
-  const getButtonHoverBg = () => {
-    if (isScrolled) return 'hover:bg-gray-100';
-    return 'hover:bg-primary/80';
-  };
+	const getButtonHoverBg = () => {
+		if (isScrolled) return 'hover:bg-gray-100';
+		return 'hover:bg-primary/80';
+	};
 
-  const textColorClass = getTextColor();
-  const hoverColorClass = getHoverColor();
-  const borderColorClass = getBorderColor();
-  const buttonHoverBgClass = getButtonHoverBg();
+	const textColorClass = getTextColor();
+	const hoverColorClass = getHoverColor();
+	const borderColorClass = getBorderColor();
+	const buttonHoverBgClass = getButtonHoverBg();
 
-  return (
-    <header 
-      className={`sticky top-3 z-50 transition-all duration-300 mx-4 rounded-2xl backdrop-blur-xl shadow-lg ${textColorClass} ${
-        isScrolled 
-          ? 'bg-white/10 shadow-black/20' 
-          : 'bg-white/5'
-      } border ${borderColorClass}`}
-      style={{
-        backdropFilter: 'blur(16px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(16px) saturate(180%)',
-      }}
-    >
-      <div className="container mx-auto px-6">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center">
-              <img
-                src="/logo.png"
-                alt="Jewelcart Logo"
-                className="w-auto"
-                style={{ height: '70px' }}
-              />
-            </Link>
-          </div>
+	return (
+		<header className={`w-full flex flex-col bg-white ${isScrolled ? 'sticky top-0 z-[48] shadow-light animate-slideDown' : ''}`}>
+			<div className="mx-auto max-w-[1232px] w-full py-2 lg:pt-4 px-4">
+				<div className="flex items-center flex-row justify-between w-full">
+					{/* Contact Us */}
+					<div className="hidden lg:flex items-center flex-row gap-4">
+						<Link
+							to="/contact"
+							className={`flex flex-row gap-1 hover:text-brandgold`}
+							aria-label="Contact Us"
+						>
+							<ContactIcon className="h-5 w-5" />
+							<span className="text-sm font-normal">Contact Us</span>
+						</Link>
+						<Link
+							to="/"
+							className={`flex flex-row gap-1 hover:text-brandgold`}
+							aria-label="Email"
+						>
+							<Mail className="h-5 w-5" />
+							<span className="text-sm font-normal">Email</span>
+						</Link>
+					</div>
+					{/* Logo */}
+					<Link to="/" className="flex md:h-[54px] max-md:h-16">
+						<img src="/logo.png" alt="Jewelcart Logo" />
+					</Link>
+					<div className="items-center flex flex-row md:gap-4 max-md:gap-3">
+						{/* Search */}
+						<Dialog>
+							<DialogTrigger asChild>
+								<Search className="cursor-pointer h-5 w-5 text-brandblue hover:text-brandgold" />
+							</DialogTrigger>
+							<DialogOverlay className="bg-transparent" />
+							<DialogContent className="max-w-full h-full border-0 shadow-none sm:rounded-none overflow-x-auto py-10">
+								<div className="inline-block max-w-[90%] mx-auto w-full">
+									<form onSubmit={handleSearch} className="flex relative" role="search" aria-label="Search products">
+										<Input
+											type="search"
+											placeholder="Search JewelCart Products..."
+											value={searchQuery}
+											onChange={(e) => setSearchQuery(e.target.value)}
+											className="md:text-2xl/loose h-16 border-0 rounded-none font-light text-brandblue p-0 pr-20 border-b-4 border-solid border-brandblue focus-visible:border-brandgold"
+											autoFocus
+											aria-label="Search input"
+										/>
+										<Button
+											type="submit"
+											className={`p-0 absolute right-0 w-16 h-16 bg-transparent rounded-br-none text-brandblue hover:bg-brandgold hover:text-white`}
+											aria-label="Submit search"
+										>
+											<Search className="h-8 w-8" />
+										</Button>
+									</form>
+									<div className="mt-12 w-full inline-block">
+										<DialogTitle>Popular</DialogTitle>
+										<div className="inline-flex w-full gap-3 mt-3">
+											<Link to="/" className="flex rounded-md bg-neutral-200 py-2 px-3 text-base font-normal text-brandblue capitalize hover:bg-brandgold hover:text-white">ring</Link>
+											<Link to="/" className="flex rounded-md bg-neutral-200 py-2 px-3 text-base font-normal text-brandblue capitalize hover:bg-brandgold hover:text-white">bracelets</Link>
+											<Link to="/" className="flex rounded-md bg-neutral-200 py-2 px-3 text-base font-normal text-brandblue capitalize hover:bg-brandgold hover:text-white">heart necklaces</Link>
+											<Link to="/" className="flex rounded-md bg-neutral-200 py-2 px-3 text-base font-normal text-brandblue capitalize hover:bg-brandgold hover:text-white">gift</Link>
+											<Link to="/" className="flex rounded-md bg-neutral-200 py-2 px-3 text-base font-normal text-brandblue capitalize hover:bg-brandgold hover:text-white">mangalsutra</Link>
+											<Link to="/" className="flex rounded-md bg-neutral-200 py-2 px-3 text-base font-normal text-brandblue capitalize hover:bg-brandgold hover:text-white">more...</Link>
+										</div>
+									</div>
+									<div className="mt-12 w-full inline-block">
+										<DialogTitle>Spotlight</DialogTitle>
+										<div className="grid grid-cols-4 w-full gap-3 mt-3">
+											<Link to="/" className="flex flex-col items-center">
+												<img src="/assets/images/spotlight1.jpg" alt="Find a store" />
+												<span className="mt-3 inline-block">Find a store</span>
+											</Link>
+											<Link to="/" className="flex flex-col items-center">
+												<img src="/assets/images/spotlight2.jpg" alt="The Holiday Gifts" />
+												<span className="mt-3 inline-block">The Holiday Gifts</span>
+											</Link>
+											<Link to="/" className="flex flex-col items-center">
+												<img src="/assets/images/spotlight3.jpg" alt="Diamond Bangles" />
+												<span className="mt-3 inline-block">Diamond Bangles</span>
+											</Link>
+											<Link to="/" className="flex flex-col items-center">
+												<img src="/assets/images/spotlight5.jpg" alt="Most Expensive Necklace" />
+												<span className="mt-3 inline-block">Most Expensive Necklace</span>
+											</Link>
+										</div>
+									</div>
+								</div>
+							</DialogContent>
+						</Dialog>
+						<Link
+							to="/"
+							className="hover:text-brandgold"
+							aria-label="Wishlist"
+						>
+							<Heart className="h-5 w-5" />
+						</Link>
+						<Link
+							to="/cart"
+							className={`relative hover:text-brandgold`}
+							aria-label={`Shopping cart with ${getTotalItems()} items`}
+						>
+							<ShoppingCart className="h-5 w-5" />
+							{getTotalItems() > 0 && (
+								<small
+									className="absolute -right-[5px] -top-[5px] bg-brandgold w-4 h-4 text-white z-[3] flex items-center justify-center text-xs font-medium rounded-xl"
+									aria-label={`${getTotalItems()} items in cart`}
+								>
+									{getTotalItems()}
+								</small>
+							)}
+						</Link>
+						{isAuthenticated ? (
+							<DropdownMenu>
+								<DropdownMenuTrigger asChild>
+									<Button
+										className="p-0 bg-transparent text-brandblue h-auto rounded-none relative hover:text-brandgold hover:bg-transparent"
+										aria-label="User account menu"
+									>
+										<User className="h-5 w-5" />
+									</Button>
+								</DropdownMenuTrigger>
+								<DropdownMenuContent align="end" className="w-44">
+									<DropdownMenuItem asChild>
+										<Link to="/profile" className="flex items-center text-brandblue hover:text-brandgold">
+											<User className="mr-2 h-4 w-4" />
+											<span>Profile</span>
+										</Link>
+									</DropdownMenuItem>
+									<DropdownMenuSeparator />
+									<DropdownMenuItem
+										onClick={logout}
+										className="flex items-center text-red-600 hover:rounded-sm cursor-pointer hover:bg-red-100"
+										aria-label="Logout from account"
+									>
+										<LogOut className="mr-2 h-4 w-4" />
+										<span>Logout</span>
+									</DropdownMenuItem>
+								</DropdownMenuContent>
+							</DropdownMenu>
+						) : (
+							<Link
+								to="/login"
+								className={`relative hover:text-brandgold`}
+								aria-label="Login"
+							>
+								<User className="h-5 w-5" />
+							</Link>
+						)}
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6" role="navigation" aria-label="Main navigation">
-            <Link 
-              to="/" 
-              className={`${textColorClass} ${hoverColorClass} transition-colors font-medium px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2`}
-              aria-label="Go to home page"
-            >
-              Home
-            </Link>
-            
-            <NavigationMenu>
-              <NavigationMenuList>
-                <NavigationMenuItem>
-                  <NavigationMenuTrigger 
-                    className={`${textColorClass} ${hoverColorClass} bg-transparent hover:bg-primary/80 font-medium px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2`}
-                    aria-label="Shop menu with collections and categories"
-                  >
-                    Shop
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <div className="w-[600px] p-4 bg-white border border-border shadow-xl rounded-lg">
-                      <div className="grid grid-cols-2 gap-6">
-                        {/* Categories Section */}
-                        <div>
-                          <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Categories</h3>
-                          <ul className="space-y-1">
-                            {categories.map((category) => (
-                              <li key={category.name}>
-                                <Link
-                                  to={category.href}
-                                  className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
-                                  aria-label={`Browse ${category.name}`}
-                                >
-                                  {category.name}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                        
-                        {/* Collections Section */}
-                        <div>
-                          <h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Collections</h3>
-                          <ul className="space-y-1">
-                            {collections.map((collection) => (
-                              <li key={collection.name}>
-                                <Link
-                                  to={collection.href}
-                                  className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
-                                  aria-label={`View ${collection.name}`}
-                                >
-                                  {collection.name}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      </div>
-                      
-                      {/* Quick Link to All Products */}
-                      <div className="mt-4 pt-4 border-t border-gray-200">
-                        <Link
-                          to="/shop"
-                          className="block px-3 py-2 text-sm font-medium text-amber-700 hover:bg-amber-50 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
-                          aria-label="View all products"
-                        >
-                          View All Products →
-                        </Link>
-                      </div>
-                    </div>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              </NavigationMenuList>
-            </NavigationMenu>
-
-            <Link 
-              to="/about" 
-              className={`${textColorClass} ${hoverColorClass} transition-colors font-medium px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2`}
-              aria-label="Learn about Jewelcart"
-            >
-              About
-            </Link>
-            <Link 
-              to="/contact" 
-              className={`${textColorClass} ${hoverColorClass} transition-colors font-medium px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2`}
-              aria-label="Contact us"
-            >
-              Contact
-            </Link>
-            <Link 
-              to="/faq" 
-              className={`${textColorClass} ${hoverColorClass} transition-colors font-medium px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2`}
-              aria-label="Frequently asked questions"
-            >
-              FAQ
-            </Link>
-          </nav>
-
-          {/* Desktop Actions */}
-          <div className="hidden md:flex items-center space-x-3" role="toolbar" aria-label="User actions">
-            {isSearchOpen ? (
-              <form onSubmit={handleSearch} className="flex items-center" role="search" aria-label="Search products">
-                <Input
-                  type="search"
-                  placeholder="Search products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-64 bg-white text-gray-900 focus:ring-2 focus:ring-primary"
-                  autoFocus
-                  aria-label="Search input"
-                />
-                <Button 
-                  type="submit" 
-                  variant="ghost" 
-                  size="icon" 
-                  className={`${textColorClass} ${buttonHoverBgClass} ml-2 focus:outline-none focus:ring-2 focus:ring-primary`}
-                  aria-label="Submit search"
-                >
-                  <Search className="h-5 w-5" />
-                </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className={`${textColorClass} ${buttonHoverBgClass} focus:outline-none focus:ring-2 focus:ring-primary`}
-                  onClick={toggleSearch}
-                  aria-label="Close search"
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-              </form>
-            ) : (
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className={`${textColorClass} ${buttonHoverBgClass} focus:outline-none focus:ring-2 focus:ring-primary`} 
-                onClick={toggleSearch}
-                aria-label="Open search"
-              >
-                <Search className="h-5 w-5" />
-              </Button>
-            )}
-
-            {isAuthenticated ? (
-              <>
-                <Link to="/cart" aria-label={`Shopping cart with ${getTotalItems()} items`}>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className={`${textColorClass} ${buttonHoverBgClass} relative focus:outline-none focus:ring-2 focus:ring-primary`}
-                    aria-label={`Shopping cart${getTotalItems() > 0 ? ` with ${getTotalItems()} item${getTotalItems() > 1 ? 's' : ''}` : ''}`}
-                  >
-                    <ShoppingBag className="h-5 w-5" />
-                    {getTotalItems() > 0 && (
-                      <span 
-                        className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold"
-                        aria-label={`${getTotalItems()} items in cart`}
-                      >
-                        {getTotalItems()}
-                      </span>
-                    )}
-                  </Button>
-                </Link>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className={`${textColorClass} ${buttonHoverBgClass} focus:outline-none focus:ring-2 focus:ring-primary`}
-                      aria-label="User account menu"
-                    >
-                      <User className="h-5 w-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuItem asChild>
-                      <Link to="/profile" className="flex items-center focus:outline-none focus:ring-2 focus:ring-primary">
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Profile</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      onClick={logout} 
-                      className="flex items-center text-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
-                      aria-label="Logout from account"
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Logout</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
-            ) : (
-              <>
-                <Link to="/login">
-                  <Button 
-                    variant="ghost" 
-                    className={`${textColorClass} ${buttonHoverBgClass} focus:outline-none focus:ring-2 focus:ring-primary`}
-                    aria-label="Login to your account"
-                  >
-                    <LogIn className="mr-2 h-4 w-4" />
-                    Login
-                  </Button>
-                </Link>
-                <Link to="/register">
-                  <Button 
-                    variant="outline" 
-                    className={`bg-transparent ${textColorClass} ${isHomePage && !isScrolled ? 'border-white' : 'border-gray-300'} ${isScrolled ? 'hover:bg-gray-100 hover:text-gray-900' : 'hover:bg-white hover:text-primary'} focus:outline-none focus:ring-2 focus:ring-primary`}
-                    aria-label="Create a new account"
-                  >
-                    Register
-                  </Button>
-                </Link>
-              </>
-            )}
-          </div>
-
-          {/* Mobile Menu Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`md:hidden ${textColorClass} ${buttonHoverBgClass} focus:outline-none focus:ring-2 focus:ring-primary`}
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={isMenuOpen}
-            aria-controls="mobile-navigation"
-          >
-            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
-        </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div 
-            id="mobile-navigation"
-            className={`md:hidden py-4 transition-all duration-300 rounded-b-2xl backdrop-blur-xl border-t ${borderColorClass} ${
-              isScrolled 
-                ? 'bg-white/10' 
-                : 'bg-white/5'
-            }`}
-            role="navigation"
-            aria-label="Mobile navigation"
-          >
-            <nav className="flex flex-col space-y-3">
-              <Link 
-                to="/" 
-                className={`${textColorClass} ${hoverColorClass} transition-colors px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary`}
-                onClick={() => setIsMenuOpen(false)}
-                aria-label="Go to home page"
-              >
-                Home
-              </Link>
-              
-              <Link 
-                to="/shop" 
-                className={`${textColorClass} ${hoverColorClass} transition-colors px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary font-medium`}
-                onClick={() => setIsMenuOpen(false)}
-                aria-label="Browse all products"
-              >
-                Shop All
-              </Link>
-
-              {/* Categories Section */}
-              <div className="space-y-2">
-                <div className={`${textColorClass} font-semibold px-4 py-2 text-sm uppercase tracking-wide`}>Categories</div>
-                <div className="pl-4 space-y-1">
-                  {categories.map((category) => (
-                    <Link
-                      key={category.name}
-                      to={category.href}
-                      className={`block ${isScrolled ? 'text-gray-700 hover:text-primary' : isHomePage ? 'text-primary-light hover:text-white' : 'text-gray-700 hover:text-primary'} transition-colors text-sm px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary`}
-                      onClick={() => setIsMenuOpen(false)}
-                      aria-label={`Browse ${category.name}`}
-                    >
-                      {category.name}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              {/* Collections Section */}
-              <div className="space-y-2">
-                <div className={`${textColorClass} font-semibold px-4 py-2 text-sm uppercase tracking-wide`}>Collections</div>
-                <div className="pl-4 space-y-1">
-                  {collections.map((collection) => (
-                    <Link
-                      key={collection.name}
-                      to={collection.href}
-                      className={`block ${isScrolled ? 'text-gray-700 hover:text-primary' : isHomePage ? 'text-primary-light hover:text-white' : 'text-gray-700 hover:text-primary'} transition-colors text-sm px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary`}
-                      onClick={() => setIsMenuOpen(false)}
-                      aria-label={`View ${collection.name}`}
-                    >
-                      {collection.name}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              <Link 
-                to="/about" 
-                className={`${textColorClass} ${hoverColorClass} transition-colors px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary`}
-                onClick={() => setIsMenuOpen(false)}
-                aria-label="Learn about Jewelcart"
-              >
-                About
-              </Link>
-              <Link 
-                to="/contact" 
-                className={`${textColorClass} ${hoverColorClass} transition-colors px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary`}
-                onClick={() => setIsMenuOpen(false)}
-                aria-label="Contact us"
-              >
-                Contact
-              </Link>
-              <Link 
-                to="/faq" 
-                className={`${textColorClass} ${hoverColorClass} transition-colors px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary`}
-                onClick={() => setIsMenuOpen(false)}
-                aria-label="Frequently asked questions"
-              >
-                FAQ
-              </Link>
-
-              {/* Mobile Search */}
-              <div className={`border-t ${isScrolled ? 'border-gray-200' : isHomePage ? 'border-primary-light' : 'border-gray-200'} pt-4`}>
-                <form onSubmit={handleSearch} className="px-4" role="search" aria-label="Search products">
-                  <Input
-                    type="search"
-                    placeholder="Search products..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className={`w-full ${isScrolled ? 'bg-white text-gray-900' : 'bg-white/80 text-gray-900'} focus:ring-2 focus:ring-primary`}
-                    aria-label="Search input"
-                  />
-                </form>
-              </div>
-
-              {/* Mobile Auth Section */}
-              <div className={`border-t ${isScrolled ? 'border-gray-200' : isHomePage ? 'border-primary-light' : 'border-gray-200'} pt-4 space-y-2`}>
-                {isAuthenticated ? (
-                  <>
-                    <Link 
-                      to="/cart" 
-                      className={`${textColorClass} ${hoverColorClass} transition-colors block px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary`}
-                      onClick={() => setIsMenuOpen(false)}
-                      aria-label={`Shopping cart with ${getTotalItems()} items`}
-                    >
-                      Cart {getTotalItems() > 0 && `(${getTotalItems()})`}
-                    </Link>
-                    <Link 
-                      to="/profile" 
-                      className={`${textColorClass} ${hoverColorClass} transition-colors block px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary`}
-                      onClick={() => setIsMenuOpen(false)}
-                      aria-label="View your profile"
-                    >
-                      Profile
-                    </Link>
-                    <button
-                      onClick={() => {
-                        logout();
-                        setIsMenuOpen(false);
-                      }}
-                      className={`${isScrolled ? 'text-red-600 hover:text-red-700' : 'text-red-300 hover:text-red-100'} transition-colors text-left w-full px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500`}
-                      aria-label="Logout from account"
-                    >
-                      Logout
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <Link 
-                      to="/login" 
-                      className={`${textColorClass} ${hoverColorClass} transition-colors block px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary`}
-                      onClick={() => setIsMenuOpen(false)}
-                      aria-label="Login to your account"
-                    >
-                      Login
-                    </Link>
-                    <Link 
-                      to="/register" 
-                      className={`${textColorClass} ${hoverColorClass} transition-colors block px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-primary`}
-                      onClick={() => setIsMenuOpen(false)}
-                      aria-label="Create a new account"
-                    >
-                      Register
-                    </Link>
-                  </>
-                )}
-              </div>
-            </nav>
-          </div>
-        )}
-      </div>
-    </header>
-  );
+						{/* Mobile Menu Button */}
+						<Button
+							className="lg:hidden p-0 bg-transparent text-brandblue h-auto rounded-none hover:text-brandgold hover:bg-transparent"
+							onClick={() => setIsMenuOpen(!isMenuOpen)}
+							aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+							aria-expanded={isMenuOpen}
+							aria-controls="mobile-navigation"
+						>
+							{isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+						</Button>
+					</div>
+				</div>
+			</div>
+			{/* Web Navigation */}
+			<div className="max-lg:hidden">
+				<div className="mx-auto max-w-[1232px] w-full px-4">
+					<div className="flex flex-row items-center justify-between gap-x-2 relative">
+						<NavigationMenu className="static">
+							<NavigationMenuList>
+								<NavigationMenuItem>
+									<NavigationMenuTrigger
+										className={`bg-transparent font-normal px-0 text-brandblue hover:text-brandgold focus:text-brandgold`}
+										aria-label="Shop menu with collections and categories"
+									>
+										By JewelCart
+									</NavigationMenuTrigger>
+									<NavigationMenuContent className="ruhsil">
+										<div className="lg:w-[960px] p-4 bg-white border border-border shadow-xl rounded-lg">
+											<div className="grid grid-cols-3 gap-6">
+												<div>
+													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Categories</h3>
+													<ul className="space-y-1">
+														{categories.map((category) => (
+															<li key={category.name}>
+																<Link
+																	to={category.href}
+																	className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+																	aria-label={`Browse ${category.name}`}
+																>
+																	{category.name}
+																</Link>
+															</li>
+														))}
+													</ul>
+												</div>
+												<div>
+													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Collections</h3>
+													<ul className="space-y-1">
+														{collections.map((collection) => (
+															<li key={collection.name}>
+																<Link
+																	to={collection.href}
+																	className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+																	aria-label={`View ${collection.name}`}
+																>
+																	{collection.name}
+																</Link>
+															</li>
+														))}
+													</ul>
+												</div>
+												<div>
+													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Collections</h3>
+													<ul className="space-y-1">
+														{collections.map((collection) => (
+															<li key={collection.name}>
+																<Link
+																	to={collection.href}
+																	className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+																	aria-label={`View ${collection.name}`}
+																>
+																	{collection.name}
+																</Link>
+															</li>
+														))}
+													</ul>
+												</div>
+											</div>
+											<div className="mt-4 pt-4 border-t border-gray-200">
+												<Link
+													to="/shop"
+													className="block px-3 py-2 text-sm font-medium text-amber-700 hover:bg-amber-50 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+													aria-label="View all products"
+												>
+													View All Products →
+												</Link>
+											</div>
+										</div>
+									</NavigationMenuContent>
+								</NavigationMenuItem>
+							</NavigationMenuList>
+						</NavigationMenu>
+						<NavigationMenu>
+							<NavigationMenuList>
+								<NavigationMenuItem>
+									<NavigationMenuTrigger
+										className={`bg-transparent font-normal px-0 text-brandblue hover:text-brandgold focus:text-brandgold`}
+										aria-label="Rings"
+									>
+										Rings
+									</NavigationMenuTrigger>
+									<NavigationMenuContent>
+										<div className="lg:w-[280px] p-4 bg-white border border-border shadow-xl rounded-lg">
+											<div className="grid grid-cols-2 gap-6">
+												<div>
+													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Categories</h3>
+													<ul className="space-y-1">
+														{categories.map((category) => (
+															<li key={category.name}>
+																<Link
+																	to={category.href}
+																	className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+																	aria-label={`Browse ${category.name}`}
+																>
+																	{category.name}
+																</Link>
+															</li>
+														))}
+													</ul>
+												</div>
+											</div>
+										</div>
+									</NavigationMenuContent>
+								</NavigationMenuItem>
+							</NavigationMenuList>
+						</NavigationMenu>
+						<NavigationMenu>
+							<NavigationMenuList>
+								<NavigationMenuItem>
+									<NavigationMenuTrigger
+										className={`bg-transparent font-normal px-0 text-brandblue hover:text-brandgold focus:text-brandgold`}
+										aria-label="Earrings"
+									>
+										Earrings
+									</NavigationMenuTrigger>
+									<NavigationMenuContent>
+										<div className="lg:w-[320px] p-4 bg-white border border-border shadow-xl rounded-lg">
+											<div className="grid grid-cols-2 gap-6">
+												<div>
+													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Categories</h3>
+													<ul className="space-y-1">
+														{categories.map((category) => (
+															<li key={category.name}>
+																<Link
+																	to={category.href}
+																	className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+																	aria-label={`Browse ${category.name}`}
+																>
+																	{category.name}
+																</Link>
+															</li>
+														))}
+													</ul>
+												</div>
+											</div>
+										</div>
+									</NavigationMenuContent>
+								</NavigationMenuItem>
+							</NavigationMenuList>
+						</NavigationMenu>
+						<NavigationMenu>
+							<NavigationMenuList>
+								<NavigationMenuItem>
+									<NavigationMenuTrigger
+										className={`bg-transparent font-normal px-0 text-brandblue hover:text-brandgold focus:text-brandgold`}
+										aria-label="Pendants"
+									>
+										Pendants
+									</NavigationMenuTrigger>
+									<NavigationMenuContent>
+										<div className="lg:w-[320px] p-4 bg-white border border-border shadow-xl rounded-lg">
+											<div className="grid grid-cols-2 gap-6">
+												<div>
+													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Categories</h3>
+													<ul className="space-y-1">
+														{categories.map((category) => (
+															<li key={category.name}>
+																<Link
+																	to={category.href}
+																	className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+																	aria-label={`Browse ${category.name}`}
+																>
+																	{category.name}
+																</Link>
+															</li>
+														))}
+													</ul>
+												</div>
+											</div>
+										</div>
+									</NavigationMenuContent>
+								</NavigationMenuItem>
+							</NavigationMenuList>
+						</NavigationMenu>
+						<NavigationMenu>
+							<NavigationMenuList>
+								<NavigationMenuItem>
+									<NavigationMenuTrigger
+										className={`bg-transparent font-normal px-0 text-brandblue hover:text-brandgold focus:text-brandgold`}
+										aria-label="Bracelets"
+									>
+										Bracelets
+									</NavigationMenuTrigger>
+									<NavigationMenuContent>
+										<div className="lg:w-[320px] p-4 bg-white border border-border shadow-xl rounded-lg">
+											<div className="grid grid-cols-2 gap-6">
+												<div>
+													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Categories</h3>
+													<ul className="space-y-1">
+														{categories.map((category) => (
+															<li key={category.name}>
+																<Link
+																	to={category.href}
+																	className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+																	aria-label={`Browse ${category.name}`}
+																>
+																	{category.name}
+																</Link>
+															</li>
+														))}
+													</ul>
+												</div>
+											</div>
+										</div>
+									</NavigationMenuContent>
+								</NavigationMenuItem>
+							</NavigationMenuList>
+						</NavigationMenu>
+						<Link
+							to="/solitaire"
+							className={`inline-flex text-brandblue text-xs tracking-wider font-normal uppercase hover:text-brandgold focus:text-brandgold`}
+							aria-label="Solitaire"
+						>
+							Solitaire
+						</Link>
+						<NavigationMenu>
+							<NavigationMenuList>
+								<NavigationMenuItem>
+									<NavigationMenuTrigger
+										className={`bg-transparent font-normal px-0 text-brandblue hover:text-brandgold focus:text-brandgold`}
+										aria-label="Gifts"
+									>
+										Gifts
+									</NavigationMenuTrigger>
+									<NavigationMenuContent>
+										<div className="lg:w-[180px] p-4 bg-white border border-border shadow-xl rounded-lg">
+											<div className="grid grid-cols-2 gap-6">
+												<div>
+													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Categories</h3>
+													<ul className="space-y-1">
+														{categories.map((category) => (
+															<li key={category.name}>
+																<Link
+																	to={category.href}
+																	className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+																	aria-label={`Browse ${category.name}`}
+																>
+																	{category.name}
+																</Link>
+															</li>
+														))}
+													</ul>
+												</div>
+											</div>
+										</div>
+									</NavigationMenuContent>
+								</NavigationMenuItem>
+							</NavigationMenuList>
+						</NavigationMenu>
+						<Link
+							to="/offers"
+							className={`inline-flex text-brandblue text-xs tracking-wider uppercase font-normal hover:text-brandgold focus:text-brandgold`}
+							aria-label="Offers"
+						>
+							Offers
+						</Link>
+					</div>
+				</div>
+			</div>
+			{/* Mobile Navigation */}
+			{isMenuOpen && (
+				<nav
+					id="mobile-navigation"
+					className="lg:hidden animate-slideDown border-t border-solid border-neutral-200 bg-slate-100"
+					role="navigation"
+					aria-label="Mobile navigation"
+				>
+					<Accordion type="single" collapsible className="w-full">
+						<AccordionItem value="item-1" className="px-4 py-3">
+							<AccordionTrigger className="p-0 text-xs uppercase tracking-wider hover:no-underline">By JewelCart</AccordionTrigger>
+							<AccordionContent className="pt-4 pb-0">
+								<div className="grid md:grid-cols-3 sm:grid-cols-2 max-sm:grid-cols-1 gap-6">
+									<div>
+										<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Categories</h3>
+										{categories.map((category) => (
+											<Link
+												key={category.name}
+												to={category.href}
+												className={`text-brandblue flex text-sm px-4 py-2 w-full hover:text-brandgold focus:outline-none`}
+												onClick={() => setIsMenuOpen(false)}
+												aria-label={`Browse ${category.name}`}
+											>
+												{category.name}
+											</Link>
+										))}
+									</div>
+									<div>
+										<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Collections</h3>
+										{collections.map((collection) => (
+											<Link
+												key={collection.name}
+												to={collection.href}
+												className={`text-brandblue flex text-sm px-4 py-2 w-full hover:text-brandgold focus:outline-none`}
+												onClick={() => setIsMenuOpen(false)}
+												aria-label={`View ${collection.name}`}
+											>
+												{collection.name}
+											</Link>
+										))}
+									</div>
+								</div>
+							</AccordionContent>
+						</AccordionItem>
+						<AccordionItem value="item-2" className="px-4 py-3">
+							<AccordionTrigger className="p-0 text-xs uppercase tracking-wider hover:no-underline">Rings</AccordionTrigger>
+							<AccordionContent className="pt-4 pb-0">
+								<div className="grid sm:grid-cols-2 max-sm:grid-cols-1 gap-6">
+									<ul className="space-y-1">
+										{categories.map((category) => (
+											<li key={category.name}>
+												<Link
+													to={category.href}
+													className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+													aria-label={`Browse ${category.name}`}
+												>
+													{category.name}
+												</Link>
+											</li>
+										))}
+									</ul>
+								</div>
+							</AccordionContent>
+						</AccordionItem>
+						<AccordionItem value="item-3" className="px-4 py-3">
+							<AccordionTrigger className="p-0 text-xs uppercase tracking-wider hover:no-underline">Earrings</AccordionTrigger>
+							<AccordionContent className="pt-4 pb-0">
+								<div className="grid sm:grid-cols-2 max-sm:grid-cols-1 gap-6">
+									<ul className="space-y-1">
+										{categories.map((category) => (
+											<li key={category.name}>
+												<Link
+													to={category.href}
+													className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+													aria-label={`Browse ${category.name}`}
+												>
+													{category.name}
+												</Link>
+											</li>
+										))}
+									</ul>
+								</div>
+							</AccordionContent>
+						</AccordionItem>
+						<AccordionItem value="item-4" className="px-4 py-3">
+							<AccordionTrigger className="p-0 text-xs uppercase tracking-wider hover:no-underline">Pendants</AccordionTrigger>
+							<AccordionContent className="pt-4 pb-0">
+								<div className="grid sm:grid-cols-2 max-sm:grid-cols-1 gap-6">
+									<ul className="space-y-1">
+										{categories.map((category) => (
+											<li key={category.name}>
+												<Link
+													to={category.href}
+													className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+													aria-label={`Browse ${category.name}`}
+												>
+													{category.name}
+												</Link>
+											</li>
+										))}
+									</ul>
+								</div>
+							</AccordionContent>
+						</AccordionItem>
+						<AccordionItem value="item-5" className="px-4 py-3">
+							<AccordionTrigger className="p-0 text-xs uppercase tracking-wider hover:no-underline">Bracelets</AccordionTrigger>
+							<AccordionContent className="pt-4 pb-0">
+								<div className="grid sm:grid-cols-2 max-sm:grid-cols-1 gap-6">
+									<ul className="space-y-1">
+										{categories.map((category) => (
+											<li key={category.name}>
+												<Link
+													to={category.href}
+													className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+													aria-label={`Browse ${category.name}`}
+												>
+													{category.name}
+												</Link>
+											</li>
+										))}
+									</ul>
+								</div>
+							</AccordionContent>
+						</AccordionItem>
+						<AccordionItem value="item-6" className="px-4 py-3">
+							<Link
+								to="/solitaire"
+								className={`inline-flex text-brandblue uppercase text-xs font-medium tracking-wider hover:text-brandgold focus:text-brandgold w-full`}
+								aria-label="Solitaire"
+							>
+								Solitaire
+							</Link>
+						</AccordionItem>
+						<AccordionItem value="item-7" className="px-4 py-3">
+							<AccordionTrigger className="p-0 text-xs uppercase tracking-wider hover:no-underline">Gifts</AccordionTrigger>
+							<AccordionContent className="pt-4 pb-0">
+								<div className="grid sm:grid-cols-2 max-sm:grid-cols-1 gap-6">
+									<ul className="space-y-1">
+										{categories.map((category) => (
+											<li key={category.name}>
+												<Link
+													to={category.href}
+													className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
+													aria-label={`Browse ${category.name}`}
+												>
+													{category.name}
+												</Link>
+											</li>
+										))}
+									</ul>
+								</div>
+							</AccordionContent>
+						</AccordionItem>
+						<AccordionItem value="item-8" className="px-4 py-3">
+							<Link
+								to="/offers"
+								className={`inline-flex text-brandblue text-xs uppercase font-medium tracking-wider hover:text-brandgold focus:text-brandgold w-full`}
+								aria-label="Solitaire"
+							>
+								Offers
+							</Link>
+						</AccordionItem>
+					</Accordion>
+				</nav>
+			)}
+		</header>
+	);
 };
 
 export default Header;

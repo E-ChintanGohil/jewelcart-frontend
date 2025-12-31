@@ -7,7 +7,7 @@ const ShopByGender = () => {
     {
       id: 1,
       title: "Women's Jewellery",
-      image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&q=80",
+      image: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=400&q=80",
       description: "Elegant and sophisticated pieces for women",
       link: "/collections/women",
       featured: true
@@ -39,11 +39,11 @@ const ShopByGender = () => {
   ];
 
   return (
-    <section className="py-16 bg-primary">
+    <section className="py-16 bg-gray-100">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-white mb-4">Shop By Gender</h2>
-          <p className="text-lg text-primary-light max-w-2xl mx-auto">
+          <h2 className="text-3xl font-bold text-black mb-4">Shop By Gender</h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Find the perfect jewelry for everyone in your family
           </p>
         </div>
@@ -53,7 +53,7 @@ const ShopByGender = () => {
             <Link key={category.id} to={category.link}>
               <div className="group cursor-pointer">
                 <div className={`relative overflow-hidden rounded-xl bg-white shadow-soft border border-gray-200 hover:shadow-elegant transition-all duration-300 ${category.featured ? 'lg:col-span-2 lg:row-span-2' : ''}`}>
-                  <div className={`aspect-square overflow-hidden ${category.featured ? 'lg:aspect-[2/1]' : ''}`}>
+                  <div className={`aspect-square overflow-hidden ${category.featured ? '' : ''}`}>
                     <img
                       src={category.image}
                       alt={category.title}

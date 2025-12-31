@@ -53,8 +53,8 @@ const OurPromise = () => {
                 key={index}
                 className="text-center group hover:scale-105 transition-transform duration-300"
               >
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-6 group-hover:bg-black group-hover:text-white transition-colors duration-300">
-                  <Icon className="h-8 w-8 text-black group-hover:text-white" />
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-6 group-hover:bg-brandgold group-hover:text-white transition-colors duration-300">
+                  <Icon className="h-8 w-8 text-brandgold group-hover:text-white" />
                 </div>
                 <h3 className="text-xl font-semibold text-black mb-3">
                   {promise.title}

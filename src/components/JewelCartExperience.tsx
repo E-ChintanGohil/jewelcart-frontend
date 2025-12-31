@@ -55,8 +55,8 @@ const JewelCartExperience = () => {
             return (
               <div key={experience.id} className="text-center">
                 <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300 group">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-colors">
-                    <Icon className="h-8 w-8 text-primary" />
+                  <div className="w-16 h-16 bg-brandblue/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-brandblue/20 transition-colors">
+                    <Icon className="h-8 w-8 text-brandgold" />
                   </div>
                   
                   <h3 className="text-lg font-semibold text-black mb-2">{experience.title}</h3>
@@ -66,7 +66,7 @@ const JewelCartExperience = () => {
                     asChild
                     variant="outline" 
                     size="sm" 
-                    className="border-primary text-primary hover:bg-primary hover:text-white"
+                    className="border-brandblue text-brandblue hover:bg-brandgold hover:text-white"
                   >
                     <Link to={experience.link}>{experience.action}</Link>
                   </Button>
@@ -77,7 +77,7 @@ const JewelCartExperience = () => {
         </div>
 
         {/* Featured Banner */}
-        <div className="relative overflow-hidden rounded-2xl bg-primary">
+        <div className="relative overflow-hidden rounded-2xl bg-brandblue">
           <div className="absolute inset-0">
             <img
               src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=80"
@@ -98,7 +98,7 @@ const JewelCartExperience = () => {
               <Button 
                 asChild
                 size="lg" 
-                className="bg-white hover:bg-gray-100 text-primary"
+                className="bg-white hover:bg-gray-100 text-brandblue"
               >
                 <Link to="/stores">Find Nearest Store</Link>
               </Button>
@@ -107,7 +107,7 @@ const JewelCartExperience = () => {
                 asChild
                 variant="outline" 
                 size="lg" 
-                className="border-white text-white hover:bg-white hover:text-primary"
+                className="border-white text-white hover:bg-white hover:text-brandblue"
               >
                 <Link to="/consultation">Book Consultation</Link>
               </Button>

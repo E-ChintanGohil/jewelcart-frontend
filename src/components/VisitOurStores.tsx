@@ -81,10 +81,10 @@ const VisitOurStores = () => {
                 </div>
                 
                 <div className="flex gap-2">
-                  <Button size="sm" className="flex-1 bg-black hover:bg-gray-800 text-white">
+                  <Button size="sm" className="flex-1 bg-brandgold hover:bg-brandblue text-white">
                     Get Directions
                   </Button>
-                  <Button variant="outline" size="sm" className="border-black text-black hover:bg-black hover:text-white">
+                  <Button variant="outline" size="sm" className="border-brandblue text-brandblue hover:bg-brandblue hover:text-white">
                     Call Store
                   </Button>
                 </div>

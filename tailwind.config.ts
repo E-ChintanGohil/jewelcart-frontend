@@ -14,14 +14,17 @@ export default {
 			center: true,
 			padding: '2rem',
 			screens: {
-				'2xl': '1400px'
+				'2xl': '1730px'
 			}
 		},
 		extend: {
 			fontFamily: {
-				sans: ['Inter', 'sans-serif'],
+				sans: ['Lexend', 'sans-serif'],
 			},
 			colors: {
+				brandblue: 'hsl(var(--brand-blue))',
+				brandgold: 'hsl(var(--brand-gold))',
+
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
@@ -74,10 +77,10 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				}
 			},
-			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+			animation: {
+				'accordion-down': 'accordion-down 0.2s ease-out',
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'slideDown': 'slideDown 0.35s ease-out'
 			},
 			keyframes: {
 				'accordion-down': {
@@ -95,11 +98,20 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'slideDown': {
+					from: {
+						transform: 'translateY(-100%)'
+					},
+					to: {
+						transform: 'translateY(0)'
+					}
 				}
 			},
-			animation: {
-				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+			transitionDuration: {
+				'2s': '.2s',
+				'3s': '.3s',
+				'5s': '.5s'
 			},
 			backgroundImage: {
 				'gradient-primary': 'var(--gradient-primary)',
@@ -107,6 +119,7 @@ export default {
 				'gradient-elegant': 'var(--gradient-elegant)'
 			},
 			boxShadow: {
+				'light': 'var(--shadow-light)',
 				'elegant': 'var(--shadow-elegant)',
 				'soft': 'var(--shadow-soft)',
 				'glow': 'var(--shadow-glow)'

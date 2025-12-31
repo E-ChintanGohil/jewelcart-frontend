@@ -22,6 +22,7 @@ const Index = () => {
         keywords="jewelry, diamonds, gold jewelry, silver jewelry, rings, necklaces, earrings, bracelets, engagement rings, wedding jewelry, luxury jewelry, handmade jewelry, online jewelry store, jewelry shopping"
       />
       <HeroSection />
+      <ShopByCollection />
       <TrendingNow />
       <ShopByCategory />
       <NewArrivals />
@@ -30,7 +31,6 @@ const Index = () => {
       <JewelCartExperience />
       <OurPromise />
       <CustomerReviews />
-      <ShopByCollection />
       <VisitOurStores />
       <FAQSection />
     </div>

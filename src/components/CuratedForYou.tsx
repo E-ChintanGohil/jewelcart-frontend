@@ -36,7 +36,7 @@ const CuratedForYou = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Heart className="h-6 w-6 text-primary" />
+            <Heart className="h-6 w-6 text-brandgold" />
             <h2 className="text-3xl font-bold text-black">Curated For You</h2>
           </div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -54,11 +54,11 @@ const CuratedForYou = () => {
                     alt={collection.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-colors duration-300"></div>
+                  {/* <div className="absolute inset-0 group-hover:bg-brandblue/40 transition-colors duration-300"></div> */}
                   
                   <div className="absolute top-4 right-4">
                     <div className="flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-2 py-1">
-                      <Star className="h-4 w-4 text-yellow-500 fill-current" />
+                      <Star className="h-4 w-4 text-brandgold fill-current" />
                       <span className="text-xs font-medium text-black">Curated</span>
                     </div>
                   </div>
@@ -66,14 +66,14 @@ const CuratedForYou = () => {
                 
                 <div className="p-6">
                   <h3 className="text-xl font-bold text-black mb-2">{collection.title}</h3>
-                  <p className="text-sm text-primary font-medium mb-2">{collection.subtitle}</p>
+                  <p className="text-sm text-brandgold font-medium mb-2">{collection.subtitle}</p>
                   <p className="text-gray-600 text-sm mb-4">{collection.description}</p>
                   
                   <Button 
                     asChild
                     variant="outline" 
                     size="sm" 
-                    className="w-full border-primary text-primary hover:bg-primary hover:text-white"
+                    className="w-full border-brandblue text-brandblue hover:bg-brandgold hover:text-white"
                   >
                     <Link to={collection.link}>Explore Collection</Link>
                   </Button>

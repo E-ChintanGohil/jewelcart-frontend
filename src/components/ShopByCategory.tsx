@@ -31,11 +31,11 @@ const ShopByCategory = () => {
   ];
 
   return (
-    <section className="py-24 bg-primary">
+    <section className="py-24 bg-gray-100">
       <div className="container mx-auto px-4">
         <div className="text-center mb-20">
-          <h2 className="text-4xl font-bold text-white mb-6">Shop by Category</h2>
-          <p className="text-lg text-primary-light max-w-2xl mx-auto">
+          <h2 className="text-4xl font-bold text-black mb-6">Shop by Category</h2>
+          <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
             Discover our curated collections of fine jewelry, each piece crafted with precision and care.
           </p>
         </div>
@@ -44,7 +44,7 @@ const ShopByCategory = () => {
           {categories.map((category) => (
             <Link key={category.id} to={`/products/${category.title.toLowerCase()}`}>
               <div className="group cursor-pointer">
-                <div className="relative overflow-hidden rounded-xl bg-white shadow-soft border border-gray-200 hover:shadow-elegant transition-all duration-300 h-[420px]">
+                <div className="relative overflow-hidden rounded-xl bg-white shadow-soft border border-gray-200 hover:shadow-elegant transition-all duration-300 h-[400px]">
                   <div className="aspect-square overflow-hidden">
                     <img
                       src={category.image}
@@ -52,7 +52,7 @@ const ShopByCategory = () => {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
-                  <div className="p-6 space-y-4">
+                  {/* <div className="p-6 space-y-4">
                     <h3 className="text-xl font-semibold text-black group-hover:text-gray-700 transition-colors">
                       {category.title}
                     </h3>
@@ -66,7 +66,7 @@ const ShopByCategory = () => {
                     >
                       Shop Now
                     </Button>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </Link>

@@ -60,7 +60,7 @@ const NewArrivals = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Sparkles className="h-6 w-6 text-primary" />
+            <Sparkles className="h-6 w-6 text-brandgold" />
             <h2 className="text-3xl font-bold text-black">New Arrivals</h2>
           </div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -80,14 +80,14 @@ const NewArrivals = () => {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                     <div className="absolute top-3 left-3">
-                      <span className="bg-green-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                      <span className="bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
                         New
                       </span>
                     </div>
                   </div>
                   <div className="p-3">
                     <h3 className="text-sm font-medium text-black mb-1 line-clamp-2">{product.title}</h3>
-                    <p className="text-sm font-bold text-primary">{product.price}</p>
+                    <p className="text-sm font-bold text-brandgold">{product.price}</p>
                   </div>
                 </div>
               </div>
@@ -98,7 +98,7 @@ const NewArrivals = () => {
         <div className="text-center mt-8">
           <Button 
             asChild
-            className="bg-primary hover:bg-primary/90 text-white"
+            className="bg-brandgold hover:bg-brandblue text-white"
           >
             <Link to="/products/new">View All New Arrivals</Link>
           </Button>
