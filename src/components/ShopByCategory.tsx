@@ -44,7 +44,7 @@ const ShopByCategory = () => {
           {categories.map((category) => (
             <Link key={category.id} to={`/products/${category.title.toLowerCase()}`}>
               <div className="group cursor-pointer">
-                <div className="relative overflow-hidden rounded-xl bg-white shadow-soft border border-gray-200 hover:shadow-elegant transition-all duration-300 h-[400px]">
+                <div className="relative overflow-hidden rounded-xl bg-white shadow-soft border border-gray-200 hover:shadow-elegant transition-all duration-300">
                   <div className="aspect-square overflow-hidden">
                     <img
                       src={category.image}

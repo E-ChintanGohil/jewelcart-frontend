@@ -88,10 +88,10 @@ const Header = () => {
 
 	return (
 		<header className={`w-full flex flex-col bg-white ${isScrolled ? 'sticky top-0 z-[48] shadow-light animate-slideDown' : ''}`}>
-			<div className="mx-auto max-w-[1232px] w-full py-2 lg:pt-4 px-4">
+			<div className="mx-auto max-w-[1232px] w-full pb-0 max-lg:py-2 lg:pt-2 px-4">
 				<div className="flex items-center flex-row justify-between w-full">
 					{/* Contact Us */}
-					<div className="hidden lg:flex items-center flex-row gap-4">
+					{/* <div className="hidden lg:flex items-center flex-row gap-4">
 						<Link
 							to="/contact"
 							className={`flex flex-row gap-1 hover:text-brandgold`}
@@ -108,14 +108,14 @@ const Header = () => {
 							<Mail className="h-5 w-5" />
 							<span className="text-sm font-normal">Email</span>
 						</Link>
-					</div>
+					</div> */}
 					{/* Logo */}
-					<Link to="/" className="flex md:h-[54px] max-md:h-16">
+					<Link to="/" className="flex md:h-20 max-md:h-16">
 						<img src="/logo.png" alt="Jewelcart Logo" />
 					</Link>
 					<div className="items-center flex flex-row md:gap-4 max-md:gap-3">
 						{/* Search */}
-						<Dialog>
+						{/* <Dialog>
 							<DialogTrigger asChild>
 								<Search className="cursor-pointer h-5 w-5 text-brandblue hover:text-brandgold" />
 							</DialogTrigger>
@@ -181,7 +181,7 @@ const Header = () => {
 							aria-label="Wishlist"
 						>
 							<Heart className="h-5 w-5" />
-						</Link>
+						</Link> */}
 						<Link
 							to="/cart"
 							className={`relative hover:text-brandgold`}
@@ -201,7 +201,7 @@ const Header = () => {
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
 									<Button
-										className="p-0 bg-transparent text-brandblue h-auto rounded-none relative hover:text-brandgold hover:bg-transparent"
+										className="min-w-fit p-0 bg-transparent text-brandblue h-auto rounded-none relative hover:text-brandgold hover:bg-transparent"
 										aria-label="User account menu"
 									>
 										<User className="h-5 w-5" />
@@ -237,7 +237,7 @@ const Header = () => {
 
 						{/* Mobile Menu Button */}
 						<Button
-							className="lg:hidden p-0 bg-transparent text-brandblue h-auto rounded-none hover:text-brandgold hover:bg-transparent"
+							className="min-w-fit lg:hidden p-0 bg-transparent text-brandblue h-auto rounded-none hover:text-brandgold hover:bg-transparent"
 							onClick={() => setIsMenuOpen(!isMenuOpen)}
 							aria-label={isMenuOpen ? "Close menu" : "Open menu"}
 							aria-expanded={isMenuOpen}
@@ -506,7 +506,7 @@ const Header = () => {
 						</NavigationMenu>
 						<Link
 							to="/offers"
-							className={`inline-flex text-brandblue text-xs tracking-wider uppercase font-normal hover:text-brandgold focus:text-brandgold`}
+							className={`inline-flex text-brandblue tracking-wider uppercase font-normal hover:text-brandgold focus:text-brandgold`}
 							aria-label="Offers"
 						>
 							Offers

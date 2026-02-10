@@ -23,16 +23,16 @@ const Index = () => {
       />
       <HeroSection />
       <ShopByCollection />
-      <TrendingNow />
+      {/* <TrendingNow /> */}
       <ShopByCategory />
-      <NewArrivals />
-      <CuratedForYou />
-      <ShopByGender />
+      {/* <NewArrivals /> */}
+      {/* <CuratedForYou /> */}
+      {/* <ShopByGender /> */}
       <JewelCartExperience />
       <OurPromise />
       <CustomerReviews />
-      <VisitOurStores />
-      <FAQSection />
+      {/* <VisitOurStores /> */}
+      {/* <FAQSection /> */}
     </div>
   );
 };

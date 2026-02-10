@@ -19,21 +19,21 @@ const StaticHoverSlider = () => {
 	}
 
 	return (
-		<section className="pt-40 pb-12 inline-block w-full">
+		<section className="max-lg:pt-20 lg:pt-40 pb-12 inline-block w-full">
 			<div className="container max-md:px-5">
-				<div className="flex">
-					<div className="inline-flex w-1/5 flex-col pr-12">
-						<h2 className="uppercase font-normal text-4xl leading-[48px]">Our Collections</h2>
+				<div className="flex max-lg:flex-col">
+					<div className="inline-flex w-full lg:w-1/4 flex-col lg:pr-20 max-lg:text-center max-lg:mb-12">
+						<h2 className="uppercase font-normal text-[34px] leading-[48px]">Our Collections</h2>
 						<Button
 							asChild
 							variant="outline"
-							className="border-brandblue text-brandblue hover:bg-brandblue hover:text-white mt-12"
+							className="border-brandblue text-brandblue hover:bg-brandblue hover:text-white lg:mt-12 max-lg:mt-6"
 						>
 							<Link to="">Shop Now</Link>
 						</Button>
 					</div>
 					
-					<div className="relative w-4/5 inline-block">
+					<div className="relative w-full lg:w-4/5 inline-block">
 						{/* Slider */}
 						<div ref={sliderRef} className="flex w-full overflow-hidden scroll-smooth">
 							<div className="group relative sm:min-w-[50%] px-2 lg:min-w-[25%] h-[350px] rounded-2xl overflow-hidden">
