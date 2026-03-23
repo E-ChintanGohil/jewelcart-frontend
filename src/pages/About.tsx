@@ -105,7 +105,7 @@ export default function About() {
               className="rounded-2xl shadow-2xl w-full h-[450px] object-cover transition-transform duration-500 group-hover:scale-[1.02]"
             />
             <Badge className="absolute top-6 right-6 bg-white/90 backdrop-blur-sm text-amber-700 border border-amber-200 shadow-lg px-4 py-2 font-light">
-              29 Years of Excellence
+              {new Date().getFullYear() - 1995} Years of Excellence
             </Badge>
           </div>
         </div>

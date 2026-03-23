@@ -1,8 +1,22 @@
 
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
+import apiService from "@/lib/apiService";
 
 const Footer = () => {
+  const [phone, setPhone] = useState("+91 98765 43210");
+  const [email, setEmail] = useState("info@jewelcart.com");
+  const [address, setAddress] = useState("123 Jewelry Street\nZaveri Bazaar, Mumbai 400002");
+
+  useEffect(() => {
+    apiService.getSettings().then((settings) => {
+      if (settings?.contact_phone) setPhone(settings.contact_phone);
+      if (settings?.contact_email) setEmail(settings.contact_email);
+      if (settings?.contact_address) setAddress(settings.contact_address);
+    }).catch(() => {});
+  }, []);
+
   return (
     <footer className="bg-white">
       <div className="container mx-auto px-4 py-16">
@@ -13,12 +27,6 @@ const Footer = () => {
             <p className="text-black text-sm leading-relaxed">
               Crafting timeless jewelry pieces that tell your unique story. Experience luxury and elegance with our handcrafted collections.
             </p>
-            <div className="flex space-x-4">
-              <Facebook className="h-5 w-5 text-brandblue hover:text-brandgold cursor-pointer transition-colors" />
-              <Instagram className="h-5 w-5 text-brandblue hover:text-brandgold cursor-pointer transition-colors" />
-              <Twitter className="h-5 w-5 text-brandblue hover:text-brandgold cursor-pointer transition-colors" />
-              <Youtube className="h-5 w-5 text-brandblue hover:text-brandgold cursor-pointer transition-colors" />
-            </div>
           </div>
 
           {/* Quick Links */}
@@ -52,15 +60,17 @@ const Footer = () => {
             <div className="space-y-3 text-sm">
               <div className="flex items-center space-x-3">
                 <Phone className="h-4 w-4 text-brandblue" />
-                <span className="text-brandblue">+91 98765 43210</span>
+                <span className="text-brandblue">{phone}</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Mail className="h-4 w-4 text-brandblue" />
-                <span className="text-brandblue">info@jewelcart.com</span>
+                <span className="text-brandblue">{email}</span>
               </div>
               <div className="flex items-start space-x-3">
                 <MapPin className="h-4 w-4 text-brandblue mt-0.5" />
-                <span className="text-brandblue">123 Jewelry Street<br />Zaveri Bazaar, Mumbai 400002</span>
+                <span className="text-brandblue">{address.split('\n').map((line, i) => (
+                  <span key={i}>{i > 0 && <br />}{line}</span>
+                ))}</span>
               </div>
             </div>
           </div>
@@ -69,7 +79,7 @@ const Footer = () => {
         <div className="border-t border-gray-600 pt-8 mt-12">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-brandblue text-sm">
-              © 2024 Jewelcart. All rights reserved.
+              © 2026 Jewelcart. All rights reserved.
             </p>
             <div className="flex flex-wrap justify-center gap-4 text-sm">
               <Link to="/privacy-policy" className="text-brandblue hover:text-brandgold transition-colors">Privacy Policy</Link>

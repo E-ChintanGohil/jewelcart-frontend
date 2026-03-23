@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Store, Mail, Phone, MapPin, DollarSign, CreditCard, Settings as SettingsIcon, Users, Shield, Plus, Trash2, Edit } from 'lucide-react';
+import { Store, Mail, Phone, MapPin, DollarSign, Settings as SettingsIcon, Users, Plus, Trash2, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
@@ -37,7 +37,7 @@ const SettingsPage = () => {
     shippingRate: 0,
     freeShippingThreshold: 0,
     currency: 'INR',
-    paymentMethods: [] as string[]
+    paymentMethods: ['razorpay'] as string[]
   });
 
   const [userSettings, setUserSettings] = useState({
@@ -86,14 +86,6 @@ const SettingsPage = () => {
   const [showMaterialDialog, setShowMaterialDialog] = useState(false);
   const [editingMaterial, setEditingMaterial] = useState<Material | null>(null);
 
-  const paymentMethodOptions = [
-    { value: 'credit-card', label: 'Credit Card' },
-    { value: 'debit-card', label: 'Debit Card' },
-    { value: 'upi', label: 'UPI' },
-    { value: 'net-banking', label: 'Net Banking' },
-    { value: 'wallet', label: 'Digital Wallet' },
-    { value: 'cod', label: 'Cash on Delivery' }
-  ];
 
   useEffect(() => {
     loadSettings();
@@ -245,16 +237,6 @@ const SettingsPage = () => {
     }
   };
 
-  const handlePaymentMethodToggle = (method: string) => {
-    const updatedMethods = formData.paymentMethods.includes(method)
-      ? formData.paymentMethods.filter(m => m !== method)
-      : [...formData.paymentMethods, method];
-    
-    setFormData(prev => ({
-      ...prev,
-      paymentMethods: updatedMethods
-    }));
-  };
 
   const calculateAutoPrice = (purity: number, materialType: 'GOLD' | 'SILVER') => {
     const basePrice = materialType === 'GOLD' ? formData.goldPrice : formData.silverPrice;
@@ -465,23 +447,6 @@ const SettingsPage = () => {
     }
   };
 
-  const handleSaveSecurity = async () => {
-    try {
-      await apiService.updateUserPreferences({ security: userSettings.security });
-      toast({
-        title: "Success",
-        description: "Security settings updated successfully"
-      });
-      loadUserPreferences();
-    } catch (error) {
-      console.error('Failed to update security settings:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update security settings",
-        variant: "destructive"
-      });
-    }
-  };
 
   const formatPrice = (amount: number): string => {
     return new Intl.NumberFormat('en-IN', {
@@ -524,10 +489,6 @@ const SettingsPage = () => {
           <TabsTrigger value="notifications" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Notifications
-          </TabsTrigger>
-          <TabsTrigger value="security" className="flex items-center gap-2">
-            <Shield className="h-4 w-4" />
-            Security
           </TabsTrigger>
         </TabsList>
 
@@ -721,34 +682,6 @@ const SettingsPage = () => {
               </CardContent>
             </Card>
           </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Payment Methods</CardTitle>
-              <CardDescription>Configure accepted payment methods</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {paymentMethodOptions.map((method) => (
-                  <div key={method.value} className="flex items-center space-x-2">
-                    <Switch
-                      id={method.value}
-                      checked={formData.paymentMethods.includes(method.value)}
-                      onCheckedChange={() => handlePaymentMethodToggle(method.value)}
-                    />
-                    <Label htmlFor={method.value}>{method.label}</Label>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-4">
-                <p className="text-sm text-muted-foreground">
-                  Selected: {formData.paymentMethods.map(method => 
-                    paymentMethodOptions.find(opt => opt.value === method)?.label
-                  ).join(', ') || 'None'}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
 
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <div className="flex items-center justify-between">
@@ -1059,57 +992,6 @@ const SettingsPage = () => {
           </Card>
         </TabsContent>
 
-        <TabsContent value="security" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Security Settings</CardTitle>
-              <CardDescription>Manage your account security preferences</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Two-Factor Authentication</Label>
-                  <p className="text-sm text-muted-foreground">Add an extra layer of security to your account</p>
-                </div>
-                <Switch
-                  checked={userSettings.security.twoFactor}
-                  onCheckedChange={(checked) => 
-                    setUserSettings(prev => ({
-                      ...prev,
-                      security: { ...prev.security, twoFactor: checked }
-                    }))
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="sessionTimeout">Session Timeout (minutes)</Label>
-                <Select 
-                  value={userSettings.security.sessionTimeout} 
-                  onValueChange={(value) => 
-                    setUserSettings(prev => ({
-                      ...prev,
-                      security: { ...prev.security, sessionTimeout: value }
-                    }))
-                  }
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="15">15 minutes</SelectItem>
-                    <SelectItem value="30">30 minutes</SelectItem>
-                    <SelectItem value="60">1 hour</SelectItem>
-                    <SelectItem value="120">2 hours</SelectItem>
-                    <SelectItem value="480">8 hours</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button onClick={handleSaveSecurity} className="w-full md:w-auto mt-4">
-                Save Security Settings
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
     </div>
   );

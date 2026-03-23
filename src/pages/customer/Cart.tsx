@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { formatCurrency } from '@/lib/currency';
 import { useCart } from '@/contexts/CartContext';
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
+import { getProductImageUrl } from '@/lib/config';
 
 interface CartItem {
   id: string;
@@ -67,7 +68,7 @@ export default function Cart() {
                 <div key={item.id}>
                   <div className="flex items-center space-x-4">
                     <img
-                      src={item.image_url}
+                      src={item.image_url || getProductImageUrl({ category: item.category })}
                       alt={item.name}
                       className="w-20 h-20 object-cover rounded-lg"
                     />

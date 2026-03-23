@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { localStorageService, Product, Category, Material } from '@/lib/localStorage';
 import apiService from '@/lib/apiService';
+import { UPLOADS_BASE_URL } from '@/lib/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -573,7 +574,7 @@ const Products = () => {
                         return (
                           <div key={index} className={`relative group ${isMarkedForDeletion ? 'opacity-40' : ''}`}>
                             <img
-                              src={`http://localhost:5001${image.imageUrl}`}
+                              src={`${UPLOADS_BASE_URL}${image.imageUrl}`}
                               alt={`Current ${index + 1}`}
                               className="w-20 h-20 object-cover rounded-lg border"
                             />
@@ -724,7 +725,7 @@ const Products = () => {
                   <TableCell>
                     {imageUrl ? (
                       <img
-                        src={`http://localhost:5001${imageUrl}`}
+                        src={`${UPLOADS_BASE_URL}${imageUrl}`}
                         alt={product.name}
                         className="w-12 h-12 object-cover rounded-lg border"
                       />

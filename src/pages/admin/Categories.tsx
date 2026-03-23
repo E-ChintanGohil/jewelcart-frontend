@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Category } from '@/lib/localStorage';
 import { apiService } from '@/lib/apiService';
+import { UPLOADS_BASE_URL } from '@/lib/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,13 +10,16 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { Trash2, Edit, Plus, Eye } from 'lucide-react';
+import { Trash2, Edit, Plus, Upload, X, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const Categories = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -57,21 +61,24 @@ const Categories = () => {
     }
 
     try {
+      let savedCategory: Category;
       if (editingCategory) {
-        // Update existing category
-        await apiService.updateCategory(editingCategory.id, formData);
-
-        toast({
-          title: "Success",
-          description: "Category updated successfully"
-        });
+        savedCategory = await apiService.updateCategory(editingCategory.id, formData);
+        toast({ title: "Success", description: "Category updated successfully" });
       } else {
-        // Create new category
-        await apiService.createCategory(formData);
+        savedCategory = await apiService.createCategory(formData);
+        toast({ title: "Success", description: "Category created successfully" });
+      }
 
-        toast({
-          title: "Success",
-          description: "Category created successfully"
+      // Upload image if a file was selected
+      if (imageFile && savedCategory?.id) {
+        const uploadFormData = new FormData();
+        uploadFormData.append('image', imageFile);
+        const token = localStorage.getItem('jewelbox_auth_token');
+        await fetch(`${UPLOADS_BASE_URL}/api/categories/${savedCategory.id}/image`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: uploadFormData,
         });
       }
 
@@ -95,8 +102,17 @@ const Categories = () => {
       status: 'ACTIVE',
       sortOrder: 0
     });
+    setImageFile(null);
+    setImagePreview('');
     setEditingCategory(null);
     setIsDialogOpen(false);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
   };
 
   const handleEdit = (category: Category) => {
@@ -107,6 +123,10 @@ const Categories = () => {
       status: category.status || 'ACTIVE',
       sortOrder: category.sortOrder || 0
     });
+    setImageFile(null);
+    setImagePreview(category.imageUrl
+      ? (category.imageUrl.startsWith('/') ? `${UPLOADS_BASE_URL}${category.imageUrl}` : category.imageUrl)
+      : '');
     setEditingCategory(category);
     setIsDialogOpen(true);
   };
@@ -183,12 +203,35 @@ const Categories = () => {
               </div>
               
               <div>
-                <Label htmlFor="imageUrl">Image URL</Label>
-                <Input
-                  id="imageUrl"
-                  placeholder="https://example.com/image.jpg"
-                  value={formData.imageUrl}
-                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                <Label>Category Image</Label>
+                <div
+                  className="mt-1 border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-gray-400 transition-colors"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  {imagePreview ? (
+                    <div className="relative inline-block">
+                      <img src={imagePreview} alt="Preview" className="h-24 w-24 object-cover rounded mx-auto" />
+                      <button
+                        type="button"
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"
+                        onClick={(e) => { e.stopPropagation(); setImageFile(null); setImagePreview(''); }}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-muted-foreground">
+                      <Upload className="h-8 w-8 mx-auto mb-1 opacity-50" />
+                      <p className="text-sm">Click to upload image</p>
+                    </div>
+                  )}
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageChange}
                 />
               </div>
 
@@ -273,7 +316,7 @@ const Categories = () => {
             <div className="aspect-video bg-secondary overflow-hidden">
               {category.imageUrl ? (
                 <img
-                  src={category.imageUrl}
+                  src={category.imageUrl.startsWith('/') ? `${UPLOADS_BASE_URL}${category.imageUrl}` : category.imageUrl}
                   alt={category.name}
                   className="w-full h-full object-cover"
                 />

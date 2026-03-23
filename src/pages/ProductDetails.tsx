@@ -1,20 +1,25 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import SEO from '@/components/SEO';
 import { Product } from '@/lib/localStorage';
 import { apiService } from '@/lib/apiService';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Heart, ShoppingCart, Star, ArrowLeft, Plus, Minus } from 'lucide-react';
+import { Heart, ShoppingCart, Star, ArrowLeft, Plus, Minus, X } from 'lucide-react';
 import { formatCurrency } from '@/lib/currency';
 import { useCart } from '@/contexts/CartContext';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import { useWishlist } from '@/contexts/WishlistContext';
+
+import { resolveImageUrl, getProductImageUrl } from '@/lib/config';
+const imgUrl = (src?: string | null) =>
+  resolveImageUrl(src) || getProductImageUrl({});
 
 const ProductDetails = () => {
   const { id } = useParams();
-  const { addToCart } = useCart();
+  const { addToCart, isInCart, removeByProductId } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
+  const navigate = useNavigate();
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -52,43 +57,34 @@ const ProductDetails = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
-        <Header />
-        <div className="container mx-auto px-4 py-20 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading product...</p>
-        </div>
-        <Footer />
+      <div className="container mx-auto px-4 py-20 text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+        <p className="text-gray-600">Loading product...</p>
       </div>
     );
   }
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-white">
-        <Header />
-        <div className="container mx-auto px-4 py-20 text-center">
-          <h1 className="text-2xl font-bold text-black mb-4">Product Not Found</h1>
-          <Link to="/products">
-            <Button className="bg-black hover:bg-gray-800 text-white">
-              Back to Products
-            </Button>
-          </Link>
-        </div>
-        <Footer />
+      <div className="container mx-auto px-4 py-20 text-center">
+        <h1 className="text-2xl font-bold text-black mb-4">Product Not Found</h1>
+        <Link to="/products">
+          <Button className="bg-black hover:bg-gray-800 text-white">
+            Back to Products
+          </Button>
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="bg-white">
       <SEO
         title={product ? `${product.name} - ${product.categoryName || 'Jewelry'} | Jewelcart` : "Product Details - Jewelcart"}
         description={product ? `${product.description || `Buy ${product.name} from Jewelcart. Premium quality ${product.categoryName || 'jewelry'} with secure payment and free shipping on orders above ₹1,00,000.`}` : "View product details at Jewelcart"}
         image={product?.imageUrl || product?.image_url || "/og-image.jpg"}
         keywords={product ? `${product.name}, ${product.categoryName}, jewelry, ${product.categoryName || 'jewelry'} online, buy ${product.categoryName || 'jewelry'}, premium jewelry` : "jewelry, product details"}
       />
-      <Header />
       
       {/* Breadcrumb */}
       <section className="py-4 bg-gray-50">
@@ -113,7 +109,7 @@ const ProductDetails = () => {
             <div className="space-y-4">
               <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
                 <img
-                  src={(product.images && product.images[selectedImage]) || (product.images && product.images[0]) || product.imageUrl || '/placeholder-jewelry.jpg'}
+                  src={imgUrl((product.images && product.images[selectedImage]) || (product.images && product.images[0]) || product.imageUrl)}
                   alt={product.name}
                   className="w-full h-full object-cover"
                 />
@@ -130,7 +126,7 @@ const ProductDetails = () => {
                       }`}
                     >
                       <img
-                        src={image}
+                        src={imgUrl(image)}
                         alt={`${product.name} view ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
@@ -220,16 +216,41 @@ const ProductDetails = () => {
 
               {/* Action Buttons */}
               <div className="flex space-x-4">
+                {product && isInCart(product.id) ? (
+                  <>
+                    <Button
+                      className="flex-1 bg-amber-600 hover:bg-amber-700 text-white"
+                      onClick={() => navigate('/cart')}
+                    >
+                      <ShoppingCart className="h-5 w-5 mr-2" />
+                      Go to Cart
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                      onClick={() => product && removeByProductId(product.id)}
+                    >
+                      <X className="h-5 w-5" />
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    className="flex-1 bg-black hover:bg-gray-800 text-white"
+                    disabled={!product || (product.stockQuantity || product.stock || 0) === 0}
+                    onClick={() => product && addToCart(product, quantity)}
+                  >
+                    <ShoppingCart className="h-5 w-5 mr-2" />
+                    Add to Cart
+                  </Button>
+                )}
                 <Button
-                  className="flex-1 bg-black hover:bg-gray-800 text-white"
-                  disabled={(product.stockQuantity || product.stock || 0) === 0}
-                  onClick={() => product && addToCart(product, quantity)}
+                  variant="outline"
+                  size="icon"
+                  className="border-black text-black hover:bg-black hover:text-white"
+                  onClick={() => product && toggleWishlist(product as any)}
                 >
-                  <ShoppingCart className="h-5 w-5 mr-2" />
-                  Add to Cart
-                </Button>
-                <Button variant="outline" size="icon" className="border-black text-black hover:bg-black hover:text-white">
-                  <Heart className="h-5 w-5" />
+                  <Heart className={`h-5 w-5 ${product && isInWishlist(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
                 </Button>
               </div>
 
@@ -256,7 +277,7 @@ const ProductDetails = () => {
                   <Card className="group cursor-pointer hover:shadow-elegant transition-all duration-300 hover:-translate-y-2">
                     <div className="aspect-square overflow-hidden rounded-t-lg">
                       <img
-                        src={(similar.images && similar.images[0]) || similar.imageUrl || '/placeholder-jewelry.jpg'}
+                        src={imgUrl((similar.images && similar.images[0]) || similar.imageUrl)}
                         alt={similar.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
@@ -273,7 +294,6 @@ const ProductDetails = () => {
         </section>
       )}
 
-      <Footer />
     </div>
   );
 };

@@ -2,9 +2,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
+import { WishlistProvider } from "@/contexts/WishlistContext";
 
 // Layout components
 import CustomerLayout from "./components/layouts/CustomerLayout";
@@ -16,6 +17,8 @@ import { RequireAuth, RequireAdmin } from "./components/auth/RequireAuth";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import AdminLogin from "./pages/admin/AdminLogin";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 
@@ -51,6 +54,7 @@ import Orders from "./pages/admin/Orders";
 import Reports from "./pages/admin/Reports";
 import Settings from "./pages/admin/Settings";
 import Content from "./pages/admin/Content";
+import Coupons from "./pages/admin/Coupons";
 
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
@@ -62,6 +66,7 @@ function App() {
 		<QueryClientProvider client={queryClient}>
 			<AuthProvider>
 				<CartProvider>
+					<WishlistProvider>
 					<TooltipProvider>
 						<Toaster />
 						<Sonner />
@@ -77,6 +82,12 @@ function App() {
 								</Route>
 								<Route path="/console/login" element={<PublicLayout />}>
 									<Route index element={<AdminLogin />} />
+								</Route>
+								<Route path="/forgot-password" element={<PublicLayout />}>
+									<Route index element={<ForgotPassword />} />
+								</Route>
+								<Route path="/reset-password" element={<PublicLayout />}>
+									<Route index element={<ResetPassword />} />
 								</Route>
 
 								{/* Customer Routes (public + authenticated customer features) */}
@@ -112,6 +123,8 @@ function App() {
 									<Route path="checkout" element={<Checkout />} />
 									<Route path="order-success" element={<OrderSuccess />} />
 									<Route path="profile" element={<Profile />} />
+									<Route path="solitaire" element={<Navigate to="/shop" replace />} />
+									<Route path="offers" element={<Navigate to="/shop" replace />} />
 									<Route path="stores" element={<ProductListing />} />
 									<Route path="consultation" element={<ProductListing />} />
 									<Route path="virtual-try-on" element={<ProductListing />} />
@@ -130,6 +143,7 @@ function App() {
 									<Route path="categories" element={<Categories />} />
 									<Route path="customers" element={<Customers />} />
 									<Route path="orders" element={<Orders />} />
+									<Route path="coupons" element={<Coupons />} />
 									<Route path="reports" element={<Reports />} />
 									<Route path="settings" element={<Settings />} />
 									<Route path="content" element={<Content />} />
@@ -140,6 +154,7 @@ function App() {
 							</Routes>
 						</BrowserRouter>
 					</TooltipProvider>
+					</WishlistProvider>
 				</CartProvider>
 			</AuthProvider>
 		</QueryClientProvider>

@@ -94,7 +94,7 @@ const Reports = () => {
     if (order.items && Array.isArray(order.items)) {
       order.items.forEach(item => {
         const product = products.find(p => p.name === item.productName);
-        const category = product?.categoryName || product?.category || 'Other';
+        const category = (product as any)?.category_name || (product as any)?.category || 'Other';
         const itemTotal = item.totalPrice || item.total;
         if (acc[category]) {
           acc[category] += itemTotal;

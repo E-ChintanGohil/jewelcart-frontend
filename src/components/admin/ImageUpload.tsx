@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { UPLOADS_BASE_URL } from '@/lib/config';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -197,7 +198,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                   <div key={`${image.imageUrl}-${index}`} className="relative group">
                     <div className="relative aspect-square rounded-lg border overflow-hidden bg-gray-100">
                       <img
-                        src={`http://localhost:5001${image.imageUrl}`}
+                        src={`${UPLOADS_BASE_URL}${image.imageUrl}`}
                         alt={`Product ${index + 1}`}
                         className="w-full h-full object-cover"
                       />

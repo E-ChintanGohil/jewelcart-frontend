@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import SEO from '@/components/SEO';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { apiService } from '@/lib/apiService';
 import { formatCurrency } from '@/lib/currency';
 import { useCart } from '@/contexts/CartContext';
-import { Loader2, ShoppingCart, Heart, Star } from 'lucide-react';
+import { useWishlist } from '@/contexts/WishlistContext';
+import { getProductImageUrl } from '@/lib/config';
+import { useToast } from '@/components/ui/use-toast';
+import { Loader2, ShoppingCart, Heart, X } from 'lucide-react';
 
 interface Product {
   id: string | number;
@@ -20,6 +23,8 @@ interface Product {
   image_url?: string;
   description?: string;
   stockQuantity?: number;
+  stock?: number;
+  stock_quantity?: number;
   in_stock?: boolean;
   isActive?: boolean;
 }
@@ -190,12 +195,40 @@ interface ProductCardProps {
 }
 
 function ProductCard({ product, featured = false }: ProductCardProps) {
-  const { addToCart } = useCart();
+  const { addToCart, isInCart, removeByProductId } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const wishlisted = isInWishlist(product.id);
+  const inCart = isInCart(product.id);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    const stock = product.stock ?? product.stockQuantity ?? product.stock_quantity ?? 0;
+    if (stock <= 0 && !product.in_stock) {
+      toast({ title: "Out of stock", description: "This product is out of stock", variant: "destructive" });
+      return;
+    }
     addToCart(product);
+  };
+
+  const handleRemoveFromCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    removeByProductId(product.id);
+  };
+
+  const handleGoToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate('/cart');
+  };
+
+  const handleToggleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWishlist(product);
   };
 
   return (
@@ -208,23 +241,40 @@ function ProductCard({ product, featured = false }: ProductCardProps) {
             </Badge>
           )}
           <img
-            src={product.imageUrl || product.image_url
-              ? `http://localhost:5001${product.imageUrl || product.image_url}`
-              : '/placeholder-jewelry.jpg'}
+            src={getProductImageUrl(product)}
             alt={product.name}
             className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
           />
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
             <div className="transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300 space-x-2">
-              <Button
-                size="sm"
-                className="bg-white text-black hover:bg-gray-100"
-                onClick={handleAddToCart}
-              >
-                <ShoppingCart className="h-4 w-4" />
-              </Button>
-              <Button size="sm" variant="outline" className="bg-white border-white hover:bg-gray-100">
-                <Heart className="h-4 w-4" />
+              {inCart ? (
+                <>
+                  <Button
+                    size="sm"
+                    className="bg-amber-600 text-white hover:bg-amber-700"
+                    onClick={handleGoToCart}
+                  >
+                    <ShoppingCart className="h-4 w-4 mr-1" /> Go to Cart
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="bg-red-500 text-white hover:bg-red-600"
+                    onClick={handleRemoveFromCart}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  size="sm"
+                  className="bg-white text-black hover:bg-gray-100"
+                  onClick={handleAddToCart}
+                >
+                  <ShoppingCart className="h-4 w-4" />
+                </Button>
+              )}
+              <Button size="sm" variant="outline" className="bg-white border-white hover:bg-gray-100" onClick={handleToggleWishlist}>
+                <Heart className={`h-4 w-4 ${wishlisted ? 'fill-red-500 text-red-500' : ''}`} />
               </Button>
             </div>
           </div>
@@ -234,13 +284,6 @@ function ProductCard({ product, featured = false }: ProductCardProps) {
             <Badge variant="secondary" className="text-xs">
               {product.categoryName || product.category}
             </Badge>
-            <div className="flex items-center">
-              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-              <Star className="h-3 w-3 fill-gray-200 text-gray-200" />
-            </div>
           </div>
           <Link to={`/product/${product.id}`}>
             <h3 className="font-semibold text-gray-900 mb-2 hover:text-amber-600 transition-colors">
@@ -255,10 +298,10 @@ function ProductCard({ product, featured = false }: ProductCardProps) {
               {formatCurrency(product.calculatedPrice || product.price || 0)}
             </span>
             <Badge
-              variant={(product.stockQuantity && product.stockQuantity > 0) || product.in_stock ? "default" : "destructive"}
+              variant={(product.stock ?? product.stockQuantity ?? product.stock_quantity ?? 0) > 0 || product.in_stock ? "default" : "destructive"}
               className="text-xs"
             >
-              {(product.stockQuantity && product.stockQuantity > 0) || product.in_stock ? 'In Stock' : 'Out of Stock'}
+              {(product.stock ?? product.stockQuantity ?? product.stock_quantity ?? 0) > 0 || product.in_stock ? 'In Stock' : 'Out of Stock'}
             </Badge>
           </div>
         </div>

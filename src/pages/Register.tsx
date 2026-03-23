@@ -79,7 +79,7 @@ const Register = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-elegant p-4">
       <Card className="w-full max-w-md shadow-elegant">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-primary">JewelBox</CardTitle>
+          <CardTitle className="text-2xl font-bold text-primary">JewelCart</CardTitle>
           <CardDescription>
             Create your account to get started
           </CardDescription>

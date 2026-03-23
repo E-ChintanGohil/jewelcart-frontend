@@ -3,7 +3,7 @@ import {
   Product, Customer, Order, Category, User, Settings, Material
 } from './localStorage';
 
-const API_BASE_URL = 'http://localhost:5001/api';
+import { API_BASE_URL } from './config';
 
 // Auth token management
 let authToken: string | null = localStorage.getItem('jewelbox_auth_token');
@@ -147,12 +147,94 @@ class ApiService {
     return response.order;
   }
 
-  async createCustomerOrder(orderData: any): Promise<Order> {
+  async createCustomerOrder(orderData: any): Promise<any> {
     const response = await apiRequest('/customer-orders', {
       method: 'POST',
       body: JSON.stringify(orderData),
     });
     return response.order;
+  }
+
+  // Payment methods
+  async createRazorpayOrder(amount: number, db_order_id: number): Promise<{
+    razorpay_order_id: string;
+    amount: number;
+    currency: string;
+    key: string;
+  }> {
+    return await apiRequest('/payments/create-order', {
+      method: 'POST',
+      body: JSON.stringify({ amount, db_order_id }),
+    });
+  }
+
+  async verifyPayment(data: {
+    razorpay_order_id: string;
+    razorpay_payment_id: string;
+    razorpay_signature: string;
+    db_order_id: number;
+  }): Promise<{ success: boolean; order_number: string; payment_id: number }> {
+    return await apiRequest('/payments/verify-payment', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async markPaymentFailed(db_order_id: number): Promise<void> {
+    await apiRequest('/payments/payment-failed', {
+      method: 'POST',
+      body: JSON.stringify({ db_order_id }),
+    });
+  }
+
+  // Coupon methods
+  async validateCoupon(code: string, orderAmount: number): Promise<{
+    valid: boolean;
+    code: string;
+    discountType: 'PERCENTAGE' | 'FIXED';
+    discountValue: number;
+    discountAmount: number;
+  }> {
+    return await apiRequest('/coupons/validate', {
+      method: 'POST',
+      body: JSON.stringify({ code, orderAmount }),
+    });
+  }
+
+  async getCoupons(): Promise<any[]> {
+    const response = await apiRequest('/coupons');
+    return response.coupons;
+  }
+
+  async createCoupon(data: any): Promise<any> {
+    const response = await apiRequest('/coupons', { method: 'POST', body: JSON.stringify(data) });
+    return response.coupon;
+  }
+
+  async updateCoupon(id: number, data: any): Promise<any> {
+    const response = await apiRequest(`/coupons/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+    return response.coupon;
+  }
+
+  async deleteCoupon(id: number): Promise<void> {
+    await apiRequest(`/coupons/${id}`, { method: 'DELETE' });
+  }
+
+  // Password reset methods
+  async forgotPassword(email: string, type: 'customer' | 'staff'): Promise<void> {
+    const endpoint = type === 'customer' ? '/customer-auth/forgot-password' : '/auth/forgot-password';
+    await apiRequest(endpoint, {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+  }
+
+  async resetPassword(token: string, password: string, type: 'customer' | 'staff'): Promise<void> {
+    const endpoint = type === 'customer' ? '/customer-auth/reset-password' : '/auth/reset-password';
+    await apiRequest(endpoint, {
+      method: 'POST',
+      body: JSON.stringify({ token, password }),
+    });
   }
 
   // Customer Address methods

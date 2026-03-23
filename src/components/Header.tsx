@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCart } from "@/contexts/CartContext";
+import { useWishlist } from "@/contexts/WishlistContext";
 import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMenuList, NavigationMenuTrigger } from "@/components/ui/navigation-menu";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogTrigger, DialogContent, DialogTitle, DialogOverlay } from "@/components/ui/dialog"
@@ -17,6 +18,7 @@ const Header = () => {
 	const [isScrolled, setIsScrolled] = useState(false);
 	const { user, logout, isAuthenticated } = useAuth();
 	const { getTotalItems } = useCart();
+	const { items: wishlistItems } = useWishlist();
 	const navigate = useNavigate();
 	const location = useLocation();
 	const isHomePage = location.pathname === '/';
@@ -43,6 +45,80 @@ const Header = () => {
 		{ name: "Earrings", href: "/products/earrings" },
 		{ name: "Bracelets", href: "/products/bracelets" }
 	];
+
+	const categoryDropdowns: Record<string, { styles: { name: string; href: string }[]; materials: { name: string; href: string }[] }> = {
+		Rings: {
+			styles: [
+				{ name: "Engagement Rings", href: "/products/rings" },
+				{ name: "Wedding Bands", href: "/products/rings" },
+				{ name: "Cocktail Rings", href: "/products/rings" },
+				{ name: "Statement Rings", href: "/products/rings" },
+				{ name: "Everyday Rings", href: "/products/rings" },
+			],
+			materials: [
+				{ name: "Gold Rings", href: "/products/rings" },
+				{ name: "Silver Rings", href: "/products/rings" },
+				{ name: "Diamond Rings", href: "/products/rings" },
+			],
+		},
+		Earrings: {
+			styles: [
+				{ name: "Studs", href: "/products/earrings" },
+				{ name: "Hoops", href: "/products/earrings" },
+				{ name: "Drops & Danglers", href: "/products/earrings" },
+				{ name: "Jhumkas", href: "/products/earrings" },
+				{ name: "Chandeliers", href: "/products/earrings" },
+			],
+			materials: [
+				{ name: "Gold Earrings", href: "/products/earrings" },
+				{ name: "Silver Earrings", href: "/products/earrings" },
+				{ name: "Diamond Earrings", href: "/products/earrings" },
+			],
+		},
+		Pendants: {
+			styles: [
+				{ name: "Solitaire Pendants", href: "/products/pendants" },
+				{ name: "Heart Pendants", href: "/products/pendants" },
+				{ name: "Religious Pendants", href: "/products/pendants" },
+				{ name: "Initial Pendants", href: "/products/pendants" },
+				{ name: "Everyday Pendants", href: "/products/pendants" },
+			],
+			materials: [
+				{ name: "Gold Pendants", href: "/products/pendants" },
+				{ name: "Silver Pendants", href: "/products/pendants" },
+				{ name: "Diamond Pendants", href: "/products/pendants" },
+			],
+		},
+		Bracelets: {
+			styles: [
+				{ name: "Chain Bracelets", href: "/products/bracelets" },
+				{ name: "Charm Bracelets", href: "/products/bracelets" },
+				{ name: "Cuff Bracelets", href: "/products/bracelets" },
+				{ name: "Tennis Bracelets", href: "/products/bracelets" },
+				{ name: "Bangles", href: "/products/bangles" },
+			],
+			materials: [
+				{ name: "Gold Bracelets", href: "/products/bracelets" },
+				{ name: "Silver Bracelets", href: "/products/bracelets" },
+				{ name: "Diamond Bracelets", href: "/products/bracelets" },
+			],
+		},
+		Gifts: {
+			styles: [
+				{ name: "Birthday Gifts", href: "/shop" },
+				{ name: "Anniversary Gifts", href: "/shop" },
+				{ name: "Valentine's Gifts", href: "/shop" },
+				{ name: "Wedding Gifts", href: "/shop" },
+				{ name: "Corporate Gifts", href: "/shop" },
+			],
+			materials: [
+				{ name: "Under ₹5,000", href: "/shop" },
+				{ name: "₹5,000 - ₹15,000", href: "/shop" },
+				{ name: "₹15,000 - ₹50,000", href: "/shop" },
+				{ name: "Above ₹50,000", href: "/shop" },
+			],
+		},
+	};
 
 	const handleSearch = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -114,6 +190,20 @@ const Header = () => {
 						<img src="/logo.png" alt="Jewelcart Logo" />
 					</Link>
 					<div className="items-center flex flex-row md:gap-4 max-md:gap-3">
+						<Link
+							to="/profile?tab=wishlist"
+							className={`relative hover:text-brandgold`}
+							aria-label={`Wishlist with ${wishlistItems.length} items`}
+						>
+							<Heart className={`h-5 w-5 ${wishlistItems.length > 0 ? 'fill-red-500 text-red-500' : ''}`} />
+							{wishlistItems.length > 0 && (
+								<small
+									className="absolute -right-[5px] -top-[5px] bg-red-500 w-4 h-4 text-white z-[3] flex items-center justify-center text-xs font-medium rounded-xl"
+								>
+									{wishlistItems.length}
+								</small>
+							)}
+						</Link>
 						{/* Search */}
 						{/* <Dialog>
 							<DialogTrigger asChild>
@@ -337,24 +427,27 @@ const Header = () => {
 										Rings
 									</NavigationMenuTrigger>
 									<NavigationMenuContent>
-										<div className="lg:w-[280px] p-4 bg-white border border-border shadow-xl rounded-lg">
+										<div className="lg:w-[380px] p-4 bg-white border border-border shadow-xl rounded-lg">
 											<div className="grid grid-cols-2 gap-6">
 												<div>
-													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Categories</h3>
+													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">By Style</h3>
 													<ul className="space-y-1">
-														{categories.map((category) => (
-															<li key={category.name}>
-																<Link
-																	to={category.href}
-																	className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
-																	aria-label={`Browse ${category.name}`}
-																>
-																	{category.name}
-																</Link>
-															</li>
+														{categoryDropdowns.Rings.styles.map((item) => (
+															<li key={item.name}><Link to={item.href} className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors">{item.name}</Link></li>
 														))}
 													</ul>
 												</div>
+												<div>
+													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">By Material</h3>
+													<ul className="space-y-1">
+														{categoryDropdowns.Rings.materials.map((item) => (
+															<li key={item.name}><Link to={item.href} className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors">{item.name}</Link></li>
+														))}
+													</ul>
+												</div>
+											</div>
+											<div className="mt-4 pt-4 border-t border-gray-200">
+												<Link to="/products/rings" className="block px-3 py-2 text-sm font-medium text-amber-700 hover:bg-amber-50 rounded-md transition-colors">View All Rings →</Link>
 											</div>
 										</div>
 									</NavigationMenuContent>
@@ -364,32 +457,20 @@ const Header = () => {
 						<NavigationMenu>
 							<NavigationMenuList>
 								<NavigationMenuItem>
-									<NavigationMenuTrigger
-										className={`bg-transparent font-normal px-0 text-brandblue hover:text-brandgold focus:text-brandgold`}
-										aria-label="Earrings"
-									>
-										Earrings
-									</NavigationMenuTrigger>
+									<NavigationMenuTrigger className={`bg-transparent font-normal px-0 text-brandblue hover:text-brandgold focus:text-brandgold`} aria-label="Earrings">Earrings</NavigationMenuTrigger>
 									<NavigationMenuContent>
-										<div className="lg:w-[320px] p-4 bg-white border border-border shadow-xl rounded-lg">
+										<div className="lg:w-[380px] p-4 bg-white border border-border shadow-xl rounded-lg">
 											<div className="grid grid-cols-2 gap-6">
 												<div>
-													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Categories</h3>
-													<ul className="space-y-1">
-														{categories.map((category) => (
-															<li key={category.name}>
-																<Link
-																	to={category.href}
-																	className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
-																	aria-label={`Browse ${category.name}`}
-																>
-																	{category.name}
-																</Link>
-															</li>
-														))}
-													</ul>
+													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">By Style</h3>
+													<ul className="space-y-1">{categoryDropdowns.Earrings.styles.map((item) => (<li key={item.name}><Link to={item.href} className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors">{item.name}</Link></li>))}</ul>
+												</div>
+												<div>
+													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">By Material</h3>
+													<ul className="space-y-1">{categoryDropdowns.Earrings.materials.map((item) => (<li key={item.name}><Link to={item.href} className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors">{item.name}</Link></li>))}</ul>
 												</div>
 											</div>
+											<div className="mt-4 pt-4 border-t border-gray-200"><Link to="/products/earrings" className="block px-3 py-2 text-sm font-medium text-amber-700 hover:bg-amber-50 rounded-md transition-colors">View All Earrings →</Link></div>
 										</div>
 									</NavigationMenuContent>
 								</NavigationMenuItem>
@@ -398,32 +479,20 @@ const Header = () => {
 						<NavigationMenu>
 							<NavigationMenuList>
 								<NavigationMenuItem>
-									<NavigationMenuTrigger
-										className={`bg-transparent font-normal px-0 text-brandblue hover:text-brandgold focus:text-brandgold`}
-										aria-label="Pendants"
-									>
-										Pendants
-									</NavigationMenuTrigger>
+									<NavigationMenuTrigger className={`bg-transparent font-normal px-0 text-brandblue hover:text-brandgold focus:text-brandgold`} aria-label="Pendants">Pendants</NavigationMenuTrigger>
 									<NavigationMenuContent>
-										<div className="lg:w-[320px] p-4 bg-white border border-border shadow-xl rounded-lg">
+										<div className="lg:w-[380px] p-4 bg-white border border-border shadow-xl rounded-lg">
 											<div className="grid grid-cols-2 gap-6">
 												<div>
-													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Categories</h3>
-													<ul className="space-y-1">
-														{categories.map((category) => (
-															<li key={category.name}>
-																<Link
-																	to={category.href}
-																	className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
-																	aria-label={`Browse ${category.name}`}
-																>
-																	{category.name}
-																</Link>
-															</li>
-														))}
-													</ul>
+													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">By Style</h3>
+													<ul className="space-y-1">{categoryDropdowns.Pendants.styles.map((item) => (<li key={item.name}><Link to={item.href} className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors">{item.name}</Link></li>))}</ul>
+												</div>
+												<div>
+													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">By Material</h3>
+													<ul className="space-y-1">{categoryDropdowns.Pendants.materials.map((item) => (<li key={item.name}><Link to={item.href} className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors">{item.name}</Link></li>))}</ul>
 												</div>
 											</div>
+											<div className="mt-4 pt-4 border-t border-gray-200"><Link to="/products/pendants" className="block px-3 py-2 text-sm font-medium text-amber-700 hover:bg-amber-50 rounded-md transition-colors">View All Pendants →</Link></div>
 										</div>
 									</NavigationMenuContent>
 								</NavigationMenuItem>
@@ -432,32 +501,20 @@ const Header = () => {
 						<NavigationMenu>
 							<NavigationMenuList>
 								<NavigationMenuItem>
-									<NavigationMenuTrigger
-										className={`bg-transparent font-normal px-0 text-brandblue hover:text-brandgold focus:text-brandgold`}
-										aria-label="Bracelets"
-									>
-										Bracelets
-									</NavigationMenuTrigger>
+									<NavigationMenuTrigger className={`bg-transparent font-normal px-0 text-brandblue hover:text-brandgold focus:text-brandgold`} aria-label="Bracelets">Bracelets</NavigationMenuTrigger>
 									<NavigationMenuContent>
-										<div className="lg:w-[320px] p-4 bg-white border border-border shadow-xl rounded-lg">
+										<div className="lg:w-[380px] p-4 bg-white border border-border shadow-xl rounded-lg">
 											<div className="grid grid-cols-2 gap-6">
 												<div>
-													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Categories</h3>
-													<ul className="space-y-1">
-														{categories.map((category) => (
-															<li key={category.name}>
-																<Link
-																	to={category.href}
-																	className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
-																	aria-label={`Browse ${category.name}`}
-																>
-																	{category.name}
-																</Link>
-															</li>
-														))}
-													</ul>
+													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">By Style</h3>
+													<ul className="space-y-1">{categoryDropdowns.Bracelets.styles.map((item) => (<li key={item.name}><Link to={item.href} className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors">{item.name}</Link></li>))}</ul>
+												</div>
+												<div>
+													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">By Material</h3>
+													<ul className="space-y-1">{categoryDropdowns.Bracelets.materials.map((item) => (<li key={item.name}><Link to={item.href} className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors">{item.name}</Link></li>))}</ul>
 												</div>
 											</div>
+											<div className="mt-4 pt-4 border-t border-gray-200"><Link to="/products/bracelets" className="block px-3 py-2 text-sm font-medium text-amber-700 hover:bg-amber-50 rounded-md transition-colors">View All Bracelets →</Link></div>
 										</div>
 									</NavigationMenuContent>
 								</NavigationMenuItem>
@@ -473,30 +530,17 @@ const Header = () => {
 						<NavigationMenu>
 							<NavigationMenuList>
 								<NavigationMenuItem>
-									<NavigationMenuTrigger
-										className={`bg-transparent font-normal px-0 text-brandblue hover:text-brandgold focus:text-brandgold`}
-										aria-label="Gifts"
-									>
-										Gifts
-									</NavigationMenuTrigger>
+									<NavigationMenuTrigger className={`bg-transparent font-normal px-0 text-brandblue hover:text-brandgold focus:text-brandgold`} aria-label="Gifts">Gifts</NavigationMenuTrigger>
 									<NavigationMenuContent>
-										<div className="lg:w-[180px] p-4 bg-white border border-border shadow-xl rounded-lg">
+										<div className="lg:w-[380px] p-4 bg-white border border-border shadow-xl rounded-lg">
 											<div className="grid grid-cols-2 gap-6">
 												<div>
-													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">Categories</h3>
-													<ul className="space-y-1">
-														{categories.map((category) => (
-															<li key={category.name}>
-																<Link
-																	to={category.href}
-																	className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-amber-500"
-																	aria-label={`Browse ${category.name}`}
-																>
-																	{category.name}
-																</Link>
-															</li>
-														))}
-													</ul>
+													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">By Occasion</h3>
+													<ul className="space-y-1">{categoryDropdowns.Gifts.styles.map((item) => (<li key={item.name}><Link to={item.href} className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors">{item.name}</Link></li>))}</ul>
+												</div>
+												<div>
+													<h3 className="font-semibold text-gray-900 mb-3 text-sm uppercase tracking-wide">By Price</h3>
+													<ul className="space-y-1">{categoryDropdowns.Gifts.materials.map((item) => (<li key={item.name}><Link to={item.href} className="block px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700 rounded-md transition-colors">{item.name}</Link></li>))}</ul>
 												</div>
 											</div>
 										</div>

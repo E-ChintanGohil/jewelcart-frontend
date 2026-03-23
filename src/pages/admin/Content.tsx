@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { UPLOADS_BASE_URL } from '@/lib/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,7 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Edit, Trash2, Image, FileText, Star, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, Image, FileText, Star, Eye, Upload, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ContentItem {
@@ -29,6 +30,9 @@ const Content = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ContentItem | null>(null);
   const [activeTab, setActiveTab] = useState('hero');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -116,9 +120,16 @@ const Content = () => {
     setContent(newContent);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.title.trim() || !formData.content.trim()) {
       toast({
         title: "Error",
@@ -129,17 +140,35 @@ const Content = () => {
     }
 
     try {
+      // Upload image file if selected
+      let imageUrl = formData.image;
+      if (imageFile) {
+        const uploadData = new FormData();
+        uploadData.append('image', imageFile);
+        const token = localStorage.getItem('jewelbox_auth_token');
+        const uploadRes = await fetch(`${UPLOADS_BASE_URL}/api/upload/general`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: uploadData
+        });
+        if (uploadRes.ok) {
+          const result = await uploadRes.json();
+          imageUrl = `${UPLOADS_BASE_URL}${result.imageUrl}`;
+        }
+      }
+
       const now = new Date().toISOString();
+      const dataToSave = { ...formData, image: imageUrl };
       
       if (editingItem) {
         // Update existing item
         const updatedContent = content.map(item =>
           item.id === editingItem.id
-            ? { ...item, ...formData, updatedAt: now }
+            ? { ...item, ...dataToSave, updatedAt: now }
             : item
         );
         saveContent(updatedContent);
-        
+
         toast({
           title: "Success",
           description: "Content updated successfully"
@@ -148,7 +177,7 @@ const Content = () => {
         // Create new item
         const newItem: ContentItem = {
           id: Date.now().toString(),
-          ...formData,
+          ...dataToSave,
           createdAt: now,
           updatedAt: now
         };
@@ -180,6 +209,8 @@ const Content = () => {
       status: 'published',
       featured: false
     });
+    setImageFile(null);
+    setImagePreview('');
     setEditingItem(null);
     setIsDialogOpen(false);
   };
@@ -193,6 +224,8 @@ const Content = () => {
       status: item.status,
       featured: item.featured
     });
+    setImageFile(null);
+    setImagePreview(item.image || '');
     setEditingItem(item);
     setIsDialogOpen(true);
   };
@@ -359,12 +392,35 @@ const Content = () => {
               </div>
               
               <div>
-                <Label htmlFor="image">Image URL</Label>
-                <Input
-                  id="image"
-                  placeholder="https://example.com/image.jpg"
-                  value={formData.image}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                <Label>Image</Label>
+                <div
+                  className="mt-1 border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-gray-400 transition-colors"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  {imagePreview ? (
+                    <div className="relative inline-block">
+                      <img src={imagePreview} alt="Preview" className="h-24 w-24 object-cover rounded mx-auto" />
+                      <button
+                        type="button"
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-0.5"
+                        onClick={(e) => { e.stopPropagation(); setImageFile(null); setImagePreview(''); setFormData({ ...formData, image: '' }); }}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-muted-foreground">
+                      <Upload className="h-8 w-8 mx-auto mb-1 opacity-50" />
+                      <p className="text-sm">Click to upload image</p>
+                    </div>
+                  )}
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageChange}
                 />
               </div>
               

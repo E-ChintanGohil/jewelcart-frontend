@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "./ui/carousel";
+import { Link } from "react-router-dom";
 
 const HeroSection = () => {
 	return (
@@ -96,8 +97,8 @@ const HeroSection = () => {
 										</div>
 									</div>
 									<div className="flex flex-wrap gap-4">
-										<Button variant="default" size="default" className="bg-brandgold uppercase hover:bg-brandblue">Shop Now</Button>
-										<Button variant="outline" size="default" className="hover:text-white hover:border-white uppercase">Our Collections</Button>
+										<Link to="/shop"><Button variant="default" size="default" className="bg-brandgold uppercase hover:bg-brandblue">Shop Now</Button></Link>
+										<Link to="/shop"><Button variant="outline" size="default" className="hover:text-white hover:border-white uppercase">Our Collections</Button></Link>
 									</div>
 								</div>
 							</div>
@@ -158,7 +159,7 @@ const HeroSection = () => {
 										</div>
 									</div>
 									<div className="flex flex-wrap gap-4">
-										<Button size="lg" className="bg-brandgold hover:bg-brandblue text-white uppercase">Shop Now</Button>
+										<Link to="/shop"><Button size="lg" className="bg-brandgold hover:bg-brandblue text-white uppercase">Shop Now</Button></Link>
 									</div>
 								</div>
 							</div>

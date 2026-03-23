@@ -1,59 +1,21 @@
 
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Sparkles } from "lucide-react";
+import apiService from "@/lib/apiService";
+import { getProductImageUrl } from "@/lib/config";
+import { formatCurrency } from "@/lib/currency";
 
 const NewArrivals = () => {
-  const newProducts = [
-    {
-      id: 1,
-      title: "Sapphire Drop Earrings",
-      price: "₹45,000",
-      image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400&q=80",
-      category: "earrings",
-      isNew: true
-    },
-    {
-      id: 2,
-      title: "Pearl Statement Necklace",
-      price: "₹32,000",
-      image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&q=80",
-      category: "necklaces",
-      isNew: true
-    },
-    {
-      id: 3,
-      title: "Vintage Rose Gold Ring",
-      price: "₹28,000",
-      image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400&q=80",
-      category: "rings",
-      isNew: true
-    },
-    {
-      id: 4,
-      title: "Tennis Bracelet",
-      price: "₹55,000",
-      image: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=400&q=80",
-      category: "bracelets",
-      isNew: true
-    },
-    {
-      id: 5,
-      title: "Diamond Stud Earrings",
-      price: "₹38,000",
-      image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400&q=80",
-      category: "earrings",
-      isNew: true
-    },
-    {
-      id: 6,
-      title: "Emerald Pendant",
-      price: "₹42,000",
-      image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&q=80",
-      category: "necklaces",
-      isNew: true
-    }
-  ];
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    apiService.getProducts({ limit: 6 }).then((res) => {
+      setProducts(res.products?.slice(0, 6) || []);
+    }).catch(() => {}).finally(() => setLoading(false));
+  }, []);
 
   return (
     <section className="py-16 bg-gray-50">
@@ -68,35 +30,51 @@ const NewArrivals = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {newProducts.map((product) => (
-            <Link key={product.id} to={`/product/${product.id}`}>
-              <div className="group cursor-pointer">
-                <div className="relative overflow-hidden rounded-lg bg-white shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300">
-                  <div className="aspect-square overflow-hidden">
-                    <img
-                      src={product.image}
-                      alt={product.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute top-3 left-3">
-                      <span className="bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
-                        New
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-3">
-                    <h3 className="text-sm font-medium text-black mb-1 line-clamp-2">{product.title}</h3>
-                    <p className="text-sm font-bold text-brandgold">{product.price}</p>
-                  </div>
+        {loading ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="rounded-lg bg-gray-200 aspect-square" />
+                <div className="p-3 space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-3/4" />
+                  <div className="h-4 bg-gray-200 rounded w-1/2" />
                 </div>
               </div>
-            </Link>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {products.map((product) => (
+              <Link key={product.id} to={`/product/${product.id}`}>
+                <div className="group cursor-pointer">
+                  <div className="relative overflow-hidden rounded-lg bg-white shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300">
+                    <div className="aspect-square overflow-hidden">
+                      <img
+                        src={getProductImageUrl(product)}
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute top-3 left-3">
+                        <span className="bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
+                          New
+                        </span>
+                      </div>
+                    </div>
+                    <div className="p-3">
+                      <h3 className="text-sm font-medium text-black mb-1 line-clamp-2">{product.name}</h3>
+                      <p className="text-sm font-bold text-brandgold">
+                        {formatCurrency(product.calculatedPrice || product.price)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
 
         <div className="text-center mt-8">
-          <Button 
+          <Button
             asChild
             className="bg-brandgold hover:bg-brandblue text-white"
           >

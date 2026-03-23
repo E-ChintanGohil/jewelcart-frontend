@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { localStorageService, Product } from '@/lib/localStorage';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { apiService } from '@/lib/apiService';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Search, Filter, Heart, ShoppingCart, SlidersHorizontal } from 'lucide-react';
+import { Search, Filter, Heart, ShoppingCart, SlidersHorizontal, X } from 'lucide-react';
 import { formatCurrency } from '@/lib/currency';
+import { useCart } from '@/contexts/CartContext';
+import { useWishlist } from '@/contexts/WishlistContext';
+import { getProductImageUrl } from '@/lib/config';
+import { useToast } from '@/hooks/use-toast';
 import ProductFilters, { FilterState } from '@/components/ProductFilters';
 
 // Default product images for different categories
@@ -21,11 +25,16 @@ const defaultImages = {
 };
 
 const ProductListing = () => {
+  const { addToCart, isInCart, removeByProductId } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const { category, collection } = useParams();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('name');
+  const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<FilterState>({
     categories: [],
     materials: [],
@@ -37,37 +46,37 @@ const ProductListing = () => {
   const [maxPrice, setMaxPrice] = useState(300000);
 
   // Function to get appropriate image for product
-  const getProductImage = (product: Product) => {
-    if (product.images && product.images.length > 0 && product.images[0]) {
-      return product.images[0];
-    }
-    
-    const categoryKey = product.category.toLowerCase() as keyof typeof defaultImages;
-    return defaultImages[categoryKey] || defaultImages.default;
-  };
+  const getProductImage = (product: any) => getProductImageUrl(product);
 
   useEffect(() => {
-    const allProducts = localStorageService.getProducts();
-    
-    let filtered = allProducts;
-    
-    if (category) {
-      filtered = allProducts.filter(product => 
-        product.category.toLowerCase() === category.toLowerCase()
-      );
-    } else if (collection) {
-      // For collections, we'll show all products for now
-      // In a real app, you'd have collection-specific filtering
-      filtered = allProducts;
-    }
-    
-    // Calculate max price for slider
-    const maxProductPrice = Math.max(...allProducts.map(p => p.price));
-    setMaxPrice(maxProductPrice);
-    setFilters(prev => ({ ...prev, priceRange: [0, maxProductPrice] }));
-    
-    setProducts(filtered);
-    setFilteredProducts(filtered);
+    const fetchProducts = async () => {
+      setIsLoading(true);
+      try {
+        const apiFilters: Record<string, any> = {};
+        if (category) apiFilters.category = category;
+        if (collection) apiFilters.collection = collection;
+
+        const response = await apiService.getProducts(apiFilters);
+        const allProducts = response.products ?? [];
+
+        const maxProductPrice = allProducts.length > 0
+          ? Math.max(...allProducts.map((p: any) => p.calculated_price ?? p.base_price ?? 0))
+          : 300000;
+        setMaxPrice(maxProductPrice);
+        setFilters(prev => ({ ...prev, priceRange: [0, maxProductPrice] }));
+
+        setProducts(allProducts);
+        setFilteredProducts(allProducts);
+      } catch (error) {
+        console.error('Failed to fetch products:', error);
+        setProducts([]);
+        setFilteredProducts([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
   }, [category, collection]);
 
   useEffect(() => {
@@ -91,41 +100,44 @@ const ProductListing = () => {
     // Material filter
     if (filters.materials.length > 0) {
       filtered = filtered.filter(product =>
-        filters.materials.includes(localStorageService.getMaterials().find(m => m.id === product.materialId)?.name || '')
+        filters.materials.includes(product.material_name ?? '')
       );
     }
-    
+
     // Gemstone filter
     if (filters.gemstones.length > 0) {
       filtered = filtered.filter(product =>
         product.gemstone && filters.gemstones.includes(product.gemstone)
       );
     }
-    
+
     // Price filter
-    filtered = filtered.filter(product =>
-      product.price >= filters.priceRange[0] && product.price <= filters.priceRange[1]
-    );
-    
+    filtered = filtered.filter(product => {
+      const price = product.calculated_price ?? product.base_price ?? 0;
+      return price >= filters.priceRange[0] && price <= filters.priceRange[1];
+    });
+
     // Stock filter
     if (filters.inStock) {
-      filtered = filtered.filter(product => product.stock > 0);
+      filtered = filtered.filter(product => (product.stock_quantity ?? 0) > 0);
     }
-    
+
     // Featured filter
     if (filters.featured) {
-      filtered = filtered.filter(product => product.featured);
+      filtered = filtered.filter(product => product.is_featured);
     }
-    
+
     // Sort
     filtered.sort((a, b) => {
+      const priceA = a.calculated_price ?? a.base_price ?? 0;
+      const priceB = b.calculated_price ?? b.base_price ?? 0;
       switch (sortBy) {
         case 'price-low':
-          return a.price - b.price;
+          return priceA - priceB;
         case 'price-high':
-          return b.price - a.price;
+          return priceB - priceA;
         case 'newest':
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          return new Date(b.createdAt ?? b.created_at).getTime() - new Date(a.createdAt ?? a.created_at).getTime();
         default:
           return a.name.localeCompare(b.name);
       }
@@ -223,9 +235,13 @@ const ProductListing = () => {
             {/* Products Grid */}
             <div className="flex-1">
               <div className="mb-6">
-                <p className="text-gray-600">
-                  Showing {filteredProducts.length} of {products.length} products
-                </p>
+                {isLoading ? (
+                  <p className="text-gray-600">Loading products...</p>
+                ) : (
+                  <p className="text-gray-600">
+                    Showing {filteredProducts.length} of {products.length} products
+                  </p>
+                )}
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -244,32 +260,78 @@ const ProductListing = () => {
                           }}
                         />
                         <div className="absolute top-4 right-4 flex gap-2">
-                          {product.featured && (
+                          {product.is_featured && (
                             <Badge className="bg-primary text-white">Featured</Badge>
                           )}
-                          <Button 
-                            size="sm" 
-                            variant="secondary" 
+                          <Button
+                            size="sm"
+                            variant="secondary"
                             className="bg-white/90 backdrop-blur-sm text-black hover:bg-white"
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
+                              toggleWishlist({
+                                id: product.id,
+                                name: product.name,
+                                price: product.calculated_price ?? product.base_price ?? 0,
+                                primary_image: product.primary_image,
+                                category: product.category,
+                              });
                             }}
                           >
-                            <Heart className="h-4 w-4" />
+                            <Heart className={`h-4 w-4 ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : ''}`} />
                           </Button>
                         </div>
                         <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <Button 
-                            className="w-full bg-primary hover:bg-primary/80 text-white"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
-                          >
-                            <ShoppingCart className="h-4 w-4 mr-2" />
-                            Add to Cart
-                          </Button>
+                          {isInCart(product.id) ? (
+                            <div className="flex gap-2">
+                              <Button
+                                className="flex-1 bg-amber-600 hover:bg-amber-700 text-white"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  navigate('/cart');
+                                }}
+                              >
+                                <ShoppingCart className="h-4 w-4 mr-2" />
+                                Go to Cart
+                              </Button>
+                              <Button
+                                className="bg-red-500 hover:bg-red-600 text-white"
+                                size="icon"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  removeByProductId(product.id);
+                                }}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button
+                              className="w-full bg-primary hover:bg-primary/80 text-white"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                const stock = product.stock_quantity ?? product.stock ?? 0;
+                                if (stock <= 0) {
+                                  toast({ title: "Out of stock", description: "This product is out of stock", variant: "destructive" });
+                                  return;
+                                }
+                                addToCart({
+                                  id: product.id,
+                                  name: product.name,
+                                  price: product.calculated_price ?? product.base_price ?? 0,
+                                  primary_image: product.primary_image,
+                                  category: product.category,
+                                });
+                              }}
+                            >
+                              <ShoppingCart className="h-4 w-4 mr-2" />
+                              Add to Cart
+                            </Button>
+                          )}
                         </div>
                       </div>
                       
@@ -283,17 +345,20 @@ const ProductListing = () => {
                       <CardContent className="pt-0">
                         <div className="flex items-center justify-between mb-3">
                           <span className="text-2xl font-bold text-black">
-                            {formatCurrency(product.price)}
+                            {formatCurrency(product.calculated_price ?? product.base_price ?? 0)}
                           </span>
-                          <Badge variant={product.stock > 0 ? "secondary" : "destructive"} className={product.stock > 0 ? "bg-gray-100 text-black" : "bg-red-500 text-white"}>
-                            {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
+                          <Badge
+                            variant={(product.stock_quantity ?? 0) > 0 ? "secondary" : "destructive"}
+                            className={(product.stock_quantity ?? 0) > 0 ? "bg-gray-100 text-black" : "bg-red-500 text-white"}
+                          >
+                            {(product.stock_quantity ?? 0) > 0 ? `${product.stock_quantity} in stock` : 'Out of stock'}
                           </Badge>
                         </div>
-                        
+
                         <div className="space-y-1 text-xs text-gray-600">
                           <div className="flex justify-between">
                             <span>Material:</span>
-                            <span>{localStorageService.getMaterials().find(m => m.id === product.materialId)?.name}</span>
+                            <span>{product.material_name}</span>
                           </div>
                           {product.gemstone && (
                             <div className="flex justify-between">

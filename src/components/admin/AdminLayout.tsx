@@ -46,6 +46,7 @@ const AdminLayout = () => {
     { name: 'Categories', href: '/console/categories', icon: Tag },
     { name: 'Orders', href: '/console/orders', icon: ShoppingCart },
     { name: 'Customers', href: '/console/customers', icon: Users },
+    { name: 'Coupons', href: '/console/coupons', icon: CreditCard },
     { name: 'Reports', href: '/console/reports', icon: BarChart3 },
     { name: 'Content', href: '/console/content', icon: FileText },
     { name: 'Settings', href: '/console/settings', icon: Settings },

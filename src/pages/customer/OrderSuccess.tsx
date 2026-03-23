@@ -7,9 +7,9 @@ import { formatCurrency } from '@/lib/currency';
 import { CheckCircle, Package, Truck, Clock, Download, ArrowRight } from 'lucide-react';
 
 interface OrderDetails {
-  orderId: string;
+  orderId: number;
+  orderNumber: string;
   amount: number;
-  status: string;
   estimatedDelivery: string;
 }
 
@@ -20,25 +20,40 @@ export default function OrderSuccess() {
 
   useEffect(() => {
     const state = location.state;
+    const searchParams = new URLSearchParams(window.location.search);
+    const orderFromUrl = searchParams.get('order');
+
     if (state?.orderId && state?.amount) {
-      // Generate order details
-      const today = new Date();
-      const deliveryDate = new Date(today);
-      deliveryDate.setDate(today.getDate() + 7); // 7 days from now
+      const deliveryDate = new Date();
+      deliveryDate.setDate(deliveryDate.getDate() + 7);
 
       setOrderDetails({
-        orderId: `JC${Date.now().toString().slice(-6)}`,
+        orderId: state.orderId,
+        orderNumber: state.orderNumber ?? `JC-${state.orderId}`,
         amount: state.amount,
-        status: 'confirmed',
         estimatedDelivery: deliveryDate.toLocaleDateString('en-IN', {
           weekday: 'long',
           year: 'numeric',
           month: 'long',
-          day: 'numeric'
-        })
+          day: 'numeric',
+        }),
+      });
+    } else if (orderFromUrl) {
+      const deliveryDate = new Date();
+      deliveryDate.setDate(deliveryDate.getDate() + 7);
+
+      setOrderDetails({
+        orderId: 0,
+        orderNumber: orderFromUrl,
+        amount: 0,
+        estimatedDelivery: deliveryDate.toLocaleDateString('en-IN', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        }),
       });
     } else {
-      // Redirect to home if no order data
       navigate('/');
     }
   }, [location.state, navigate]);
@@ -74,7 +89,7 @@ export default function OrderSuccess() {
             <CardTitle className="flex items-center justify-between">
               <span>Order Details</span>
               <Badge className="bg-green-100 text-green-800 border-green-200">
-                {orderDetails.status.toUpperCase()}
+                CONFIRMED
               </Badge>
             </CardTitle>
           </CardHeader>
@@ -84,8 +99,8 @@ export default function OrderSuccess() {
                 <h4 className="font-semibold text-gray-900 mb-3">Order Information</h4>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Order ID:</span>
-                    <span className="font-mono font-semibold">{orderDetails.orderId}</span>
+                    <span className="text-gray-600">Order Number:</span>
+                    <span className="font-mono font-semibold">{orderDetails.orderNumber}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Order Date:</span>

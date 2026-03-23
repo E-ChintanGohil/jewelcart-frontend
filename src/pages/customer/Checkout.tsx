@@ -10,16 +10,14 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { formatCurrency } from '@/lib/currency';
+import { useToast } from '@/hooks/use-toast';
 import {
-  CreditCard,
   Truck,
   MapPin,
   Plus,
   Shield,
   CheckCircle,
-  AlertCircle,
   ArrowLeft
 } from 'lucide-react';
 
@@ -36,26 +34,29 @@ interface Address {
   isDefault: boolean;
 }
 
-interface PaymentMethod {
-  id: string;
-  type: 'card' | 'upi' | 'netbanking' | 'wallet';
-  name: string;
-  icon: React.ReactNode;
-  enabled: boolean;
-}
-
 export default function Checkout() {
   const { user } = useAuth();
   const { items: cartItems, getTotalPrice, clearCart } = useCart();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loadingAddresses, setLoadingAddresses] = useState(true);
-  const [currentStep, setCurrentStep] = useState<'address' | 'payment' | 'review'>('address');
+  const [currentStep, setCurrentStep] = useState<'address' | 'review'>('address');
   const [selectedAddress, setSelectedAddress] = useState<string>('');
   const [selectedPayment, setSelectedPayment] = useState<string>('razorpay');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showAddressForm, setShowAddressForm] = useState(false);
+
+  // Coupon state
+  const [couponInput, setCouponInput] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    discountAmount: number;
+    discountType: string;
+    discountValue: number;
+  } | null>(null);
 
   // New Address Form State
   const [newAddress, setNewAddress] = useState({
@@ -95,32 +96,35 @@ export default function Checkout() {
     }
   };
 
-  const paymentMethods: PaymentMethod[] = [
-    {
-      id: 'razorpay',
-      type: 'card',
-      name: 'Credit/Debit Card / UPI',
-      icon: <CreditCard className="h-5 w-5" />,
-      enabled: true
-    }
-  ];
-
   const subtotal = getTotalPrice();
   const shipping = subtotal > 100000 ? 0 : 2000;
   const tax = subtotal * 0.03;
-  const total = subtotal + shipping + tax;
+  const couponDiscount = appliedCoupon?.discountAmount ?? 0;
+  const total = subtotal + shipping + tax - couponDiscount;
+
+  const handleApplyCoupon = async () => {
+    if (!couponInput.trim()) return;
+    setCouponLoading(true);
+    try {
+      const result = await apiService.validateCoupon(couponInput.trim(), subtotal);
+      setAppliedCoupon({
+        code: result.code,
+        discountAmount: result.discountAmount,
+        discountType: result.discountType,
+        discountValue: result.discountValue,
+      });
+      setCouponInput('');
+      toast({ title: 'Coupon applied!', description: `Saving ${formatCurrency(result.discountAmount)}` });
+    } catch (err: any) {
+      toast({ title: 'Invalid coupon', description: err.message, variant: 'destructive' });
+    } finally {
+      setCouponLoading(false);
+    }
+  };
 
   const handleAddressNext = () => {
     if (!selectedAddress) {
-      alert('Please select a delivery address');
-      return;
-    }
-    setCurrentStep('payment');
-  };
-
-  const handlePaymentNext = () => {
-    if (!selectedPayment) {
-      alert('Please select a payment method');
+      toast({ title: 'Address required', description: 'Please select a delivery address.', variant: 'destructive' });
       return;
     }
     setCurrentStep('review');
@@ -134,21 +138,10 @@ export default function Checkout() {
       setAddresses(prev => [addedAddress, ...prev]);
       setSelectedAddress(addedAddress.id);
       setShowAddressForm(false);
-      // Reset form
-      setNewAddress({
-        name: '',
-        street: '',
-        city: '',
-        state: '',
-        zipCode: '',
-        country: 'India',
-        phone: '',
-        type: 'HOME',
-        isDefault: false
-      });
+      setNewAddress({ name: '', street: '', city: '', state: '', zipCode: '', country: 'India', phone: '', type: 'HOME', isDefault: false });
     } catch (error) {
       console.error('Failed to add address:', error);
-      alert('Failed to add address. Please try again.');
+      toast({ title: 'Failed to add address', description: 'Please try again.', variant: 'destructive' });
     } finally {
       setIsProcessing(false);
     }
@@ -156,73 +149,102 @@ export default function Checkout() {
 
   const handlePlaceOrder = async () => {
     setIsProcessing(true);
+    let dbOrderId: number | null = null;
 
     try {
       const selectedAddr = addresses.find(a => a.id === selectedAddress);
       if (!selectedAddr) throw new Error('Address not found');
 
-      // Create order in backend first
-      const orderData = {
+      // Step 1: Create DB order
+      const dbOrder = await apiService.createCustomerOrder({
         billingAddressId: parseInt(selectedAddress),
         shippingAddressId: parseInt(selectedAddress),
         items: cartItems.map(item => ({
           productId: item.productId,
-          quantity: item.quantity
+          quantity: item.quantity,
         })),
         subtotal,
-        totalAmount: total
-      };
+        taxAmount: tax,
+        shippingAmount: shipping,
+        couponCode: appliedCoupon?.code,
+      });
+      dbOrderId = dbOrder.id;
 
-      const order = await apiService.createCustomerOrder(orderData);
+      // Step 2: Create Razorpay order (backend generates order_id)
+      const rzpOrderData = await apiService.createRazorpayOrder(total, dbOrderId!);
 
-      // Initialize Razorpay
+      // Step 3: Open Razorpay modal
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_1234567890',
-        amount: Math.round(total * 100), // Amount in paise
-        currency: 'INR',
+        key: rzpOrderData.key,
+        amount: rzpOrderData.amount,
+        currency: rzpOrderData.currency,
         name: 'JewelCart',
-        description: `Order #${order.orderNumber}`,
+        description: `Order #${dbOrder.orderNumber}`,
         image: '/logo.png',
-        order_id: '', // If you implement backend order creation for Razorpay
-        handler: function(response: any) {
-          // Payment successful
-          console.log('Payment successful:', response);
-          // Here you would typically verify payment on backend
-          clearCart();
-          navigate('/order-success', {
-            state: {
-              orderId: order.id,
-              orderNumber: order.orderNumber,
-              amount: total
-            }
-          });
+        order_id: rzpOrderData.razorpay_order_id,
+        handler: async function (response: any) {
+          try {
+            // Step 4: Verify payment signature on backend
+            await apiService.verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              db_order_id: dbOrderId!,
+            });
+
+            clearCart();
+            navigate(`/order-success?order=${encodeURIComponent(dbOrder.orderNumber)}`, {
+              state: {
+                orderId: dbOrder.id,
+                orderNumber: dbOrder.orderNumber,
+                amount: total,
+              },
+            });
+          } catch {
+            toast({
+              title: 'Payment verification failed',
+              description: 'Your payment was received but verification failed. Please contact support with your payment ID.',
+              variant: 'destructive',
+            });
+            setIsProcessing(false);
+          }
         },
         prefill: {
           name: selectedAddr.contactName,
           email: user?.email,
-          contact: selectedAddr.phone
+          contact: selectedAddr.phone,
         },
         notes: {
-          address: `${selectedAddr.street}, ${selectedAddr.city}`,
-          order_id: order.id
+          order_id: dbOrder.id,
+          order_number: dbOrder.orderNumber,
         },
-        theme: {
-          color: '#D97706'
-        }
+        theme: { color: '#D97706' },
+        modal: {
+          ondismiss: () => setIsProcessing(false),
+        },
       };
 
       const rzp = new (window as any).Razorpay(options);
 
-      rzp.on('payment.failed', function(response: any) {
-        console.error('Payment failed:', response.error);
-        alert('Payment failed. Please try again.');
+      rzp.on('payment.failed', async function (response: any) {
+        try {
+          if (dbOrderId) await apiService.markPaymentFailed(dbOrderId);
+        } catch { /* best-effort */ }
+        toast({
+          title: 'Payment failed',
+          description: response.error?.description || 'Please try again from your order history.',
+          variant: 'destructive',
+        });
+        setIsProcessing(false);
       });
 
       rzp.open();
-    } catch (error) {
-      console.error('Order placement failed:', error);
-      alert('Failed to place order. Please try again.');
-    } finally {
+    } catch (error: any) {
+      toast({
+        title: 'Order could not be placed',
+        description: error.message || 'Please try again.',
+        variant: 'destructive',
+      });
       setIsProcessing(false);
     }
   };
@@ -231,7 +253,7 @@ export default function Checkout() {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Please log in to checkout</h1>
-        <Button onClick={() => navigate('/login')}>Login</Button>
+        <Button onClick={() => navigate('/login', { state: { from: '/checkout' } })}>Login</Button>
       </div>
     );
   }
@@ -246,7 +268,6 @@ export default function Checkout() {
   }
 
   const selectedAddressData = addresses.find(a => a.id === selectedAddress);
-  const selectedPaymentData = paymentMethods.find(p => p.id === selectedPayment);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -272,18 +293,11 @@ export default function Checkout() {
             <span className="ml-2 font-medium">Address</span>
           </div>
           <div className="w-16 h-px bg-gray-300"></div>
-          <div className={`flex items-center ${currentStep === 'payment' ? 'text-amber-600' : 'text-gray-400'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${currentStep === 'payment' ? 'border-amber-600 bg-amber-50' : 'border-gray-300'}`}>
-              2
-            </div>
-            <span className="ml-2 font-medium">Payment</span>
-          </div>
-          <div className="w-16 h-px bg-gray-300"></div>
           <div className={`flex items-center ${currentStep === 'review' ? 'text-amber-600' : 'text-gray-400'}`}>
             <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${currentStep === 'review' ? 'border-amber-600 bg-amber-50' : 'border-gray-300'}`}>
-              3
+              2
             </div>
-            <span className="ml-2 font-medium">Review</span>
+            <span className="ml-2 font-medium">Review & Pay</span>
           </div>
         </div>
       </div>
@@ -423,61 +437,6 @@ export default function Checkout() {
 
                 <div className="flex justify-end">
                   <Button onClick={handleAddressNext} className="bg-amber-600 hover:bg-amber-700">
-                    Continue to Payment
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Payment Step */}
-          {currentStep === 'payment' && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5" />
-                  Payment Method
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <RadioGroup value={selectedPayment} onValueChange={setSelectedPayment}>
-                  {paymentMethods.map((method) => (
-                    <div key={method.id} className="border rounded-lg p-4">
-                      <div className="flex items-center space-x-3">
-                        <RadioGroupItem
-                          value={method.id}
-                          id={method.id}
-                          disabled={!method.enabled}
-                        />
-                        <div className="flex items-center gap-3 flex-1">
-                          {method.icon}
-                          <Label
-                            htmlFor={method.id}
-                            className={`font-medium ${!method.enabled ? 'text-gray-400' : ''}`}
-                          >
-                            {method.name}
-                          </Label>
-                          {method.id === 'razorpay' && (
-                            <Badge className="bg-blue-100 text-blue-800">Secure</Badge>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </RadioGroup>
-
-                <Alert>
-                  <Shield className="h-4 w-4" />
-                  <AlertDescription>
-                    Your payment information is secure and encrypted. We never store your card details.
-                  </AlertDescription>
-                </Alert>
-
-                <div className="flex justify-between">
-                  <Button variant="outline" onClick={() => setCurrentStep('address')}>
-                    Back
-                  </Button>
-                  <Button onClick={handlePaymentNext} className="bg-amber-600 hover:bg-amber-700">
                     Review Order
                   </Button>
                 </div>
@@ -498,7 +457,7 @@ export default function Checkout() {
                     <div key={item.id}>
                       <div className="flex items-center space-x-4">
                         <img
-                          src={item.image_url || item.imageUrl || '/placeholder-jewelry.jpg'}
+                          src={item.image_url || item.imageUrl || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80'}
                           alt={item.name}
                           className="w-16 h-16 object-cover rounded-lg"
                         />
@@ -540,23 +499,8 @@ export default function Checkout() {
                 </CardContent>
               </Card>
 
-              {/* Payment Method */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Payment Method</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {selectedPaymentData && (
-                    <div className="flex items-center gap-3">
-                      {selectedPaymentData.icon}
-                      <span className="font-medium">{selectedPaymentData.name}</span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
               <div className="flex justify-between">
-                <Button variant="outline" onClick={() => setCurrentStep('payment')}>
+                <Button variant="outline" onClick={() => setCurrentStep('address')}>
                   Back
                 </Button>
                 <Button
@@ -592,6 +536,38 @@ export default function Checkout() {
                 <span className="text-gray-600">Tax (3%)</span>
                 <span className="font-semibold">{formatCurrency(tax)}</span>
               </div>
+              {appliedCoupon && (
+                <div className="flex justify-between text-green-700">
+                  <span className="flex items-center gap-1">
+                    Coupon <Badge variant="outline" className="text-xs">{appliedCoupon.code}</Badge>
+                    <button className="text-xs underline ml-1" onClick={() => setAppliedCoupon(null)}>remove</button>
+                  </span>
+                  <span className="font-semibold">−{formatCurrency(appliedCoupon.discountAmount)}</span>
+                </div>
+              )}
+
+              {/* Coupon Input */}
+              {!appliedCoupon && (
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Coupon code"
+                    value={couponInput}
+                    onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                    onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon()}
+                    className="text-sm"
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleApplyCoupon}
+                    disabled={couponLoading || !couponInput.trim()}
+                    className="shrink-0"
+                  >
+                    {couponLoading ? '...' : 'Apply'}
+                  </Button>
+                </div>
+              )}
+
               <Separator />
               <div className="flex justify-between text-lg">
                 <span className="font-bold">Total</span>

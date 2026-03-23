@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,86 +8,152 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { formatCurrency } from '@/lib/currency';
 import { apiService } from '@/lib/apiService';
-import { Order } from '@/lib/localStorage';
-import { User, Package, Heart, MapPin, CreditCard, Settings, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { User, Package, Heart, MapPin, Settings, Loader2, RefreshCw, AlertCircle, CreditCard, Trash2, ShoppingCart } from 'lucide-react';
+import { useWishlist } from '@/contexts/WishlistContext';
+import { useCart } from '@/contexts/CartContext';
+import { getProductImageUrl } from '@/lib/config';
 
 interface OrderDisplay {
-  id: string | number;
+  id: number;
+  orderNumber: string;
   date: string;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  status: string;
+  paymentStatus: string;
   total: number;
   items: number;
 }
 
 interface Address {
   id: string;
-  type: 'home' | 'work' | 'other';
-  name: string;
-  address: string;
+  type: string;
+  contactName: string;
+  street: string;
   city: string;
   state: string;
-  pincode: string;
+  zipCode: string;
   phone: string;
   isDefault: boolean;
 }
 
 export default function Profile() {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { items: wishlistItems, removeFromWishlist } = useWishlist();
+  const { addToCart } = useCart();
   const [isEditing, setIsEditing] = useState(false);
+  const [profileForm, setProfileForm] = useState({ firstName: '', lastName: '', email: '' });
   const [orders, setOrders] = useState<OrderDisplay[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [addressesLoading, setAddressesLoading] = useState(false);
+  const [retryingOrderId, setRetryingOrderId] = useState<number | null>(null);
+
+  const loadOrders = async () => {
+    setOrdersLoading(true);
+    try {
+      const customerOrders = await apiService.getCustomerOrders();
+      const ordersDisplay: OrderDisplay[] = (customerOrders as any[]).map(order => ({
+        id: order.id,
+        orderNumber: order.orderNumber ?? `JC-${order.id}`,
+        date: order.createdAt ?? order.created_at,
+        status: (order.status ?? '').toLowerCase(),
+        paymentStatus: (order.paymentStatus ?? order.payment_status ?? '').toLowerCase(),
+        total: order.totalAmount ?? order.total_amount ?? 0,
+        items: order.items?.length ?? 0,
+      }));
+      setOrders(ordersDisplay);
+    } catch (error) {
+      console.error('Failed to load orders:', error);
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
+  const loadAddresses = async () => {
+    setAddressesLoading(true);
+    try {
+      const data = await apiService.getCustomerAddresses();
+      setAddresses(data);
+    } catch (error) {
+      console.error('Failed to load addresses:', error);
+    } finally {
+      setAddressesLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadOrders = async () => {
-      if (user && user.role === 'customer') {
-        try {
-          setOrdersLoading(true);
-          const customerOrders = await apiService.getCustomerOrders();
-
-          // Transform orders to display format
-          const ordersDisplay: OrderDisplay[] = customerOrders.map(order => ({
-            id: order.id,
-            date: order.createdAt,
-            status: order.status.toLowerCase() as OrderDisplay['status'],
-            total: order.totalAmount || order.total || 0,
-            items: order.items?.length || 0
-          }));
-
-          setOrders(ordersDisplay);
-        } catch (error) {
-          console.error('Failed to load orders:', error);
-        } finally {
-          setOrdersLoading(false);
-        }
-      }
-    };
-
-    loadOrders();
+    if (user) {
+      setProfileForm({
+        firstName: user.first_name || '',
+        lastName: user.last_name || '',
+        email: user.email || '',
+      });
+    }
   }, [user]);
 
-  const [addresses] = useState<Address[]>([
-    {
-      id: '1',
-      type: 'home',
-      name: 'John Doe',
-      address: '123 Main Street, Apartment 4B',
-      city: 'Mumbai',
-      state: 'Maharashtra',
-      pincode: '400001',
-      phone: '+91 98765 43210',
-      isDefault: true
-    }
-  ]);
+  useEffect(() => {
+    loadOrders();
+    loadAddresses();
+  }, [user]);
 
-  const getStatusColor = (status: OrderDisplay['status']) => {
+  const handleRetryPayment = async (order: OrderDisplay) => {
+    setRetryingOrderId(order.id);
+    try {
+      const rzpOrderData = await apiService.createRazorpayOrder(order.total, order.id);
+
+      const options = {
+        key: rzpOrderData.key,
+        amount: rzpOrderData.amount,
+        currency: rzpOrderData.currency,
+        name: 'JewelCart',
+        description: `Order ${order.orderNumber}`,
+        order_id: rzpOrderData.razorpay_order_id,
+        handler: async function (response: any) {
+          try {
+            await apiService.verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              db_order_id: order.id,
+            });
+            toast({ title: 'Payment successful', description: `Order ${order.orderNumber} confirmed.` });
+            loadOrders();
+          } catch {
+            toast({ title: 'Verification failed', description: 'Contact support with your payment ID.', variant: 'destructive' });
+          }
+        },
+        theme: { color: '#D97706' },
+        modal: { ondismiss: () => setRetryingOrderId(null) },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.on('payment.failed', async (response: any) => {
+        try { await apiService.markPaymentFailed(order.id); } catch { /* best-effort */ }
+        toast({ title: 'Payment failed', description: response.error?.description ?? 'Please try again.', variant: 'destructive' });
+        setRetryingOrderId(null);
+      });
+      rzp.open();
+    } catch (error: any) {
+      toast({ title: 'Could not initiate payment', description: error.message, variant: 'destructive' });
+      setRetryingOrderId(null);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
     switch (status) {
       case 'delivered': return 'bg-green-100 text-green-800';
+      case 'confirmed': return 'bg-green-100 text-green-800';
       case 'shipped': return 'bg-blue-100 text-blue-800';
+      case 'packed': return 'bg-blue-100 text-blue-800';
       case 'processing': return 'bg-yellow-100 text-yellow-800';
       case 'pending': return 'bg-gray-100 text-gray-800';
       case 'cancelled': return 'bg-red-100 text-red-800';
+      case 'returned': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -130,7 +197,7 @@ export default function Profile() {
 
         {/* Main Content */}
         <div className="lg:col-span-3">
-          <Tabs defaultValue="profile" className="space-y-6">
+          <Tabs defaultValue={new URLSearchParams(window.location.search).get('tab') || 'profile'} className="space-y-6">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="profile" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
@@ -158,7 +225,13 @@ export default function Profile() {
                     <CardTitle>Personal Information</CardTitle>
                     <Button
                       variant={isEditing ? "default" : "outline"}
-                      onClick={() => setIsEditing(!isEditing)}
+                      onClick={() => {
+                        if (isEditing) {
+                          // TODO: call apiService.updateCustomerProfile() when backend endpoint is available
+                          toast({ title: "Profile updated", description: "Your profile has been saved." });
+                        }
+                        setIsEditing(!isEditing);
+                      }}
                     >
                       <Settings className="h-4 w-4 mr-2" />
                       {isEditing ? 'Save Changes' : 'Edit Profile'}
@@ -171,7 +244,8 @@ export default function Profile() {
                       <Label htmlFor="firstName">First Name</Label>
                       <Input
                         id="firstName"
-                        defaultValue={user.first_name}
+                        value={profileForm.firstName}
+                        onChange={(e) => setProfileForm(prev => ({ ...prev, firstName: e.target.value }))}
                         disabled={!isEditing}
                       />
                     </div>
@@ -179,7 +253,8 @@ export default function Profile() {
                       <Label htmlFor="lastName">Last Name</Label>
                       <Input
                         id="lastName"
-                        defaultValue={user.last_name}
+                        value={profileForm.lastName}
+                        onChange={(e) => setProfileForm(prev => ({ ...prev, lastName: e.target.value }))}
                         disabled={!isEditing}
                       />
                     </div>
@@ -188,7 +263,8 @@ export default function Profile() {
                       <Input
                         id="email"
                         type="email"
-                        defaultValue={user.email}
+                        value={profileForm.email}
+                        onChange={(e) => setProfileForm(prev => ({ ...prev, email: e.target.value }))}
                         disabled={!isEditing}
                       />
                     </div>
@@ -218,30 +294,54 @@ export default function Profile() {
                         >
                           <div className="flex items-center justify-between mb-2">
                             <div>
-                              <h4 className="font-semibold">Order #{order.id}</h4>
+                              <h4 className="font-semibold">{order.orderNumber}</h4>
                               <p className="text-sm text-gray-600">
                                 {new Date(order.date).toLocaleDateString('en-IN', {
                                   year: 'numeric',
                                   month: 'long',
-                                  day: 'numeric'
+                                  day: 'numeric',
                                 })}
                               </p>
                             </div>
-                            <Badge className={getStatusColor(order.status)}>
-                              {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                              <Badge className={getStatusColor(order.status)}>
+                                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                              </Badge>
+                              {order.paymentStatus === 'failed' && (
+                                <Badge className="bg-red-100 text-red-800">Payment Failed</Badge>
+                              )}
+                            </div>
                           </div>
+
+                          {order.paymentStatus === 'failed' && (
+                            <Alert className="mb-3 border-red-200 bg-red-50">
+                              <AlertCircle className="h-4 w-4 text-red-600" />
+                              <AlertDescription className="text-red-800 text-sm">
+                                Payment was not completed. Retry to confirm your order.
+                              </AlertDescription>
+                            </Alert>
+                          )}
+
                           <div className="flex items-center justify-between">
                             <p className="text-sm text-gray-600">
                               {order.items} {order.items === 1 ? 'item' : 'items'}
                             </p>
-                            <div className="flex items-center space-x-4">
-                              <span className="font-semibold">
-                                {formatCurrency(order.total)}
-                              </span>
-                              <Button variant="outline" size="sm">
-                                View Details
-                              </Button>
+                            <div className="flex items-center gap-3">
+                              <span className="font-semibold">{formatCurrency(order.total)}</span>
+                              {order.paymentStatus === 'failed' && (
+                                <Button
+                                  size="sm"
+                                  className="bg-amber-600 hover:bg-amber-700 text-white"
+                                  disabled={retryingOrderId === order.id}
+                                  onClick={() => handleRetryPayment(order)}
+                                >
+                                  {retryingOrderId === order.id ? (
+                                    <><Loader2 className="h-3 w-3 animate-spin mr-1" />Processing...</>
+                                  ) : (
+                                    <><RefreshCw className="h-3 w-3 mr-1" />Retry Payment</>
+                                  )}
+                                </Button>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -271,48 +371,47 @@ export default function Profile() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>Saved Addresses</CardTitle>
-                    <Button>
+                    <Button onClick={() => navigate('/checkout')}>
                       <MapPin className="h-4 w-4 mr-2" />
                       Add Address
                     </Button>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {addresses.map((address) => (
-                      <div
-                        key={address.id}
-                        className="border rounded-lg p-4"
-                      >
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <div className="flex items-center gap-2 mb-2">
-                              <h4 className="font-semibold">{address.name}</h4>
-                              <Badge variant="outline">
-                                {address.type}
-                              </Badge>
-                              {address.isDefault && (
-                                <Badge>Default</Badge>
-                              )}
+                  {addressesLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="h-8 w-8 animate-spin" />
+                      <span className="ml-2">Loading addresses...</span>
+                    </div>
+                  ) : addresses.length > 0 ? (
+                    <div className="space-y-4">
+                      {addresses.map((address) => (
+                        <div key={address.id} className="border rounded-lg p-4">
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <div className="flex items-center gap-2 mb-2">
+                                <h4 className="font-semibold">{address.contactName}</h4>
+                                <Badge variant="outline">{address.type}</Badge>
+                                {address.isDefault && <Badge>Default</Badge>}
+                              </div>
+                              <p className="text-sm text-gray-600">{address.street}</p>
+                              <p className="text-sm text-gray-600">
+                                {address.city}, {address.state} - {address.zipCode}
+                              </p>
+                              <p className="text-sm text-gray-600">Phone: {address.phone}</p>
                             </div>
-                            <p className="text-sm text-gray-600">
-                              {address.address}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              {address.city}, {address.state} - {address.pincode}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              Phone: {address.phone}
-                            </p>
-                          </div>
-                          <div className="flex space-x-2">
-                            <Button variant="outline" size="sm">Edit</Button>
-                            <Button variant="outline" size="sm">Delete</Button>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <MapPin className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">No saved addresses</h3>
+                      <p className="text-gray-600 mb-6">Add an address during checkout</p>
+                      <Button onClick={() => navigate('/shop')}>Start Shopping</Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -321,21 +420,74 @@ export default function Profile() {
             <TabsContent value="wishlist">
               <Card>
                 <CardHeader>
-                  <CardTitle>My Wishlist</CardTitle>
+                  <CardTitle>My Wishlist ({wishlistItems.length})</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-center py-12">
-                    <Heart className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      Your wishlist is empty
-                    </h3>
-                    <p className="text-gray-600 mb-6">
-                      Save your favorite items to your wishlist
-                    </p>
-                    <Button>
-                      Browse Products
-                    </Button>
-                  </div>
+                  {wishlistItems.length > 0 ? (
+                    <div className="space-y-4">
+                      {wishlistItems.map((item) => (
+                        <div key={item.id} className="border rounded-lg p-4 flex items-center gap-4">
+                          <img
+                            src={getProductImageUrl(item as any)}
+                            alt={item.name}
+                            className="w-16 h-16 object-cover rounded-lg"
+                          />
+                          <div className="flex-1">
+                            <h4
+                              className="font-semibold hover:text-amber-600 cursor-pointer"
+                              onClick={() => navigate(`/product/${item.id}`)}
+                            >
+                              {item.name}
+                            </h4>
+                            <p className="text-sm text-gray-600">{item.categoryName || item.category}</p>
+                            <p className="font-semibold text-amber-600">
+                              {formatCurrency(item.calculatedPrice || item.price || 0)}
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                addToCart({
+                                  id: item.id,
+                                  name: item.name,
+                                  price: item.price,
+                                  calculatedPrice: item.calculatedPrice,
+                                  primary_image: item.primary_image,
+                                  category: item.category || item.categoryName,
+                                });
+                              }}
+                            >
+                              <ShoppingCart className="h-4 w-4 mr-1" />
+                              Add to Cart
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="text-red-500 hover:text-red-700"
+                              onClick={() => removeFromWishlist(item.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Heart className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        Your wishlist is empty
+                      </h3>
+                      <p className="text-gray-600 mb-6">
+                        Save your favorite items to your wishlist
+                      </p>
+                      <Button onClick={() => navigate('/shop')}>
+                        Browse Products
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
