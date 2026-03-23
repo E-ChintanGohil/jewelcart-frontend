@@ -52,6 +52,8 @@ export default function Profile() {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [addressesLoading, setAddressesLoading] = useState(false);
   const [retryingOrderId, setRetryingOrderId] = useState<number | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'profile');
 
   const loadOrders = async () => {
     setOrdersLoading(true);
@@ -197,7 +199,7 @@ export default function Profile() {
 
         {/* Main Content */}
         <div className="lg:col-span-3">
-          <Tabs defaultValue={new URLSearchParams(window.location.search).get('tab') || 'profile'} className="space-y-6">
+          <Tabs value={activeTab} onValueChange={(val) => { setActiveTab(val); setSearchParams(val === 'profile' ? {} : { tab: val }); }} className="space-y-6">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="profile" className="flex items-center gap-2">
                 <User className="h-4 w-4" />

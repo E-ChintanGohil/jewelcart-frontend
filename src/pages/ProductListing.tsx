@@ -35,8 +35,9 @@ const ProductListing = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [isLoading, setIsLoading] = useState(true);
+  const initialCategory = category ? category.charAt(0).toUpperCase() + category.slice(1).toLowerCase() : '';
   const [filters, setFilters] = useState<FilterState>({
-    categories: [],
+    categories: initialCategory ? [initialCategory] : [],
     materials: [],
     gemstones: [],
     priceRange: [0, 300000],
@@ -52,8 +53,8 @@ const ProductListing = () => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
+        // Always fetch ALL products — sidebar filters handle narrowing
         const apiFilters: Record<string, any> = {};
-        if (category) apiFilters.category = category;
         if (collection) apiFilters.collection = collection;
 
         const response = await apiService.getProducts(apiFilters);
@@ -77,7 +78,13 @@ const ProductListing = () => {
     };
 
     fetchProducts();
-  }, [category, collection]);
+  }, [collection]);
+
+  // When URL category changes, reset category filter
+  useEffect(() => {
+    const cat = category ? category.charAt(0).toUpperCase() + category.slice(1).toLowerCase() : '';
+    setFilters(prev => ({ ...prev, categories: cat ? [cat] : [] }));
+  }, [category]);
 
   useEffect(() => {
     let filtered = [...products];
@@ -195,6 +202,7 @@ const ProductListing = () => {
                       onFiltersChange={setFilters}
                       maxPrice={maxPrice}
                       isMobile={true}
+                      initialCategory={category}
                     />
                   </div>
                 </SheetContent>
@@ -228,6 +236,7 @@ const ProductListing = () => {
                 <ProductFilters
                   onFiltersChange={setFilters}
                   maxPrice={maxPrice}
+                  initialCategory={category}
                 />
               </div>
             </div>

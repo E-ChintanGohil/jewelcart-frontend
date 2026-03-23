@@ -28,6 +28,7 @@ const Products = () => {
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [primaryImageUrl, setPrimaryImageUrl] = useState<string | null>(null);
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -75,6 +76,7 @@ const Products = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
 
     try {
       const productData: any = {
@@ -170,6 +172,8 @@ const Products = () => {
         description: errorDescription,
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -672,11 +676,14 @@ const Products = () => {
               </div>
 
               <div className="flex justify-end space-x-2 pt-4">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} disabled={isSaving}>
                   Cancel
                 </Button>
-                <Button type="submit">
-                  {editingProduct ? 'Update Product' : 'Create Product'}
+                <Button type="submit" disabled={isSaving}>
+                  {isSaving
+                    ? (selectedImages.length > 0 ? 'Uploading images...' : 'Saving...')
+                    : (editingProduct ? 'Update Product' : 'Create Product')
+                  }
                 </Button>
               </div>
             </form>

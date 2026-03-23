@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
 import { formatCurrency } from '@/lib/currency';
 import { X } from 'lucide-react';
 
@@ -14,6 +15,7 @@ interface ProductFiltersProps {
   maxPrice: number;
   onClose?: () => void;
   isMobile?: boolean;
+  initialCategory?: string;
 }
 
 export interface FilterState {
@@ -25,9 +27,9 @@ export interface FilterState {
   featured: boolean;
 }
 
-const ProductFilters = ({ onFiltersChange, maxPrice, onClose, isMobile }: ProductFiltersProps) => {
+const ProductFilters = ({ onFiltersChange, maxPrice, onClose, isMobile, initialCategory }: ProductFiltersProps) => {
   const [filters, setFilters] = useState<FilterState>({
-    categories: [],
+    categories: initialCategory ? [initialCategory.charAt(0).toUpperCase() + initialCategory.slice(1).toLowerCase()] : [],
     materials: [],
     gemstones: [],
     priceRange: [0, maxPrice],
@@ -131,12 +133,31 @@ const ProductFilters = ({ onFiltersChange, maxPrice, onClose, isMobile }: Produc
               onValueChange={(value) => updateFilters({ priceRange: value as [number, number] })}
               max={maxPrice}
               min={0}
-              step={5000}
+              step={500}
               className="w-full"
             />
-            <div className="flex justify-between text-sm text-gray-600 mt-2">
-              <span>{formatCurrency(filters.priceRange[0])}</span>
-              <span>{formatCurrency(filters.priceRange[1])}</span>
+            <div className="flex items-center gap-2 mt-3">
+              <Input
+                type="number"
+                value={filters.priceRange[0]}
+                onChange={(e) => {
+                  const val = Math.max(0, Math.min(Number(e.target.value) || 0, filters.priceRange[1]));
+                  updateFilters({ priceRange: [val, filters.priceRange[1]] });
+                }}
+                className="h-8 text-xs text-center"
+                placeholder="Min"
+              />
+              <span className="text-gray-400 text-sm">to</span>
+              <Input
+                type="number"
+                value={filters.priceRange[1]}
+                onChange={(e) => {
+                  const val = Math.min(maxPrice, Math.max(Number(e.target.value) || 0, filters.priceRange[0]));
+                  updateFilters({ priceRange: [filters.priceRange[0], val] });
+                }}
+                className="h-8 text-xs text-center"
+                placeholder="Max"
+              />
             </div>
           </div>
         </div>
