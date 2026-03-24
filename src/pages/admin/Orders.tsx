@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Search, Eye, Edit, Package, Truck, CheckCircle, XCircle } from 'lucide-react';
+import { Search, Eye, Edit, Package, Truck, CheckCircle, XCircle, Download } from 'lucide-react';
 import { formatCurrency } from '@/lib/currency';
 import { useToast } from '@/hooks/use-toast';
 
@@ -19,6 +19,7 @@ const Orders = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -118,6 +119,24 @@ const Orders = () => {
           <h1 className="text-3xl font-bold text-foreground">Orders</h1>
           <p className="text-muted-foreground">Manage customer orders and shipments</p>
         </div>
+        <Button
+          variant="outline"
+          disabled={isExporting}
+          onClick={async () => {
+            setIsExporting(true);
+            try {
+              await apiService.exportOrders();
+              toast({ title: "Success", description: "Orders exported successfully" });
+            } catch (error) {
+              toast({ title: "Error", description: "Failed to export orders", variant: "destructive" });
+            } finally {
+              setIsExporting(false);
+            }
+          }}
+        >
+          <Download className="h-4 w-4 mr-2" />
+          {isExporting ? 'Exporting...' : 'Export CSV'}
+        </Button>
       </div>
 
       {/* Statistics Cards */}

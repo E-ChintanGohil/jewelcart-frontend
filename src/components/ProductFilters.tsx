@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
@@ -20,7 +19,8 @@ interface ProductFiltersProps {
 
 export interface FilterState {
   categories: string[];
-  materials: string[];
+  metals: string[];
+  purities: string[];
   gemstones: string[];
   priceRange: [number, number];
   inStock: boolean;
@@ -30,15 +30,17 @@ export interface FilterState {
 const ProductFilters = ({ onFiltersChange, maxPrice, onClose, isMobile, initialCategory }: ProductFiltersProps) => {
   const [filters, setFilters] = useState<FilterState>({
     categories: initialCategory ? [initialCategory.charAt(0).toUpperCase() + initialCategory.slice(1).toLowerCase()] : [],
-    materials: [],
+    metals: [],
+    purities: [],
     gemstones: [],
     priceRange: [0, maxPrice],
     inStock: false,
     featured: false,
   });
 
-  const categories = ['Rings', 'Necklaces', 'Earrings', 'Bracelets'];
-  const materials = ['14K Yellow Gold', '18K White Gold', '18K Rose Gold', 'Platinum', '22K Yellow Gold'];
+  const categories = ['Rings', 'Necklaces', 'Earrings', 'Bracelets', 'Bangles', 'Pendants'];
+  const metals = ['Gold', 'Silver', 'Platinum'];
+  const purities = ['24K', '22K', '18K', '14K', '999 Fine', '925 Sterling'];
   const gemstones = ['Diamond', 'Ruby', 'Sapphire', 'Emerald', 'Pearl'];
 
   const updateFilters = (newFilters: Partial<FilterState>) => {
@@ -47,31 +49,17 @@ const ProductFilters = ({ onFiltersChange, maxPrice, onClose, isMobile, initialC
     onFiltersChange(updatedFilters);
   };
 
-  const handleCategoryChange = (category: string, checked: boolean) => {
-    const newCategories = checked
-      ? [...filters.categories, category]
-      : filters.categories.filter(c => c !== category);
-    updateFilters({ categories: newCategories });
-  };
-
-  const handleMaterialChange = (material: string, checked: boolean) => {
-    const newMaterials = checked
-      ? [...filters.materials, material]
-      : filters.materials.filter(m => m !== material);
-    updateFilters({ materials: newMaterials });
-  };
-
-  const handleGemstoneChange = (gemstone: string, checked: boolean) => {
-    const newGemstones = checked
-      ? [...filters.gemstones, gemstone]
-      : filters.gemstones.filter(g => g !== gemstone);
-    updateFilters({ gemstones: newGemstones });
+  const handleCheckboxChange = (field: 'categories' | 'metals' | 'purities' | 'gemstones', value: string, checked: boolean) => {
+    const current = filters[field];
+    const updated = checked ? [...current, value] : current.filter(v => v !== value);
+    updateFilters({ [field]: updated });
   };
 
   const clearAllFilters = () => {
     const clearedFilters: FilterState = {
       categories: [],
-      materials: [],
+      metals: [],
+      purities: [],
       gemstones: [],
       priceRange: [0, maxPrice],
       inStock: false,
@@ -80,7 +68,6 @@ const ProductFilters = ({ onFiltersChange, maxPrice, onClose, isMobile, initialC
     setFilters(clearedFilters);
     onFiltersChange(clearedFilters);
   };
-
 
   return (
     <Card className="w-full bg-white border-gray-300">
@@ -92,7 +79,7 @@ const ProductFilters = ({ onFiltersChange, maxPrice, onClose, isMobile, initialC
           </Button>
         </CardHeader>
       )}
-      
+
       <CardContent className="space-y-6">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-black">Filters</h3>
@@ -112,7 +99,7 @@ const ProductFilters = ({ onFiltersChange, maxPrice, onClose, isMobile, initialC
                 <Checkbox
                   id={`category-${category}`}
                   checked={filters.categories.includes(category)}
-                  onCheckedChange={(checked) => handleCategoryChange(category, checked as boolean)}
+                  onCheckedChange={(checked) => handleCheckboxChange('categories', category, checked as boolean)}
                 />
                 <Label htmlFor={`category-${category}`} className="text-sm text-black cursor-pointer">
                   {category}
@@ -164,19 +151,40 @@ const ProductFilters = ({ onFiltersChange, maxPrice, onClose, isMobile, initialC
 
         <Separator />
 
-        {/* Materials */}
+        {/* Metal */}
         <div className="space-y-3">
-          <h4 className="font-medium text-black">Materials</h4>
+          <h4 className="font-medium text-black">Metal</h4>
           <div className="space-y-2">
-            {materials.map((material) => (
-              <div key={material} className="flex items-center space-x-2">
+            {metals.map((metal) => (
+              <div key={metal} className="flex items-center space-x-2">
                 <Checkbox
-                  id={`material-${material}`}
-                  checked={filters.materials.includes(material)}
-                  onCheckedChange={(checked) => handleMaterialChange(material, checked as boolean)}
+                  id={`metal-${metal}`}
+                  checked={filters.metals.includes(metal)}
+                  onCheckedChange={(checked) => handleCheckboxChange('metals', metal, checked as boolean)}
                 />
-                <Label htmlFor={`material-${material}`} className="text-sm text-black cursor-pointer">
-                  {material}
+                <Label htmlFor={`metal-${metal}`} className="text-sm text-black cursor-pointer">
+                  {metal}
+                </Label>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <Separator />
+
+        {/* Purity */}
+        <div className="space-y-3">
+          <h4 className="font-medium text-black">Purity</h4>
+          <div className="space-y-2">
+            {purities.map((purity) => (
+              <div key={purity} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`purity-${purity}`}
+                  checked={filters.purities.includes(purity)}
+                  onCheckedChange={(checked) => handleCheckboxChange('purities', purity, checked as boolean)}
+                />
+                <Label htmlFor={`purity-${purity}`} className="text-sm text-black cursor-pointer">
+                  {purity}
                 </Label>
               </div>
             ))}
@@ -194,7 +202,7 @@ const ProductFilters = ({ onFiltersChange, maxPrice, onClose, isMobile, initialC
                 <Checkbox
                   id={`gemstone-${gemstone}`}
                   checked={filters.gemstones.includes(gemstone)}
-                  onCheckedChange={(checked) => handleGemstoneChange(gemstone, checked as boolean)}
+                  onCheckedChange={(checked) => handleCheckboxChange('gemstones', gemstone, checked as boolean)}
                 />
                 <Label htmlFor={`gemstone-${gemstone}`} className="text-sm text-black cursor-pointer">
                   {gemstone}

@@ -38,7 +38,8 @@ const ProductListing = () => {
   const initialCategory = category ? category.charAt(0).toUpperCase() + category.slice(1).toLowerCase() : '';
   const [filters, setFilters] = useState<FilterState>({
     categories: initialCategory ? [initialCategory] : [],
-    materials: [],
+    metals: [],
+    purities: [],
     gemstones: [],
     priceRange: [0, 300000],
     inStock: false,
@@ -104,10 +105,17 @@ const ProductListing = () => {
       );
     }
     
-    // Material filter
-    if (filters.materials.length > 0) {
+    // Metal filter (Gold, Silver, Platinum)
+    if (filters.metals.length > 0) {
       filtered = filtered.filter(product =>
-        filters.materials.includes(product.material_name ?? '')
+        filters.metals.includes(product.material_name ?? '')
+      );
+    }
+
+    // Purity filter (24K, 22K, 18K, etc.)
+    if (filters.purities.length > 0) {
+      filtered = filtered.filter(product =>
+        filters.purities.includes(product.karat_value ?? '')
       );
     }
 
@@ -397,7 +405,8 @@ const ProductListing = () => {
                       setSearchQuery('');
                       setFilters({
                         categories: [],
-                        materials: [],
+                        metals: [],
+                        purities: [],
                         gemstones: [],
                         priceRange: [0, maxPrice],
                         inStock: false,

@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Store, Mail, Phone, MapPin, DollarSign, Settings as SettingsIcon, Users, Plus, Trash2, Edit } from 'lucide-react';
+import { Store, Mail, Phone, MapPin, DollarSign, Settings as SettingsIcon, Users, Plus, Trash2, Edit, Send, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
@@ -39,6 +39,18 @@ const SettingsPage = () => {
     currency: 'INR',
     paymentMethods: ['razorpay'] as string[]
   });
+
+  const [emailForm, setEmailForm] = useState({
+    smtpHost: '',
+    smtpPort: 587,
+    smtpUser: '',
+    smtpPassword: '',
+    smtpFromEmail: '',
+    smtpFromName: 'JewelCart',
+    smtpSecure: false
+  });
+
+  const [isSendingTest, setIsSendingTest] = useState(false);
 
   const [userSettings, setUserSettings] = useState({
     notifications: {
@@ -131,6 +143,16 @@ const SettingsPage = () => {
         freeShippingThreshold: settingsData.freeShippingThreshold,
         currency: settingsData.currency,
         paymentMethods: settingsData.paymentMethods
+      });
+
+      setEmailForm({
+        smtpHost: (response as any).smtp_host || '',
+        smtpPort: (response as any).smtp_port || 587,
+        smtpUser: (response as any).smtp_user || '',
+        smtpPassword: (response as any).smtp_password || '',
+        smtpFromEmail: (response as any).smtp_from_email || '',
+        smtpFromName: (response as any).smtp_from_name || 'JewelCart',
+        smtpSecure: !!(response as any).smtp_secure
       });
     } catch (error) {
       console.error('Failed to load settings:', error);
@@ -448,6 +470,54 @@ const SettingsPage = () => {
   };
 
 
+  const handleSaveEmail = async () => {
+    try {
+      await apiService.updateSettings({
+        smtpHost: emailForm.smtpHost,
+        smtpPort: emailForm.smtpPort,
+        smtpUser: emailForm.smtpUser,
+        smtpPassword: emailForm.smtpPassword,
+        smtpFromEmail: emailForm.smtpFromEmail,
+        smtpFromName: emailForm.smtpFromName,
+        smtpSecure: emailForm.smtpSecure
+      } as any);
+
+      toast({
+        title: "Success",
+        description: "Email settings saved successfully"
+      });
+
+      loadSettings();
+    } catch (error) {
+      console.error('Failed to save email settings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save email settings",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleSendTestEmail = async () => {
+    setIsSendingTest(true);
+    try {
+      const result = await apiService.sendTestEmail();
+      toast({
+        title: "Success",
+        description: result.message
+      });
+    } catch (error: any) {
+      console.error('Failed to send test email:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send test email",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSendingTest(false);
+    }
+  };
+
   const formatPrice = (amount: number): string => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -473,7 +543,7 @@ const SettingsPage = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="general" className="flex items-center gap-2">
             <SettingsIcon className="h-4 w-4" />
             General
@@ -485,6 +555,10 @@ const SettingsPage = () => {
           <TabsTrigger value="materials" className="flex items-center gap-2">
             <DollarSign className="h-4 w-4" />
             Materials
+          </TabsTrigger>
+          <TabsTrigger value="email" className="flex items-center gap-2">
+            <Mail className="h-4 w-4" />
+            Email
           </TabsTrigger>
           <TabsTrigger value="notifications" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
@@ -913,6 +987,112 @@ const SettingsPage = () => {
                     No materials found. Add your first material to get started.
                   </div>
                 )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="email" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5" />
+                SMTP Configuration
+              </CardTitle>
+              <CardDescription>Configure outgoing email settings for order confirmations, password resets, and notifications</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="smtpHost">SMTP Host</Label>
+                  <Input
+                    id="smtpHost"
+                    value={emailForm.smtpHost}
+                    onChange={(e) => setEmailForm(prev => ({ ...prev, smtpHost: e.target.value }))}
+                    placeholder="e.g., smtp.gmail.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="smtpPort">SMTP Port</Label>
+                  <Input
+                    id="smtpPort"
+                    type="number"
+                    value={emailForm.smtpPort}
+                    onChange={(e) => setEmailForm(prev => ({ ...prev, smtpPort: Number(e.target.value) }))}
+                    placeholder="587"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="smtpUser">SMTP Username</Label>
+                  <Input
+                    id="smtpUser"
+                    value={emailForm.smtpUser}
+                    onChange={(e) => setEmailForm(prev => ({ ...prev, smtpUser: e.target.value }))}
+                    placeholder="your-email@gmail.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="smtpPassword">SMTP Password</Label>
+                  <Input
+                    id="smtpPassword"
+                    type="password"
+                    value={emailForm.smtpPassword}
+                    onChange={(e) => setEmailForm(prev => ({ ...prev, smtpPassword: e.target.value }))}
+                    placeholder="App password or SMTP password"
+                  />
+                </div>
+              </div>
+              <Separator />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="smtpFromEmail">From Email</Label>
+                  <Input
+                    id="smtpFromEmail"
+                    type="email"
+                    value={emailForm.smtpFromEmail}
+                    onChange={(e) => setEmailForm(prev => ({ ...prev, smtpFromEmail: e.target.value }))}
+                    placeholder="noreply@yourstore.com"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="smtpFromName">From Name</Label>
+                  <Input
+                    id="smtpFromName"
+                    value={emailForm.smtpFromName}
+                    onChange={(e) => setEmailForm(prev => ({ ...prev, smtpFromName: e.target.value }))}
+                    placeholder="JewelCart"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label>Secure Connection (SSL/TLS)</Label>
+                  <p className="text-sm text-muted-foreground">Enable for port 465. Disable for port 587 with STARTTLS.</p>
+                </div>
+                <Switch
+                  checked={emailForm.smtpSecure}
+                  onCheckedChange={(checked) => setEmailForm(prev => ({ ...prev, smtpSecure: checked }))}
+                />
+              </div>
+              <Separator />
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button onClick={handleSaveEmail}>
+                  Save Email Settings
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleSendTestEmail}
+                  disabled={isSendingTest}
+                >
+                  {isSendingTest ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4 mr-2" />
+                  )}
+                  {isSendingTest ? 'Sending...' : 'Send Test Email'}
+                </Button>
               </div>
             </CardContent>
           </Card>

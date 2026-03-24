@@ -197,11 +197,12 @@ const Products = () => {
     }
 
     const weight = parseFloat(formData.weight);
-    const basePrice = parseFloat(formData.basePrice);
+    const makingChargePerGram = parseFloat(formData.basePrice);
     const pricePerGram = karat.pricePerGram;
 
     const materialCost = pricePerGram * weight;
-    const totalPrice = Math.round(materialCost + basePrice);
+    const makingCost = makingChargePerGram * weight;
+    const totalPrice = Math.round(materialCost + makingCost);
 
     setCalculatedPrice(totalPrice);
   };
@@ -456,7 +457,7 @@ const Products = () => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="basePrice">Base Price (INR)</Label>
+                  <Label htmlFor="basePrice">Making Charge (₹/gram)</Label>
                   <Input
                     id="basePrice"
                     name="basePrice"
@@ -464,7 +465,7 @@ const Products = () => {
                     step="0.01"
                     value={formData.basePrice}
                     onChange={handleInputChange}
-                    placeholder="Making charges, etc."
+                    placeholder="Making charge per gram"
                     required
                   />
                 </div>
@@ -482,10 +483,10 @@ const Products = () => {
                       {formData.weight && formData.karatId && formData.materialId && (
                         <div className="mt-2 text-xs space-y-1">
                           <div className="text-amber-700">
-                            <strong>Material Cost:</strong> {parseFloat(formData.weight)}g × ₹{materials.find(m => m.id === parseInt(formData.materialId))?.karats.find(k => k.id === parseInt(formData.karatId))?.pricePerGram}/g = ₹{Math.round((parseFloat(formData.weight) || 0) * (materials.find(m => m.id === parseInt(formData.materialId))?.karats.find(k => k.id === parseInt(formData.karatId))?.pricePerGram || 0))}
+                            <strong>Metal Cost:</strong> {parseFloat(formData.weight)}g × ₹{materials.find(m => m.id === parseInt(formData.materialId))?.karats.find(k => k.id === parseInt(formData.karatId))?.pricePerGram}/g = ₹{Math.round((parseFloat(formData.weight) || 0) * (materials.find(m => m.id === parseInt(formData.materialId))?.karats.find(k => k.id === parseInt(formData.karatId))?.pricePerGram || 0))}
                           </div>
                           <div className="text-amber-700">
-                            <strong>Base Price:</strong> ₹{parseFloat(formData.basePrice) || 0} (making charges, etc.)
+                            <strong>Making Charges:</strong> {parseFloat(formData.weight)}g × ₹{parseFloat(formData.basePrice) || 0}/g = ₹{Math.round((parseFloat(formData.weight) || 0) * (parseFloat(formData.basePrice) || 0))}
                           </div>
                         </div>
                       )}

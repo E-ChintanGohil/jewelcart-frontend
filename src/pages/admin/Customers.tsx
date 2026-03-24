@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { formatCurrency } from '@/lib/currency';
-import { Plus, Edit, Search, MessageSquare, Phone, Mail } from 'lucide-react';
+import { Plus, Edit, Search, MessageSquare, Phone, Mail, Download } from 'lucide-react';
 
 const Customers = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -21,6 +21,7 @@ const Customers = () => {
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [noteDialog, setNoteDialog] = useState<{ open: boolean; customer: Customer | null }>({ open: false, customer: null });
   const [newNote, setNewNote] = useState('');
+  const [isExporting, setIsExporting] = useState(false);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -193,13 +194,32 @@ const Customers = () => {
           <h1 className="text-3xl font-bold text-foreground">Customers</h1>
           <p className="text-muted-foreground">Manage your customer relationships</p>
         </div>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Customer
-            </Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            disabled={isExporting}
+            onClick={async () => {
+              setIsExporting(true);
+              try {
+                await apiService.exportCustomers();
+                toast({ title: "Success", description: "Customers exported successfully" });
+              } catch (error) {
+                toast({ title: "Error", description: "Failed to export customers", variant: "destructive" });
+              } finally {
+                setIsExporting(false);
+              }
+            }}
+          >
+            <Download className="h-4 w-4 mr-2" />
+            {isExporting ? 'Exporting...' : 'Export CSV'}
+          </Button>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={resetForm}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Customer
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
@@ -357,6 +377,7 @@ const Customers = () => {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       <Card>

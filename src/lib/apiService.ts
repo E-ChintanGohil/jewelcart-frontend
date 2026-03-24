@@ -613,6 +613,12 @@ class ApiService {
     return response.settings;
   }
 
+  async sendTestEmail(): Promise<{ message: string }> {
+    return await apiRequest('/settings/test-email', {
+      method: 'POST',
+    });
+  }
+
   // User Preferences methods
   async getUserPreferences(): Promise<any> {
     const response = await apiRequest('/user-preferences');
@@ -744,6 +750,53 @@ class ApiService {
       body: JSON.stringify({ imageUrl }),
     });
     return response;
+  }
+
+  // CSV Export methods
+  async exportOrders(): Promise<void> {
+    const url = `${API_BASE_URL}/orders/export`;
+    const response = await fetch(url, {
+      headers: {
+        Authorization: authToken ? `Bearer ${authToken}` : '',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Export failed: ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || 'orders.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(downloadUrl);
+  }
+
+  async exportCustomers(): Promise<void> {
+    const url = `${API_BASE_URL}/customers/export`;
+    const response = await fetch(url, {
+      headers: {
+        Authorization: authToken ? `Bearer ${authToken}` : '',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Export failed: ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = response.headers.get('Content-Disposition')?.split('filename=')[1]?.replace(/"/g, '') || 'customers.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(downloadUrl);
   }
 
   // Initialize from localStorage token if exists
