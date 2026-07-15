@@ -24,9 +24,14 @@ function getCategoryImage(category: any): string {
 	return categoryFallbackImages[name] || categoryFallbackImages.default;
 }
 
+const AUTO_ADVANCE_MS = 3500;   // advance one tile every 3.5s
+const RESUME_AFTER_MS = 4000;   // resume auto-scroll 4s after the user stops interacting
+
 const StaticHoverSlider = () => {
 	const sliderRef = useRef<HTMLDivElement>(null);
 	const [categories, setCategories] = useState<any[]>([]);
+	const pausedRef = useRef(false);          // true while the user is interacting
+	const resumeTimer = useRef<number>();
 
 	useEffect(() => {
 		apiService.getCategories().then((data) => {
@@ -36,18 +41,58 @@ const StaticHoverSlider = () => {
 		}).catch(() => {});
 	}, []);
 
-	function scrollSlider(dir: string) {
-		let slider = sliderRef.current;
-		if (!slider || !slider.children[0]) return;
-		let slide = slider.children[0] as HTMLElement;
-
-		let slideWidth = slide.getBoundingClientRect().width;
-
-		slider.scrollBy({
-			left: dir === "left" ? -slideWidth : slideWidth,
-			behavior: "smooth",
-		});
+	// Pause auto-scroll while the user interacts, then resume after a quiet period
+	function pauseForUser() {
+		pausedRef.current = true;
+		if (resumeTimer.current) window.clearTimeout(resumeTimer.current);
+		resumeTimer.current = window.setTimeout(() => {
+			pausedRef.current = false;
+		}, RESUME_AFTER_MS);
 	}
+
+	function slideBy(dir: number) {
+		const slider = sliderRef.current;
+		if (!slider || !slider.children[0]) return;
+		const slideWidth = (slider.children[0] as HTMLElement).getBoundingClientRect().width;
+		const maxScroll = slider.scrollWidth - slider.clientWidth;
+		// Loop back to the start once we reach the end (…-4-5-1-2-…)
+		if (dir > 0 && slider.scrollLeft >= maxScroll - 5) {
+			slider.scrollTo({ left: 0, behavior: "smooth" });
+		} else if (dir < 0 && slider.scrollLeft <= 5) {
+			slider.scrollTo({ left: maxScroll, behavior: "smooth" });
+		} else {
+			slider.scrollBy({ left: dir * slideWidth, behavior: "smooth" });
+		}
+	}
+
+	function scrollSlider(dir: string) {
+		pauseForUser();               // arrow click counts as user interaction
+		slideBy(dir === "left" ? -1 : 1);
+	}
+
+	// Auto-scroll loop + user-interaction listeners
+	useEffect(() => {
+		if (categories.length === 0) return;
+		const slider = sliderRef.current;
+		if (!slider) return;
+
+		const interval = window.setInterval(() => {
+			if (!pausedRef.current) slideBy(1);
+		}, AUTO_ADVANCE_MS);
+
+		const onInteract = () => pauseForUser();
+		slider.addEventListener("pointerdown", onInteract);
+		slider.addEventListener("touchstart", onInteract, { passive: true });
+		slider.addEventListener("wheel", onInteract, { passive: true });
+
+		return () => {
+			window.clearInterval(interval);
+			if (resumeTimer.current) window.clearTimeout(resumeTimer.current);
+			slider.removeEventListener("pointerdown", onInteract);
+			slider.removeEventListener("touchstart", onInteract);
+			slider.removeEventListener("wheel", onInteract);
+		};
+	}, [categories.length]);
 
 	return (
 		<section className="max-lg:pt-20 lg:pt-40 pb-12 inline-block w-full">
@@ -66,12 +111,15 @@ const StaticHoverSlider = () => {
 
 					<div className="relative w-full lg:w-4/5 inline-block">
 						{/* Slider */}
-						<div ref={sliderRef} className="flex w-full overflow-hidden scroll-smooth">
+						<div
+							ref={sliderRef}
+							className="flex w-full overflow-x-auto scroll-smooth snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+						>
 							{categories.map((category, index) => (
 								<Link
 									key={category.id || index}
 									to={`/products/${(category.name || '').toLowerCase()}`}
-									className="group relative min-w-[85%] sm:min-w-[50%] px-2 lg:min-w-[25%] h-[350px]"
+									className="group relative snap-start min-w-[85%] sm:min-w-[50%] px-2 lg:min-w-[25%] h-[350px]"
 								>
 									<div className="relative h-full rounded-2xl overflow-hidden">
 										<img
