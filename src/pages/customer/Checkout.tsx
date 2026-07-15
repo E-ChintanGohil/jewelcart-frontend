@@ -365,7 +365,7 @@ export default function Checkout() {
                           required
                         />
                       </div>
-                      <div className="col-span-2 space-y-2">
+                      <div className="md:col-span-2 space-y-2">
                         <Label htmlFor="street">Street Address</Label>
                         <Input
                           id="street"
@@ -457,7 +457,7 @@ export default function Checkout() {
                     <div key={item.id}>
                       <div className="flex items-center space-x-4">
                         <img
-                          src={item.image_url || item.imageUrl || 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80'}
+                          src={item.image_url || item.imageUrl || '/placeholder.svg'}
                           alt={item.name}
                           className="w-16 h-16 object-cover rounded-lg"
                         />
