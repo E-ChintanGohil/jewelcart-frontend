@@ -6,13 +6,13 @@ import { apiService } from "@/lib/apiService";
 import { resolveImageUrl } from "@/lib/config";
 
 const categoryFallbackImages: Record<string, string> = {
-	rings: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80",
-	necklaces: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&q=80",
-	earrings: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&q=80",
-	bracelets: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=600&q=80",
-	pendants: "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?w=600&q=80",
-	bangles: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=600&q=80",
-	default: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80",
+	rings: "/placeholder.svg",
+	necklaces: "/placeholder.svg",
+	earrings: "/placeholder.svg",
+	bracelets: "/placeholder.svg",
+	pendants: "/placeholder.svg",
+	bangles: "/placeholder.svg",
+	default: "/placeholder.svg",
 };
 
 function getCategoryImage(category: any): string {
@@ -31,7 +31,8 @@ const StaticHoverSlider = () => {
 	useEffect(() => {
 		apiService.getCategories().then((data) => {
 			const cats = data.categories || data || [];
-			setCategories(Array.isArray(cats) ? cats : []);
+			const homepage = (Array.isArray(cats) ? cats : []).filter((c: any) => c.showOnHomepage !== false && c.show_on_homepage !== false);
+			setCategories(homepage);
 		}).catch(() => {});
 	}, []);
 
@@ -70,19 +71,25 @@ const StaticHoverSlider = () => {
 								<Link
 									key={category.id || index}
 									to={`/products/${(category.name || '').toLowerCase()}`}
-									className="group relative sm:min-w-[50%] px-2 lg:min-w-[25%] h-[350px] rounded-2xl overflow-hidden"
+									className="group relative min-w-[85%] sm:min-w-[50%] px-2 lg:min-w-[25%] h-[350px]"
 								>
 									<div className="relative h-full rounded-2xl overflow-hidden">
 										<img
 											src={getCategoryImage(category)}
 											alt={category.name}
-											className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+											className="w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-110"
 										/>
-										<div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-										<div className="absolute bottom-0 left-0 right-0 p-6 translate-y-full group-hover:translate-y-0 transition-all duration-500 text-white">
-											<h3 className="text-2xl font-bold">{category.name}</h3>
+										{/* Always-on gradient */}
+										<div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
+										{/* Always-visible name + accent */}
+										<div className="absolute inset-x-0 bottom-0 p-5 text-white">
+											<div className="flex items-center justify-between mb-3">
+												<span className="text-xs tracking-[0.25em] uppercase text-white/70">{String(index + 1).padStart(2, '0')}</span>
+												<span className="h-px w-12 bg-brandgold transition-all duration-500 group-hover:w-24" />
+											</div>
+											<h3 className="text-xl md:text-2xl font-serif leading-tight">{category.name}</h3>
 											{category.description && (
-												<p className="mt-2 text-sm">{category.description}</p>
+												<p className="mt-1 text-xs text-white/80 line-clamp-1">{category.description}</p>
 											)}
 										</div>
 									</div>
@@ -116,7 +123,8 @@ const ShopByCollection = () => {
 	useEffect(() => {
 		apiService.getCategories().then((data) => {
 			const cats = data.categories || data || [];
-			setCategories(Array.isArray(cats) ? cats.slice(0, 4) : []);
+			const homepage = (Array.isArray(cats) ? cats : []).filter((c: any) => c.showOnHomepage !== false && c.show_on_homepage !== false);
+			setCategories(homepage.slice(0, 4));
 		}).catch(() => {});
 	}, []);
 
@@ -132,31 +140,32 @@ const ShopByCollection = () => {
 					</div>
 
 					<div className="grid md:grid-cols-2 gap-10">
-						{categories.map((category) => (
+						{categories.map((category, idx) => (
 							<Link key={category.id} to={`/products/${(category.name || '').toLowerCase()}`}>
 								<div className="group cursor-pointer">
-									<div className="relative overflow-hidden rounded-xl bg-white shadow-soft border border-gray-200 hover:shadow-elegant transition-all duration-300">
+									<div className="relative overflow-hidden rounded-xl">
 										<div className="aspect-[4/3] overflow-hidden">
 											<img
 												src={getCategoryImage(category)}
 												alt={category.name}
-												className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+												className="w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-110"
 											/>
-											<div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors duration-300"></div>
+											<div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+										</div>
+										<div className="absolute top-6 left-6 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-white text-xs tracking-[0.2em] font-medium">
+											{String(idx + 1).padStart(2, '0')}
 										</div>
 										<div className="absolute bottom-0 left-0 right-0 p-8 text-white">
 											<div className="mb-6">
-												<h3 className="text-2xl font-bold mb-2">{category.name}</h3>
+												<h3 className="text-3xl font-serif mb-2">{category.name}</h3>
 												{category.description && (
-													<p className="text-lg opacity-90">{category.description}</p>
+													<p className="text-base text-white/85">{category.description}</p>
 												)}
 											</div>
-											<Button
-												size="sm"
-												className="bg-white hover:bg-gray-100 text-black border-0"
-											>
-												Explore Collection
-											</Button>
+											<div className="inline-flex items-center gap-3 text-sm tracking-[0.2em] uppercase text-white">
+												<span>Explore Collection</span>
+												<span className="h-px w-10 bg-brandgold transition-all duration-500 group-hover:w-20" />
+											</div>
 										</div>
 									</div>
 								</div>
