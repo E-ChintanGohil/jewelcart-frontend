@@ -37,12 +37,12 @@ const HeroSection = () => {
 
 							<div className="flex flex-wrap gap-4">
 								<div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-elegant border">
-									<div className="text-3xl font-bold text-black">20%</div>
+									<div className="text-3xl font-bold text-black">10%</div>
 									<div className="text-sm text-gray-600">OFF RINGS</div>
 									<div className="text-xs text-gray-500">Code: RING20</div>
 								</div>
 								<div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-elegant border">
-									<div className="text-3xl font-bold text-black">20%</div>
+									<div className="text-3xl font-bold text-black">10%</div>
 									<div className="text-sm text-gray-600">OFF NECKLACES</div>
 									<div className="text-xs text-gray-500">Code: NECK20</div>
 								</div>
@@ -86,12 +86,12 @@ const HeroSection = () => {
 									</div>
 									<div className="flex flex-wrap gap-4">
 										<div className="bg-white/90 rounded-lg p-4">
-											<div className="text-3xl font-bold text-black">20%</div>
+											<div className="text-3xl font-bold text-black">10%</div>
 											<div className="text-sm text-gray-600">OFF RINGS</div>
 											<div className="text-xs text-gray-500">Code: RING20</div>
 										</div>
 										<div className="bg-white/90 rounded-lg p-4">
-											<div className="text-3xl font-bold text-black">20%</div>
+											<div className="text-3xl font-bold text-black">10%</div>
 											<div className="text-sm text-gray-600">OFF NECKLACES</div>
 											<div className="text-xs text-gray-500">Code: NECK20</div>
 										</div>
@@ -148,12 +148,12 @@ const HeroSection = () => {
 									</div>
 									<div className="flex flex-wrap gap-4">
 										<div className="bg-white/90 rounded-lg p-4">
-											<div className="text-3xl font-bold text-black">20%</div>
+											<div className="text-3xl font-bold text-black">10%</div>
 											<div className="text-sm text-gray-600">OFF RINGS</div>
 											<div className="text-xs text-gray-500">Code: RING20</div>
 										</div>
 										<div className="bg-white/90 rounded-lg p-4">
-											<div className="text-3xl font-bold text-black">20%</div>
+											<div className="text-3xl font-bold text-black">10%</div>
 											<div className="text-sm text-gray-600">OFF NECKLACES</div>
 											<div className="text-xs text-gray-500">Code: NECK20</div>
 										</div>
