@@ -30,7 +30,7 @@ const Index = () => {
       {/* <ShopByGender /> */}
       <JewelCartExperience />
       <OurPromise />
-      <CustomerReviews />
+      {/* <CustomerReviews /> — removed per client (placeholder testimonials) */}
       {/* <VisitOurStores /> */}
       {/* <FAQSection /> */}
     </div>
