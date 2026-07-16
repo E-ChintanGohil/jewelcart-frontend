@@ -34,6 +34,7 @@ const standardMetals = ["Gold", "White Gold", "Rose Gold", "Platinum", "Silver"]
 const standardGemstones = ["Diamond", "Ruby", "Sapphire", "Emerald", "Pearl"];
 
 const megaCategories: MegaMenuCategory[] = [
+	/* Rings — no products yet; commented out until the category has stock
 	{
 		slug: "rings",
 		label: "Rings",
@@ -44,6 +45,7 @@ const megaCategories: MegaMenuCategory[] = [
 		gemstones: standardGemstones,
 		occasions: ["Engagement", "Wedding", "Anniversary", "Birthday", "Gifting"],
 	},
+	*/
 	{
 		slug: "earrings",
 		label: "Earrings",
@@ -84,6 +86,7 @@ const megaCategories: MegaMenuCategory[] = [
 		gemstones: standardGemstones,
 		occasions: ["Wedding", "Anniversary", "Festive", "Casual", "Gifting"],
 	},
+	/* Bangles — no products yet; commented out until the category has stock
 	{
 		slug: "bangles",
 		label: "Bangles",
@@ -94,6 +97,7 @@ const megaCategories: MegaMenuCategory[] = [
 		gemstones: standardGemstones,
 		occasions: ["Wedding", "Festive", "Daily", "Office", "Gifting"],
 	},
+	*/
 ];
 
 const simpleNavLinks = [
