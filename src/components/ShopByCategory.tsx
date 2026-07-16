@@ -35,18 +35,18 @@ const ShopByCategory = () => {
         </div>
 
         {loading ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="animate-pulse rounded-2xl bg-neutral-100 aspect-[4/5]" />
+          <div className="flex flex-wrap justify-center gap-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="animate-pulse rounded-2xl bg-neutral-100 aspect-[4/5] w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]" />
             ))}
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="flex flex-wrap justify-center gap-6">
             {categories.map((category, idx) => (
               <Link
                 key={category.id}
                 to={`/products/${(category.name || "").toLowerCase()}`}
-                className="group relative block aspect-[4/5] overflow-hidden rounded-2xl bg-neutral-100"
+                className="group relative block aspect-[4/5] overflow-hidden rounded-2xl bg-neutral-100 w-full md:w-[calc(50%-0.75rem)] lg:w-[calc(33.333%-1rem)]"
               >
                 {/* Image */}
                 <img

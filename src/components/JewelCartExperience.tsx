@@ -51,11 +51,11 @@ const JewelCartExperience = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="flex flex-wrap justify-center gap-6 mb-12">
           {experiences.map((experience) => {
             const Icon = experience.icon;
             return (
-              <div key={experience.id} className="text-center">
+              <div key={experience.id} className="text-center w-full sm:w-[300px]">
                 <div className="bg-white rounded-xl p-6 shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300 group">
                   <div className="w-16 h-16 bg-brandblue/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-brandblue/20 transition-colors">
                     <Icon className="h-8 w-8 text-brandgold" />
