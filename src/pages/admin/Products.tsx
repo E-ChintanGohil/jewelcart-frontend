@@ -43,6 +43,29 @@ const Products = () => {
     certification: '',
     featured: false,
     basePrice: '',
+    // Fixed-price mode: one set price used everywhere, ignores weight & metal-rate cron
+    isFixedPrice: false,
+    fixedPrice: '',
+    // Phase 1: color & purity
+    availableColors: ['yellow'] as string[],
+    defaultColor: 'yellow',
+    availablePurities: [] as string[],
+    defaultPurity: '',
+    // Phase 2: size
+    sizeMin: '' as string | number,
+    sizeMax: '' as string | number,
+    sizeUnit: '' as '' | 'ring' | 'inch' | 'cm',
+    // Phase 3: diamond
+    diamondShape: '',
+    diamondCount: '' as string | number,
+    diamondTotalWeight: '' as string | number,
+    diamondColor: '',
+    diamondClarity: '',
+    diamondSizeRange: '',
+    // Phase 3: stones
+    stoneDetails: [] as { name: string; count: string; totalWeight: string }[],
+    // Phase 4: price breakup
+    priceBreakup: [] as { label: string; amount: string }[],
   });
 
   useEffect(() => {
@@ -84,15 +107,50 @@ const Products = () => {
         description: formData.description,
         categoryId: parseInt(categories.find(c => c.name === formData.category)?.id || '1'),
         stock: parseInt(formData.stock),
-        weight: parseFloat(formData.weight),
+        // Fixed-price products carry no weight/making charge; send 0 and the fixed price
+        weight: formData.isFixedPrice ? 0 : parseFloat(formData.weight),
         materialId: parseInt(formData.materialId),
         karatId: parseInt(formData.karatId),
         gemstone: formData.gemstone || undefined,
         certification: formData.certification || undefined,
         featured: formData.featured,
-        basePrice: parseFloat(formData.basePrice),
+        basePrice: formData.isFixedPrice ? 0 : parseFloat(formData.basePrice),
+        fixedPrice: formData.isFixedPrice ? parseFloat(formData.fixedPrice) : null,
         tags: [],
         isActive: true,
+        // Phase 1: color & purity
+        availableColors: formData.availableColors,
+        defaultColor: formData.defaultColor || undefined,
+        availablePurities: formData.availablePurities,
+        defaultPurity: formData.defaultPurity || undefined,
+        // Phase 2: size
+        sizeMin: formData.sizeMin === '' ? null : Number(formData.sizeMin),
+        sizeMax: formData.sizeMax === '' ? null : Number(formData.sizeMax),
+        sizeUnit: formData.sizeUnit || undefined,
+        // Phase 3: diamond
+        diamondDetails: (formData.diamondShape || formData.diamondCount || formData.diamondTotalWeight || formData.diamondColor || formData.diamondClarity || formData.diamondSizeRange) ? {
+          shape: formData.diamondShape || undefined,
+          count: formData.diamondCount === '' ? undefined : Number(formData.diamondCount),
+          totalWeight: formData.diamondTotalWeight === '' ? undefined : Number(formData.diamondTotalWeight),
+          color: formData.diamondColor || undefined,
+          clarity: formData.diamondClarity || undefined,
+          sizeRange: formData.diamondSizeRange || undefined,
+        } : null,
+        // Phase 3: stones
+        stoneDetails: formData.stoneDetails
+          .filter(s => s.name)
+          .map(s => ({
+            name: s.name,
+            count: s.count === '' ? null : Number(s.count),
+            totalWeight: s.totalWeight === '' ? null : Number(s.totalWeight),
+          })),
+        // Phase 4: price breakup
+        priceBreakup: formData.priceBreakup
+          .filter(b => b.label && b.amount !== '')
+          .map(b => ({
+            label: b.label,
+            amount: Number(b.amount),
+          })),
       };
 
       // Only include images field for new products
@@ -179,6 +237,10 @@ const Products = () => {
 
   // Calculate price in real-time
   const calculatePrice = () => {
+    if (formData.isFixedPrice) {
+      setCalculatedPrice(parseFloat(formData.fixedPrice) || 0);
+      return;
+    }
     if (!formData.materialId || !formData.karatId || !formData.weight || !formData.basePrice) {
       setCalculatedPrice(0);
       return;
@@ -210,7 +272,7 @@ const Products = () => {
   // Effect to recalculate price when form values change
   useEffect(() => {
     calculatePrice();
-  }, [formData.materialId, formData.karatId, formData.weight, formData.basePrice, materials]);
+  }, [formData.materialId, formData.karatId, formData.weight, formData.basePrice, formData.isFixedPrice, formData.fixedPrice, materials]);
 
   const resetForm = () => {
     setFormData({
@@ -225,6 +287,23 @@ const Products = () => {
       certification: '',
       featured: false,
       basePrice: '',
+      isFixedPrice: false,
+      fixedPrice: '',
+      availableColors: ['yellow'],
+      defaultColor: 'yellow',
+      availablePurities: [],
+      defaultPurity: '',
+      sizeMin: '',
+      sizeMax: '',
+      sizeUnit: '',
+      diamondShape: '',
+      diamondCount: '',
+      diamondTotalWeight: '',
+      diamondColor: '',
+      diamondClarity: '',
+      diamondSizeRange: '',
+      stoneDetails: [],
+      priceBreakup: [],
     });
     setCalculatedPrice(0);
     setEditingProduct(null);
@@ -292,6 +371,10 @@ const Products = () => {
       setPrimaryImageUrl(primaryImage?.imageUrl || null);
 
       setEditingProduct(fullProduct);
+      const fp: any = fullProduct;
+      const dd = fp.diamondDetails || fp.diamond_details;
+      const sd = fp.stoneDetails || fp.stone_details || [];
+      const pb = fp.priceBreakup || fp.price_breakup || [];
       setFormData({
         name: fullProduct.name,
         description: fullProduct.description,
@@ -304,6 +387,30 @@ const Products = () => {
         certification: fullProduct.certification || '',
         featured: fullProduct.featured || false,
         basePrice: basePriceValue?.toString() || '',
+        isFixedPrice: (fp.is_fixed_price ?? (fp.fixed_price != null)) || false,
+        fixedPrice: fp.fixed_price != null ? fp.fixed_price.toString() : '',
+        availableColors: fp.availableColors || fp.available_colors || ['yellow'],
+        defaultColor: fp.defaultColor || fp.default_color || 'yellow',
+        availablePurities: fp.availablePurities || fp.available_purities || [],
+        defaultPurity: fp.defaultPurity || fp.default_purity || '',
+        sizeMin: fp.sizeMin ?? fp.size_min ?? '',
+        sizeMax: fp.sizeMax ?? fp.size_max ?? '',
+        sizeUnit: fp.sizeUnit || fp.size_unit || '',
+        diamondShape: dd?.shape || '',
+        diamondCount: dd?.count ?? '',
+        diamondTotalWeight: dd?.totalWeight ?? dd?.total_weight ?? '',
+        diamondColor: dd?.color || '',
+        diamondClarity: dd?.clarity || '',
+        diamondSizeRange: dd?.sizeRange || dd?.size_range || '',
+        stoneDetails: sd.map((s: any) => ({
+          name: s.name || '',
+          count: s.count?.toString() || '',
+          totalWeight: (s.totalWeight ?? s.total_weight)?.toString() || '',
+        })),
+        priceBreakup: pb.map((b: any) => ({
+          label: b.label || '',
+          amount: b.amount?.toString() || '',
+        })),
       });
       // Set the current calculated price for editing
       setCalculatedPrice(fullProduct.price || 0);
@@ -440,6 +547,36 @@ const Products = () => {
                 </div>
               </div>
 
+              {/* Fixed-price toggle: one set price, ignores weight & the metal-rate cron */}
+              <div className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 bg-gray-50">
+                <input
+                  type="checkbox"
+                  id="isFixedPrice"
+                  checked={formData.isFixedPrice}
+                  onChange={(e) => setFormData(prev => ({ ...prev, isFixedPrice: e.target.checked }))}
+                  className="h-4 w-4"
+                />
+                <Label htmlFor="isFixedPrice" className="cursor-pointer">
+                  Fixed price &mdash; set one price directly (no weight, not affected by metal-rate updates)
+                </Label>
+              </div>
+
+              {formData.isFixedPrice && (
+                <div className="space-y-2">
+                  <Label htmlFor="fixedPrice">Fixed Price (₹)</Label>
+                  <Input
+                    id="fixedPrice"
+                    name="fixedPrice"
+                    type="number"
+                    step="0.01"
+                    value={formData.fixedPrice}
+                    onChange={handleInputChange}
+                    placeholder="Final selling price"
+                    required
+                  />
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="karatId">Karat/Purity</Label>
@@ -456,19 +593,21 @@ const Products = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="basePrice">Making Charge (₹/gram)</Label>
-                  <Input
-                    id="basePrice"
-                    name="basePrice"
-                    type="number"
-                    step="0.01"
-                    value={formData.basePrice}
-                    onChange={handleInputChange}
-                    placeholder="Making charge per gram"
-                    required
-                  />
-                </div>
+                {!formData.isFixedPrice && (
+                  <div className="space-y-2">
+                    <Label htmlFor="basePrice">Making Charge (₹/gram)</Label>
+                    <Input
+                      id="basePrice"
+                      name="basePrice"
+                      type="number"
+                      step="0.01"
+                      value={formData.basePrice}
+                      onChange={handleInputChange}
+                      placeholder="Making charge per gram"
+                      required
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Price Calculation Display */}
@@ -504,18 +643,20 @@ const Products = () => {
               )}
 
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="weight">Weight (g)</Label>
-                  <Input
-                    id="weight"
-                    name="weight"
-                    type="number"
-                    step="0.1"
-                    value={formData.weight}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
+                {!formData.isFixedPrice && (
+                  <div className="space-y-2">
+                    <Label htmlFor="weight">Weight (g)</Label>
+                    <Input
+                      id="weight"
+                      name="weight"
+                      type="number"
+                      step="0.1"
+                      value={formData.weight}
+                      onChange={handleInputChange}
+                      required
+                    />
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="stock">Stock</Label>
                   <Input
@@ -561,6 +702,255 @@ const Products = () => {
                   />
                   <Label htmlFor="featured">Featured Product</Label>
                 </div>
+              </div>
+
+              {/* ─── Color & Purity (PDP options) ──────────────────── */}
+              <div className="border-t pt-5 space-y-4">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500">PDP Options</h3>
+
+                <div className="space-y-2">
+                  <Label>Available Colors</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { value: 'yellow', label: 'Yellow', hex: 'linear-gradient(135deg, #f4d35e, #e8b923)' },
+                      { value: 'white', label: 'White', hex: 'linear-gradient(135deg, #f0f0f0, #c8c8c8)' },
+                      { value: 'rose', label: 'Rose', hex: 'linear-gradient(135deg, #f7cac9, #e8a899)' },
+                    ].map(c => {
+                      const active = formData.availableColors.includes(c.value);
+                      return (
+                        <button
+                          key={c.value}
+                          type="button"
+                          onClick={() => {
+                            setFormData(prev => {
+                              const exists = prev.availableColors.includes(c.value);
+                              const next = exists
+                                ? prev.availableColors.filter(v => v !== c.value)
+                                : [...prev.availableColors, c.value];
+                              return {
+                                ...prev,
+                                availableColors: next.length > 0 ? next : ['yellow'],
+                                defaultColor: next.includes(prev.defaultColor) ? prev.defaultColor : (next[0] || 'yellow'),
+                              };
+                            });
+                          }}
+                          className={`flex items-center gap-2 px-3 py-1.5 rounded-md border text-xs ${active ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
+                        >
+                          <span className="w-4 h-4 rounded-full" style={{ background: c.hex, boxShadow: 'inset 0 0 0 1px #999' }} />
+                          {c.label}
+                          {active && formData.defaultColor === c.value && <span className="text-[10px] uppercase text-blue-600">default</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {formData.availableColors.length > 1 && (
+                    <div className="text-xs">
+                      Default color:
+                      <select
+                        value={formData.defaultColor}
+                        onChange={(e) => setFormData(prev => ({ ...prev, defaultColor: e.target.value }))}
+                        className="ml-2 border rounded px-1 py-0.5 text-xs"
+                      >
+                        {formData.availableColors.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Available Purities (Karat)</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {['9K', '14K', '18K', '22K', '24K', '925 Sterling', '999 Fine'].map(p => {
+                      const active = formData.availablePurities.includes(p);
+                      return (
+                        <button
+                          key={p}
+                          type="button"
+                          onClick={() => {
+                            setFormData(prev => {
+                              const exists = prev.availablePurities.includes(p);
+                              const next = exists
+                                ? prev.availablePurities.filter(v => v !== p)
+                                : [...prev.availablePurities, p];
+                              return {
+                                ...prev,
+                                availablePurities: next,
+                                defaultPurity: next.includes(prev.defaultPurity) ? prev.defaultPurity : (next[0] || ''),
+                              };
+                            });
+                          }}
+                          className={`px-2.5 py-1 rounded text-xs ${active ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}
+                        >
+                          {p}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {formData.availablePurities.length > 1 && (
+                    <div className="text-xs">
+                      Default purity:
+                      <select
+                        value={formData.defaultPurity}
+                        onChange={(e) => setFormData(prev => ({ ...prev, defaultPurity: e.target.value }))}
+                        className="ml-2 border rounded px-1 py-0.5 text-xs"
+                      >
+                        {formData.availablePurities.map(p => <option key={p} value={p}>{p}</option>)}
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                {/* Size selector — only for relevant categories */}
+                <div className="space-y-2">
+                  <Label>Size Range (optional)</Label>
+                  <div className="flex gap-2 items-center">
+                    <select
+                      value={formData.sizeUnit}
+                      onChange={(e) => setFormData(prev => ({ ...prev, sizeUnit: e.target.value as any }))}
+                      className="border rounded px-2 py-1.5 text-sm"
+                    >
+                      <option value="">No size</option>
+                      <option value="ring">Ring size (6-26)</option>
+                      <option value="inch">Length (inches)</option>
+                      <option value="cm">Length (cm)</option>
+                    </select>
+                    {formData.sizeUnit && (
+                      <>
+                        <Input
+                          type="number"
+                          placeholder="Min"
+                          value={formData.sizeMin}
+                          onChange={(e) => setFormData(prev => ({ ...prev, sizeMin: e.target.value }))}
+                          className="w-20"
+                        />
+                        <span>to</span>
+                        <Input
+                          type="number"
+                          placeholder="Max"
+                          value={formData.sizeMax}
+                          onChange={(e) => setFormData(prev => ({ ...prev, sizeMax: e.target.value }))}
+                          className="w-20"
+                        />
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* ─── Diamond Details ──────────────────────────────── */}
+              <div className="border-t pt-5 space-y-4">
+                <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500">Diamond Details (optional)</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="diamondShape">Shape</Label>
+                    <Input id="diamondShape" placeholder="e.g. Round, Princess"
+                      value={formData.diamondShape}
+                      onChange={(e) => setFormData(p => ({ ...p, diamondShape: e.target.value }))} />
+                  </div>
+                  <div>
+                    <Label htmlFor="diamondCount">No. of Diamonds</Label>
+                    <Input id="diamondCount" type="number"
+                      value={formData.diamondCount}
+                      onChange={(e) => setFormData(p => ({ ...p, diamondCount: e.target.value }))} />
+                  </div>
+                  <div>
+                    <Label htmlFor="diamondTotalWeight">Total Weight (carats)</Label>
+                    <Input id="diamondTotalWeight" type="number" step="0.001"
+                      value={formData.diamondTotalWeight}
+                      onChange={(e) => setFormData(p => ({ ...p, diamondTotalWeight: e.target.value }))} />
+                  </div>
+                  <div>
+                    <Label htmlFor="diamondColor">Color</Label>
+                    <Input id="diamondColor" placeholder="e.g. F-G"
+                      value={formData.diamondColor}
+                      onChange={(e) => setFormData(p => ({ ...p, diamondColor: e.target.value }))} />
+                  </div>
+                  <div>
+                    <Label htmlFor="diamondClarity">Clarity</Label>
+                    <Input id="diamondClarity" placeholder="e.g. VS1-VS2"
+                      value={formData.diamondClarity}
+                      onChange={(e) => setFormData(p => ({ ...p, diamondClarity: e.target.value }))} />
+                  </div>
+                  <div>
+                    <Label htmlFor="diamondSizeRange">Size Range</Label>
+                    <Input id="diamondSizeRange" placeholder="e.g. 1.0-1.5mm"
+                      value={formData.diamondSizeRange}
+                      onChange={(e) => setFormData(p => ({ ...p, diamondSizeRange: e.target.value }))} />
+                  </div>
+                </div>
+              </div>
+
+              {/* ─── Other Stones (multi-row) ─────────────────────── */}
+              <div className="border-t pt-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500">Other Stones (optional)</h3>
+                  <Button type="button" size="sm" variant="outline"
+                    onClick={() => setFormData(p => ({ ...p, stoneDetails: [...p.stoneDetails, { name: '', count: '', totalWeight: '' }] }))}>
+                    + Add Stone
+                  </Button>
+                </div>
+                {formData.stoneDetails.map((s, i) => (
+                  <div key={i} className="grid grid-cols-[1fr_100px_120px_auto] gap-2 items-center">
+                    <Input placeholder="Stone name (e.g. Ruby)"
+                      value={s.name}
+                      onChange={(e) => {
+                        const next = [...formData.stoneDetails];
+                        next[i] = { ...next[i], name: e.target.value };
+                        setFormData(p => ({ ...p, stoneDetails: next }));
+                      }} />
+                    <Input placeholder="Count" type="number"
+                      value={s.count}
+                      onChange={(e) => {
+                        const next = [...formData.stoneDetails];
+                        next[i] = { ...next[i], count: e.target.value };
+                        setFormData(p => ({ ...p, stoneDetails: next }));
+                      }} />
+                    <Input placeholder="Wt (g)" type="number" step="0.001"
+                      value={s.totalWeight}
+                      onChange={(e) => {
+                        const next = [...formData.stoneDetails];
+                        next[i] = { ...next[i], totalWeight: e.target.value };
+                        setFormData(p => ({ ...p, stoneDetails: next }));
+                      }} />
+                    <Button type="button" size="sm" variant="ghost"
+                      onClick={() => setFormData(p => ({ ...p, stoneDetails: p.stoneDetails.filter((_, j) => j !== i) }))}>
+                      ×
+                    </Button>
+                  </div>
+                ))}
+              </div>
+
+              {/* ─── Price Breakup (multi-row) ────────────────────── */}
+              <div className="border-t pt-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-500">Price Breakup (optional)</h3>
+                  <Button type="button" size="sm" variant="outline"
+                    onClick={() => setFormData(p => ({ ...p, priceBreakup: [...p.priceBreakup, { label: '', amount: '' }] }))}>
+                    + Add Row
+                  </Button>
+                </div>
+                {formData.priceBreakup.map((b, i) => (
+                  <div key={i} className="grid grid-cols-[1fr_140px_auto] gap-2 items-center">
+                    <Input placeholder="Particular (e.g. 18Kt Gold 3.2g)"
+                      value={b.label}
+                      onChange={(e) => {
+                        const next = [...formData.priceBreakup];
+                        next[i] = { ...next[i], label: e.target.value };
+                        setFormData(p => ({ ...p, priceBreakup: next }));
+                      }} />
+                    <Input placeholder="Amount" type="number" step="0.01"
+                      value={b.amount}
+                      onChange={(e) => {
+                        const next = [...formData.priceBreakup];
+                        next[i] = { ...next[i], amount: e.target.value };
+                        setFormData(p => ({ ...p, priceBreakup: next }));
+                      }} />
+                    <Button type="button" size="sm" variant="ghost"
+                      onClick={() => setFormData(p => ({ ...p, priceBreakup: p.priceBreakup.filter((_, j) => j !== i) }))}>
+                      ×
+                    </Button>
+                  </div>
+                ))}
               </div>
 
               {/* Image Upload Section */}

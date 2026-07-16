@@ -267,14 +267,13 @@ const ProductDetails = () => {
                   <span className="text-brandblue font-medium">{product.gemstone}</span>
                 </div>
               )}
-              {/* Weight hidden per client — internal-only field used for pricing, not shown to customers
-              {product.weight && (
+              {/* Weight shown only for weight-based products — hidden for fixed-price items */}
+              {!product.is_fixed_price && !product.fixed_price && product.weight ? (
                 <div className="flex justify-between py-2.5 border-b border-gray-100 text-sm">
                   <span className="text-gray-400">Weight</span>
                   <span className="text-brandblue font-medium">{product.weight}g</span>
                 </div>
-              )}
-              */}
+              ) : null}
               {product.sku && (
                 <div className="flex justify-between py-2.5 border-b border-gray-100 text-sm">
                   <span className="text-gray-400">SKU</span>

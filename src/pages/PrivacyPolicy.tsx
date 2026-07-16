@@ -165,7 +165,7 @@ export default function PrivacyPolicy() {
       <Card className="mb-12 border border-gray-100 shadow-xl bg-white/50 backdrop-blur-sm">
         <CardContent className="p-8">
           <p className="text-gray-700 mb-6 leading-relaxed font-light">
-            Jewelcart ("we", "us", or "our") operates www.jewelcart.com. This Privacy Policy
+            Jewelcart ("we", "us", or "our") operates www.jewelcart.shop. This Privacy Policy
             explains how we collect, use, disclose, and safeguard your information when you
             visit our website and make purchases.
           </p>
@@ -275,8 +275,8 @@ export default function PrivacyPolicy() {
           </div>
           <div className="mt-8 p-6 bg-gradient-to-br from-amber-50/50 to-amber-100/50 rounded-xl border border-amber-200/50">
             <p className="text-gray-800 font-light leading-relaxed">
-              <span className="font-normal">To exercise your rights:</span> Contact us at privacy@jewelcart.com or
-              call +91 98765 43210. We will respond within 30 days.
+              <span className="font-normal">To exercise your rights:</span> Contact us at info@jewelcart.shop or
+              call +91-9023002331. We will respond within 30 days.
             </p>
           </div>
         </CardContent>
@@ -394,10 +394,10 @@ export default function PrivacyPolicy() {
             If you have questions or concerns about this Privacy Policy or your personal information:
           </p>
           <div className="space-y-2 text-gray-700 font-light">
-            <p><span className="text-gray-900">Email:</span> privacy@jewelcart.com</p>
-            <p><span className="text-gray-900">Phone:</span> +91 98765 43210</p>
-            <p><span className="text-gray-900">Address:</span> Jewelcart Pvt Ltd, 123 Jewelry Street, Zaveri Bazaar, Mumbai, Maharashtra 400002, India</p>
-            <p><span className="text-gray-900">Data Protection Officer:</span> dpo@jewelcart.com</p>
+            <p><span className="text-gray-900">Email:</span> info@jewelcart.shop</p>
+            <p><span className="text-gray-900">Phone:</span> +91-9023002331</p>
+            <p><span className="text-gray-900">Address:</span> BVM Enterprise, 61 Thakorbaug Market, Nr. Sardar Patel Seva Samaj, Navrangpura, Ahmedabad 380009, Gujarat, India</p>
+            <p><span className="text-gray-900">Data Protection Officer:</span> info@jewelcart.shop</p>
           </div>
           <p className="text-gray-700 text-sm mt-4 font-light">
             We aim to respond to all inquiries within 30 days.
@@ -418,7 +418,7 @@ export default function PrivacyPolicy() {
           <div className="space-y-3 text-gray-700 font-light">
             <p><span className="text-gray-900">Name:</span> Mr. Anil Kumar</p>
             <p><span className="text-gray-900">Designation:</span> Grievance Officer</p>
-            <p><span className="text-gray-900">Email:</span> grievance@jewelcart.com</p>
+            <p><span className="text-gray-900">Email:</span> info@jewelcart.shop</p>
             <p><span className="text-gray-900">Phone:</span> +91 22 1234 5678</p>
             <p><span className="text-gray-900">Time:</span> Monday to Friday (10:00 AM to 6:00 PM IST)</p>
           </div>

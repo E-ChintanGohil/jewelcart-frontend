@@ -27,7 +27,8 @@ const Categories = () => {
     description: '',
     imageUrl: '',
     status: 'ACTIVE' as 'ACTIVE' | 'INACTIVE',
-    sortOrder: 0
+    sortOrder: 0,
+    showOnHomepage: true,
   });
 
   useEffect(() => {
@@ -100,7 +101,8 @@ const Categories = () => {
       description: '',
       imageUrl: '',
       status: 'ACTIVE',
-      sortOrder: 0
+      sortOrder: 0,
+      showOnHomepage: true,
     });
     setImageFile(null);
     setImagePreview('');
@@ -121,7 +123,8 @@ const Categories = () => {
       description: category.description || '',
       imageUrl: category.imageUrl || '',
       status: category.status || 'ACTIVE',
-      sortOrder: category.sortOrder || 0
+      sortOrder: category.sortOrder || 0,
+      showOnHomepage: (category as any).showOnHomepage !== false && (category as any).show_on_homepage !== false,
     });
     setImageFile(null);
     setImagePreview(category.imageUrl
@@ -258,7 +261,20 @@ const Categories = () => {
                   </SelectContent>
                 </Select>
               </div>
-              
+
+              <div className="flex items-center space-x-2 pt-2">
+                <input
+                  id="showOnHomepage"
+                  type="checkbox"
+                  className="h-4 w-4 rounded border-gray-300"
+                  checked={formData.showOnHomepage}
+                  onChange={(e) => setFormData({ ...formData, showOnHomepage: e.target.checked })}
+                />
+                <Label htmlFor="showOnHomepage" className="cursor-pointer text-sm font-normal">
+                  Show on homepage (Shop by Category section)
+                </Label>
+              </div>
+
               <div className="flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={resetForm}>
                   Cancel

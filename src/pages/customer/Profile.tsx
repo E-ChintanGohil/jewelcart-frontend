@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { formatCurrency } from '@/lib/currency';
 import { apiService } from '@/lib/apiService';
 import { useToast } from '@/hooks/use-toast';
-import { User, Package, Heart, MapPin, Settings, Loader2, RefreshCw, AlertCircle, CreditCard, Trash2, ShoppingCart } from 'lucide-react';
+import { User, Package, Heart, MapPin, Settings, Loader2, RefreshCw, AlertCircle, CreditCard, Trash2, ShoppingCart, Download } from 'lucide-react';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useCart } from '@/contexts/CartContext';
 import { getProductImageUrl } from '@/lib/config';
@@ -52,6 +52,18 @@ export default function Profile() {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [addressesLoading, setAddressesLoading] = useState(false);
   const [retryingOrderId, setRetryingOrderId] = useState<number | null>(null);
+  const [invoiceLoadingId, setInvoiceLoadingId] = useState<number | null>(null);
+
+  const handleDownloadInvoice = async (orderId: number) => {
+    setInvoiceLoadingId(orderId);
+    try {
+      await apiService.downloadInvoice(orderId, 'customer');
+    } catch (err: any) {
+      toast({ title: 'Download failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setInvoiceLoadingId(null);
+    }
+  };
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'profile');
 
@@ -330,6 +342,21 @@ export default function Profile() {
                             </p>
                             <div className="flex items-center gap-3">
                               <span className="font-semibold">{formatCurrency(order.total)}</span>
+                              {order.paymentStatus !== 'failed' && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-gray-200 text-gray-600 hover:text-brandblue hover:border-brandblue"
+                                  disabled={invoiceLoadingId === order.id}
+                                  onClick={() => handleDownloadInvoice(order.id)}
+                                >
+                                  {invoiceLoadingId === order.id ? (
+                                    <><Loader2 className="h-3 w-3 animate-spin mr-1" />Preparing...</>
+                                  ) : (
+                                    <><Download className="h-3 w-3 mr-1" />Invoice</>
+                                  )}
+                                </Button>
+                              )}
                               {order.paymentStatus === 'failed' && (
                                 <Button
                                   size="sm"

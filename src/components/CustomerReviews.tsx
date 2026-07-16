@@ -6,25 +6,25 @@ const reviews = [
     name: "Sarah Johnson",
     rating: 5,
     review: "Absolutely stunning jewelry! The craftsmanship is exceptional and the customer service was wonderful.",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&q=80"
+    image: "/placeholder.svg"
   },
   {
     name: "Michael Chen",
     rating: 5,
     review: "Bought an engagement ring here and couldn't be happier. The quality exceeded my expectations.",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&q=80"
+    image: "/placeholder.svg"
   },
   {
     name: "Emily Rodriguez",
     rating: 5,
     review: "Beautiful necklace that I wear every day. The attention to detail is remarkable.",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&q=80"
+    image: "/placeholder.svg"
   },
   {
     name: "David Wilson",
     rating: 5,
     review: "Professional service and exquisite jewelry. Highly recommend for special occasions.",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&q=80"
+    image: "/placeholder.svg"
   }
 ];
 

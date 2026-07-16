@@ -5,24 +5,10 @@ import storeImage from "@/assets/store-interior.jpg";
 
 const stores = [
   {
-    name: "Downtown Flagship",
-    address: "123 Jewelry Avenue, Downtown District",
-    hours: "Mon-Sat: 10AM-8PM, Sun: 12PM-6PM", 
-    phone: "(555) 123-4567",
-    image: storeImage
-  },
-  {
-    name: "Mall Location",
-    address: "456 Shopping Center, Second Floor",
-    hours: "Mon-Sun: 10AM-9PM",
-    phone: "(555) 987-6543", 
-    image: storeImage
-  },
-  {
-    name: "Uptown Boutique",
-    address: "789 Luxury Row, Uptown Area",
-    hours: "Tue-Sat: 11AM-7PM, Closed Sun-Mon",
-    phone: "(555) 456-7890",
+    name: "JewelCart — Ahmedabad",
+    address: "61 Thakorbaug Market, Nr. Sardar Patel Seva Samaj, Navrangpura, Ahmedabad 380009",
+    hours: "Mon-Sat: 10AM-8PM",
+    phone: "+91-9023002331",
     image: storeImage
   }
 ];

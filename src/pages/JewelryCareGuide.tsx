@@ -121,7 +121,7 @@ export default function JewelryCareGuide() {
             <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-600" /> Minor repairs (first year free)</li>
             <li className="flex items-center gap-2"><CheckCircle className="h-4 w-4 text-green-600" /> Professional polishing</li>
           </ul>
-          <p className="text-gray-700 text-sm"><strong>Contact:</strong> support@jewelcart.com | +91 98765 43210</p>
+          <p className="text-gray-700 text-sm"><strong>Contact:</strong> info@jewelcart.shop | +91-9023002331</p>
         </CardContent>
       </Card>
     </div>

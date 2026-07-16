@@ -73,26 +73,18 @@ function App() {
 						<BrowserRouter>
 							<ScrollToTop />
 							<Routes>
-								{/* Public Routes (no auth required) */}
-								<Route path="/login" element={<PublicLayout />}>
-									<Route index element={<Login />} />
-								</Route>
-								<Route path="/register" element={<PublicLayout />}>
-									<Route index element={<Register />} />
-								</Route>
+								{/* Admin login (standalone) */}
 								<Route path="/console/login" element={<PublicLayout />}>
 									<Route index element={<AdminLogin />} />
-								</Route>
-								<Route path="/forgot-password" element={<PublicLayout />}>
-									<Route index element={<ForgotPassword />} />
-								</Route>
-								<Route path="/reset-password" element={<PublicLayout />}>
-									<Route index element={<ResetPassword />} />
 								</Route>
 
 								{/* Customer Routes (public + authenticated customer features) */}
 								<Route path="/" element={<CustomerLayout />}>
 									<Route index element={<Index />} />
+									<Route path="login" element={<Login />} />
+									<Route path="register" element={<Register />} />
+									<Route path="forgot-password" element={<ForgotPassword />} />
+									<Route path="reset-password" element={<ResetPassword />} />
 									<Route path="shop" element={<Shop />} />
 									<Route path="about" element={<About />} />
 									<Route path="contact" element={<Contact />} />
@@ -110,6 +102,7 @@ function App() {
 									<Route path="certifications" element={<Certifications />} />
 
 									{/* Product & Shopping */}
+									<Route path="products" element={<Navigate to="/shop" replace />} />
 									<Route path="products/:category" element={<ProductListing />} />
 									<Route path="collections/:collection" element={<ProductListing />} />
 									<Route path="collections/women" element={<WomenCollection />} />

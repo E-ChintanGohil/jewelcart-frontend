@@ -91,7 +91,7 @@ export default function CancellationPolicy() {
             <ul className="space-y-2 text-gray-700 text-sm">
               <li className="flex items-start gap-2">
                 <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full mt-2 flex-shrink-0"></div>
-                <span>Contact us immediately at +91 98765 43210 or orders@jewelcart.com</span>
+                <span>Contact us immediately at +91-9023002331 or info@jewelcart.shop</span>
               </li>
               <li className="flex items-start gap-2">
                 <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full mt-2 flex-shrink-0"></div>
@@ -213,13 +213,13 @@ export default function CancellationPolicy() {
             <h3 className="font-semibold text-gray-900 mb-3">Method 2: Contact Customer Support</h3>
             <div className="p-4 bg-gray-50 rounded-lg space-y-2">
               <p className="text-gray-700 text-sm">
-                <strong>Phone:</strong> +91 98765 43210 (Available 10 AM - 8 PM, Mon-Sat)
+                <strong>Phone:</strong> +91-9023002331 (Available 10 AM - 8 PM, Mon-Sat)
               </p>
               <p className="text-gray-700 text-sm">
-                <strong>Email:</strong> orders@jewelcart.com
+                <strong>Email:</strong> info@jewelcart.shop
               </p>
               <p className="text-gray-700 text-sm">
-                <strong>WhatsApp:</strong> +91 98765 43210
+                <strong>WhatsApp:</strong> +91-9023002331
               </p>
               <p className="text-gray-700 text-sm mt-3">
                 <strong>Information needed:</strong> Order number, registered email, reason for cancellation
@@ -445,9 +445,9 @@ export default function CancellationPolicy() {
             Contact us immediately for fastest service:
           </p>
           <div className="space-y-2 text-gray-700">
-            <p><strong>Cancellation Hotline:</strong> +91 98765 43210</p>
-            <p><strong>Email:</strong> orders@jewelcart.com</p>
-            <p><strong>WhatsApp:</strong> +91 98765 43210</p>
+            <p><strong>Cancellation Hotline:</strong> +91-9023002331</p>
+            <p><strong>Email:</strong> info@jewelcart.shop</p>
+            <p><strong>WhatsApp:</strong> +91-9023002331</p>
             <p><strong>Self-Service:</strong> Login to your account → My Orders → Cancel Order</p>
           </div>
           <div className="mt-4 p-3 bg-blue-50 rounded-lg">

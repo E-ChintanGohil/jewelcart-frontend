@@ -16,10 +16,10 @@ const Index = () => {
   return (
     <div className="relative">
       <SEO
-        title="Jewelcart - Exquisite Handcrafted Jewelry Collection | Rings, Necklaces, Earrings & More"
-        description="Discover our exquisite collection of handcrafted jewelry, where each piece tells a unique story of elegance and timeless beauty. Shop premium gold, silver, and diamond jewelry online. Free shipping on orders above ₹1,00,000."
+        title="JewelCart - Affordable Gold, Silver & Diamond Jewellery Online | Trusted Quality"
+        description="Buy affordable Gold, Silver, and Diamond jewellery online from JewelCart. Explore elegant collections with trusted quality, secure shopping, transparent pricing, and fast delivery across India."
         image="/og-image.jpg"
-        keywords="jewelry, diamonds, gold jewelry, silver jewelry, rings, necklaces, earrings, bracelets, engagement rings, wedding jewelry, luxury jewelry, handmade jewelry, online jewelry store, jewelry shopping"
+        keywords="jewellery, diamonds, gold jewellery, silver jewellery, rings, necklaces, earrings, bracelets, affordable jewellery, wedding jewellery, online jewellery store india, jewelcart"
       />
       <HeroSection />
       <ShopByCollection />

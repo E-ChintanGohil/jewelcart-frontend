@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Store, Mail, Phone, MapPin, DollarSign, Settings as SettingsIcon, Users, Plus, Trash2, Edit, Send, Loader2 } from 'lucide-react';
+import { Store, Mail, Phone, MapPin, DollarSign, Settings as SettingsIcon, Users, Plus, Trash2, Edit, Send, Loader2, RefreshCw, Coins } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
@@ -29,7 +29,8 @@ const SettingsPage = () => {
     contact: {
       email: '',
       phone: '',
-      address: ''
+      address: '',
+      instagram: ''
     },
     goldPrice: 0,
     silverPrice: 0,
@@ -39,6 +40,12 @@ const SettingsPage = () => {
     currency: 'INR',
     paymentMethods: ['razorpay'] as string[]
   });
+
+  const [priceUpdate, setPriceUpdate] = useState<any>(null);
+  const [priceUpdateForm, setPriceUpdateForm] = useState({ enabled: false, importDutyPercent: 6, gstOnMetalPercent: 3, metalPriceApiKey: '' });
+  const [priceUpdateLoading, setPriceUpdateLoading] = useState(false);
+  const [priceUpdateRunning, setPriceUpdateRunning] = useState(false);
+  const [priceHistory, setPriceHistory] = useState<any[]>([]);
 
   const [emailForm, setEmailForm] = useState({
     smtpHost: '',
@@ -103,7 +110,75 @@ const SettingsPage = () => {
     loadSettings();
     loadMaterials();
     loadUserPreferences();
+    loadPriceUpdateStatus();
+    loadPriceHistory();
   }, []);
+
+  const loadPriceUpdateStatus = async () => {
+    try {
+      const s = await apiService.getPriceUpdateStatus();
+      setPriceUpdate(s);
+      setPriceUpdateForm({
+        enabled: !!s.enabled,
+        importDutyPercent: Number(s.importDutyPercent ?? 6),
+        gstOnMetalPercent: Number(s.gstOnMetalPercent ?? 3),
+        metalPriceApiKey: '',
+      });
+    } catch (e) {
+      console.error('loadPriceUpdateStatus error', e);
+    }
+  };
+
+  const loadPriceHistory = async () => {
+    try {
+      const r = await apiService.getPriceUpdateHistory(50);
+      setPriceHistory(r.rows || []);
+    } catch (e) {
+      console.error('loadPriceHistory error', e);
+    }
+  };
+
+  const savePriceUpdateSettings = async () => {
+    try {
+      setPriceUpdateLoading(true);
+      const payload: any = {
+        enabled: priceUpdateForm.enabled,
+        importDutyPercent: priceUpdateForm.importDutyPercent,
+        gstOnMetalPercent: priceUpdateForm.gstOnMetalPercent,
+      };
+      if (priceUpdateForm.metalPriceApiKey) payload.metalPriceApiKey = priceUpdateForm.metalPriceApiKey;
+      const result = await apiService.updatePriceUpdateSettings(payload);
+      const rerun = result?.rerun;
+      toast({
+        title: 'Saved',
+        description: rerun?.ok
+          ? `Recalculated. Gold ₹${rerun.goldInrPerGram}/g · Silver ₹${rerun.silverInrPerGram}/g`
+          : rerun?.error
+            ? `Settings saved, but rerun failed: ${rerun.error}`
+            : 'Live rate settings updated.',
+      });
+      await loadPriceUpdateStatus();
+      await loadPriceHistory();
+    } catch (e: any) {
+      toast({ title: 'Error', description: e.message || 'Save failed', variant: 'destructive' });
+    } finally {
+      setPriceUpdateLoading(false);
+    }
+  };
+
+  const triggerPriceUpdate = async () => {
+    try {
+      setPriceUpdateRunning(true);
+      const r = await apiService.runPriceUpdate();
+      toast({ title: 'Rate refresh', description: r.ok === false ? r.error : `Gold ₹${r.goldInrPerGram}/g · Silver ₹${r.silverInrPerGram}/g` });
+      await loadPriceUpdateStatus();
+      await loadPriceHistory();
+    } catch (e: any) {
+      toast({ title: 'Refresh failed', description: e.message || 'Unknown error', variant: 'destructive' });
+    } finally {
+      setPriceUpdateRunning(false);
+    }
+  };
 
   const loadSettings = async () => {
     try {
@@ -119,7 +194,8 @@ const SettingsPage = () => {
         contact: {
           email: response.contact_email || '',
           phone: response.contact_phone || '',
-          address: response.contact_address || ''
+          address: response.contact_address || '',
+          instagram: response.contact_instagram || ''
         },
         goldPrice: response.gold_price || 0,
         silverPrice: response.silver_price || 0,
@@ -203,7 +279,8 @@ const SettingsPage = () => {
         logo: formData.logo,
         contactEmail: formData.contact.email,
         contactPhone: formData.contact.phone,
-        contactAddress: formData.contact.address
+        contactAddress: formData.contact.address,
+        contactInstagram: formData.contact.instagram
       };
 
       await apiService.updateSettings(settingsToUpdate);
@@ -556,6 +633,10 @@ const SettingsPage = () => {
             <DollarSign className="h-4 w-4" />
             Materials
           </TabsTrigger>
+          <TabsTrigger value="live-rates" className="flex items-center gap-2">
+            <Coins className="h-4 w-4" />
+            Live Rates
+          </TabsTrigger>
           <TabsTrigger value="email" className="flex items-center gap-2">
             <Mail className="h-4 w-4" />
             Email
@@ -638,6 +719,19 @@ const SettingsPage = () => {
                     onChange={(e) => setFormData(prev => ({
                       ...prev,
                       contact: { ...prev.contact, address: e.target.value }
+                    }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="instagram">Instagram URL</Label>
+                  <Input
+                    id="instagram"
+                    type="url"
+                    placeholder="https://www.instagram.com/yourhandle"
+                    value={formData.contact.instagram}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      contact: { ...prev.contact, instagram: e.target.value }
                     }))}
                   />
                 </div>
@@ -988,6 +1082,148 @@ const SettingsPage = () => {
                   </div>
                 )}
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="live-rates" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Coins className="h-5 w-5" />
+                Live Metal Rates
+              </CardTitle>
+              <CardDescription>Auto-fetched from metalpriceapi.com at 10:00 and 17:00 IST. Updates karat prices + product prices.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>Auto-refresh enabled</Label>
+                    <Switch checked={priceUpdateForm.enabled} onCheckedChange={(v) => setPriceUpdateForm(p => ({ ...p, enabled: v }))} />
+                  </div>
+                  <p className="text-xs text-muted-foreground">Cron fires at 10:00 and 17:00 Asia/Kolkata</p>
+                </div>
+                <div className="space-y-2">
+                  <Label>API Key (metalpriceapi.com)</Label>
+                  <Input type="password" placeholder={priceUpdate?.hasApiKey ? '•••••••• (set)' : 'Paste key'} value={priceUpdateForm.metalPriceApiKey} onChange={(e) => setPriceUpdateForm(p => ({ ...p, metalPriceApiKey: e.target.value }))} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Import Duty %</Label>
+                  <Input type="number" step="0.01" value={priceUpdateForm.importDutyPercent} onChange={(e) => setPriceUpdateForm(p => ({ ...p, importDutyPercent: parseFloat(e.target.value) || 0 }))} />
+                </div>
+                <div className="space-y-2">
+                  <Label>GST on Metal %</Label>
+                  <Input type="number" step="0.01" value={priceUpdateForm.gstOnMetalPercent} onChange={(e) => setPriceUpdateForm(p => ({ ...p, gstOnMetalPercent: parseFloat(e.target.value) || 0 }))} />
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button onClick={savePriceUpdateSettings} disabled={priceUpdateLoading}>
+                  {priceUpdateLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Save
+                </Button>
+                <Button variant="outline" onClick={triggerPriceUpdate} disabled={priceUpdateRunning}>
+                  {priceUpdateRunning ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+                  Refresh now
+                </Button>
+              </div>
+
+              {priceUpdate?.lastPriceUpdateAt && (
+                <div className="text-sm text-muted-foreground">
+                  Last update: {new Date(priceUpdate.lastPriceUpdateAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} IST
+                  {priceUpdate.lastPriceUpdateStatus && <span className="ml-2">— {priceUpdate.lastPriceUpdateStatus}</span>}
+                </div>
+              )}
+
+              {priceUpdate?.lastPriceBreakdown && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {(['gold', 'silver'] as const).map((metal) => {
+                    const b = priceUpdate.lastPriceBreakdown[metal];
+                    if (!b) return null;
+                    const rows = [
+                      [`${metal === 'gold' ? 'Gold' : 'Silver'} Rate International`, b.intlUsdPerOz, 'USD / oz'],
+                      ['Ounce To Gm', b.troyOzToGram, ''],
+                      [`${metal === 'gold' ? 'Gold' : 'Silver'} USD Rate Gram`, b.usdPerGram, `${b.intlUsdPerOz} / ${b.troyOzToGram}`],
+                      ['USD INR Rate', b.usdInr, ''],
+                      [`${metal === 'gold' ? 'Gold' : 'Silver'} Rate in INR`, b.inrPerGramRaw, `${b.usdPerGram} * ${b.usdInr}`],
+                      [`Import Duty ${b.importDutyPercent}%`, b.importDutyAmount, `${b.inrPerGramRaw.toFixed(2)} * ${b.importDutyPercent}%`],
+                      [`${metal === 'gold' ? 'Gold' : 'Silver'} Rate INR + Import Duty`, b.afterDuty, `${b.inrPerGramRaw.toFixed(2)} + ${b.importDutyAmount.toFixed(2)}`],
+                      [`GST On top of it ${b.gstPercent}%`, b.gstAmount, `${b.afterDuty.toFixed(2)} * ${b.gstPercent}%`],
+                      [`Final ${metal === 'gold' ? 'Gold' : 'Silver'} Rate`, b.finalRate, `${b.afterDuty.toFixed(2)} + ${b.gstAmount.toFixed(2)}`],
+                    ];
+                    return (
+                      <Card key={metal}>
+                        <CardHeader>
+                          <CardTitle className="text-base capitalize">{metal} breakdown</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <table className="w-full text-sm">
+                            <tbody>
+                              {rows.map(([label, value, formula], i) => {
+                                const isFinal = i === rows.length - 1;
+                                return (
+                                  <tr key={i} className={isFinal ? 'font-semibold bg-muted/40' : ''}>
+                                    <td className="py-1.5 pr-3">{label}</td>
+                                    <td className="py-1.5 pr-3 text-right tabular-nums">{Number(value).toLocaleString('en-IN', { maximumFractionDigits: 4 })}</td>
+                                    <td className="py-1.5 text-muted-foreground text-xs">{formula}</td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Fetch History</CardTitle>
+              <CardDescription>Recent rate fetches (cron + manual). Most recent first.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {priceHistory.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No fetches yet.</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b text-left text-muted-foreground">
+                        <th className="py-2 pr-3">When (IST)</th>
+                        <th className="py-2 pr-3">Trigger</th>
+                        <th className="py-2 pr-3">Status</th>
+                        <th className="py-2 pr-3 text-right">Gold ₹/g</th>
+                        <th className="py-2 pr-3 text-right">Silver ₹/g</th>
+                        <th className="py-2 pr-3 text-right">USD/INR</th>
+                        <th className="py-2 pr-3 text-right">Karats</th>
+                        <th className="py-2 pr-3 text-right">Products</th>
+                        <th className="py-2">Note</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {priceHistory.map((h: any) => (
+                        <tr key={h.id} className="border-b last:border-0">
+                          <td className="py-1.5 pr-3 whitespace-nowrap">{new Date(h.fetchedAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</td>
+                          <td className="py-1.5 pr-3 whitespace-nowrap">{h.trigger}</td>
+                          <td className="py-1.5 pr-3">
+                            <Badge variant={h.status === 'OK' ? 'default' : 'destructive'}>{h.status}</Badge>
+                          </td>
+                          <td className="py-1.5 pr-3 text-right tabular-nums">{h.goldInrPerGram != null ? Number(h.goldInrPerGram).toLocaleString('en-IN') : '—'}</td>
+                          <td className="py-1.5 pr-3 text-right tabular-nums">{h.silverInrPerGram != null ? Number(h.silverInrPerGram).toLocaleString('en-IN') : '—'}</td>
+                          <td className="py-1.5 pr-3 text-right tabular-nums">{h.usdInr != null ? Number(h.usdInr).toFixed(2) : '—'}</td>
+                          <td className="py-1.5 pr-3 text-right tabular-nums">{h.karatsUpdated ?? '—'}</td>
+                          <td className="py-1.5 pr-3 text-right tabular-nums">{h.productsUpdated ?? '—'}</td>
+                          <td className="py-1.5 text-xs text-muted-foreground">{h.errorMessage || ''}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

@@ -12,7 +12,9 @@
     "test": "node test-scripts/run-all-tests.js",
     "test:auth": "node test-scripts/test-auth.js",
     "test:products": "node test-scripts/test-products.js",
-    "test:customers": "node test-scripts/test-customers.js"
+    "test:customers": "node test-scripts/test-customers.js",
+    "deploy": "npm run build && (command -v python3.12 >/dev/null && python3.12 scripts/deploy.py || python3 scripts/deploy.py)",
+    "deploy:upload": "(command -v python3.12 >/dev/null && python3.12 scripts/deploy.py || python3 scripts/deploy.py)"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

@@ -1,17 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import apiService from "@/lib/apiService";
 import { resolveImageUrl } from "@/lib/config";
-
-const fallbackImages: Record<string, string> = {
-  rings: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500&q=80",
-  necklaces: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&q=80",
-  earrings: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500&q=80",
-  bracelets: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=500&q=80",
-};
-
-const defaultFallback = "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500&q=80";
+import { ArrowUpRight } from "lucide-react";
 
 const ShopByCategory = () => {
   const [categories, setCategories] = useState<any[]>([]);
@@ -20,66 +11,79 @@ const ShopByCategory = () => {
   useEffect(() => {
     apiService.getCategories().then((data) => {
       const list = Array.isArray(data) ? data : (data as any)?.categories || [];
-      setCategories(list);
+      const homepage = list.filter((c: any) => c.showOnHomepage !== false && c.show_on_homepage !== false);
+      setCategories(homepage);
     }).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
   const getCategoryImage = (cat: any): string => {
     const resolved = resolveImageUrl(cat.image_url || cat.imageUrl);
-    if (resolved) return resolved;
-    const name = (cat.name || "").toLowerCase();
-    return fallbackImages[name] || defaultFallback;
+    return resolved || "/placeholder.svg";
   };
 
-  if (loading) {
-    return (
-      <section className="py-24 bg-gray-100">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl font-bold text-black mb-6">Shop by Category</h2>
-            <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-              Discover our curated collections of fine jewelry, each piece crafted with precision and care.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="animate-pulse">
-                <div className="rounded-xl bg-gray-200 aspect-square" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
   return (
-    <section className="py-24 bg-gray-100">
+    <section className="py-24 bg-white">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-20">
-          <h2 className="text-4xl font-bold text-black mb-6">Shop by Category</h2>
-          <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-14 gap-6">
+          <div>
+            <p className="text-sm tracking-[0.3em] text-brandgold uppercase mb-3">Browse</p>
+            <h2 className="text-4xl md:text-5xl font-serif text-brandblue">Shop by Category</h2>
+          </div>
+          <p className="text-base text-neutral-600 max-w-md">
             Discover our curated collections of fine jewelry, each piece crafted with precision and care.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {categories.map((category) => (
-            <Link key={category.id} to={`/products/${category.name.toLowerCase()}`}>
-              <div className="group cursor-pointer">
-                <div className="relative overflow-hidden rounded-xl bg-white shadow-soft border border-gray-200 hover:shadow-elegant transition-all duration-300">
-                  <div className="aspect-square overflow-hidden">
-                    <img
-                      src={getCategoryImage(category)}
-                      alt={category.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
+        {loading ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="animate-pulse rounded-2xl bg-neutral-100 aspect-[4/5]" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {categories.map((category, idx) => (
+              <Link
+                key={category.id}
+                to={`/products/${(category.name || "").toLowerCase()}`}
+                className="group relative block aspect-[4/5] overflow-hidden rounded-2xl bg-neutral-100"
+              >
+                {/* Image */}
+                <img
+                  src={getCategoryImage(category)}
+                  alt={category.name}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-110"
+                  loading="lazy"
+                />
+
+                {/* Gradient overlay — always present, strengthens on hover */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity duration-500 group-hover:from-black/90" />
+
+                {/* Index chip */}
+                <div className="absolute top-5 left-5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-white text-xs tracking-[0.2em] font-medium">
+                  {String(idx + 1).padStart(2, "0")}
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+
+                {/* Name + CTA */}
+                <div className="absolute inset-x-0 bottom-0 p-6 text-white">
+                  <div className="flex items-end justify-between gap-4">
+                    <div>
+                      <h3 className="text-2xl md:text-3xl font-serif leading-tight">{category.name}</h3>
+                      {category.description && (
+                        <p className="text-sm text-white/80 mt-2 line-clamp-2 max-w-xs">{category.description}</p>
+                      )}
+                    </div>
+                    <div className="flex-shrink-0 w-11 h-11 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center transition-all duration-300 group-hover:bg-brandgold group-hover:rotate-45">
+                      <ArrowUpRight className="w-5 h-5" />
+                    </div>
+                  </div>
+                  {/* Animated underline accent */}
+                  <div className="mt-4 h-px w-12 bg-brandgold transition-all duration-500 group-hover:w-full" />
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

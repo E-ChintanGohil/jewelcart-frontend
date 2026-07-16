@@ -22,7 +22,7 @@ const WomenCollection = () => {
     if (product.images && product.images.length > 0 && product.images[0]) {
       return product.images[0];
     }
-    return "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500&q=80";
+    return "/placeholder.svg";
   };
 
   return (

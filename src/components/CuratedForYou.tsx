@@ -9,7 +9,7 @@ const CuratedForYou = () => {
       id: 1,
       title: "Bridal Elegance",
       subtitle: "For Your Special Day",
-      image: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80",
+      image: "/placeholder.svg",
       description: "Exquisite pieces for the bride-to-be",
       link: "/collections/bridal"
     },
@@ -17,7 +17,7 @@ const CuratedForYou = () => {
       id: 2,
       title: "Everyday Luxury",
       subtitle: "For Daily Wear",
-      image: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&q=80",
+      image: "/placeholder.svg",
       description: "Elegant pieces for your daily style",
       link: "/collections/everyday"
     },
@@ -25,7 +25,7 @@ const CuratedForYou = () => {
       id: 3,
       title: "Anniversary Special",
       subtitle: "Celebrate Love",
-      image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80",
+      image: "/placeholder.svg",
       description: "Perfect gifts for special occasions",
       link: "/collections/anniversary"
     }

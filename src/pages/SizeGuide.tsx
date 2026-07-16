@@ -123,7 +123,7 @@ export default function SizeGuide() {
           <div className="space-y-2 text-gray-700 text-sm">
             <p><strong>Free Ring Sizer:</strong> Request a complimentary ring sizer kit (delivered in 2-3 days)</p>
             <p><strong>Video Consultation:</strong> Book a free video call with our jewelry expert</p>
-            <p><strong>Contact:</strong> sizing@jewelcart.com | +91 98765 43210</p>
+            <p><strong>Contact:</strong> info@jewelcart.shop | +91-9023002331</p>
             <p><strong>Complimentary Resizing:</strong> First resize free within 30 days of purchase</p>
           </div>
         </CardContent>

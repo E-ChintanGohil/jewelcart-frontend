@@ -237,6 +237,34 @@ class ApiService {
     });
   }
 
+  // Invoice download — triggers browser download of PDF
+  async downloadInvoice(orderId: string | number, scope: 'customer' | 'staff' = 'customer'): Promise<void> {
+    const endpoint = scope === 'customer'
+      ? `/customer-orders/${orderId}/invoice`
+      : `/orders/${orderId}/invoice`;
+    const url = `${API_BASE_URL}${endpoint}`;
+
+    const headers: HeadersInit = {};
+    if (authToken) headers.Authorization = `Bearer ${authToken}`;
+
+    const response = await fetch(url, { headers });
+    if (!response.ok) {
+      let msg = 'Failed to download invoice';
+      try { const err = await response.json(); msg = err.error || msg; } catch {}
+      throw new Error(msg);
+    }
+
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = `invoice-${orderId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(downloadUrl);
+  }
+
   // Customer Address methods
   async getCustomerAddresses(): Promise<any[]> {
     const response = await apiRequest('/customer-auth/addresses');
@@ -304,11 +332,39 @@ class ApiService {
     formData.append('stock', productData.stock.toString());
     formData.append('featured', productData.featured.toString());
     formData.append('isActive', productData.isActive.toString());
+    if (productData.fixedPrice !== undefined && productData.fixedPrice !== null) {
+      formData.append('fixedPrice', productData.fixedPrice.toString());
+    }
 
     if (productData.gemstone) formData.append('gemstone', productData.gemstone);
     if (productData.certification) formData.append('certification', productData.certification);
     if (productData.tags && productData.tags.length > 0) {
       formData.append('tags', JSON.stringify(productData.tags));
+    }
+
+    if (productData.availableColors !== undefined) {
+      formData.append('availableColors', JSON.stringify(productData.availableColors));
+    }
+    if (productData.defaultColor) formData.append('defaultColor', productData.defaultColor);
+    if (productData.availablePurities !== undefined) {
+      formData.append('availablePurities', JSON.stringify(productData.availablePurities));
+    }
+    if (productData.defaultPurity) formData.append('defaultPurity', productData.defaultPurity);
+    if (productData.sizeMin !== undefined && productData.sizeMin !== null) {
+      formData.append('sizeMin', String(productData.sizeMin));
+    }
+    if (productData.sizeMax !== undefined && productData.sizeMax !== null) {
+      formData.append('sizeMax', String(productData.sizeMax));
+    }
+    if (productData.sizeUnit) formData.append('sizeUnit', productData.sizeUnit);
+    if (productData.diamondDetails !== undefined) {
+      formData.append('diamondDetails', JSON.stringify(productData.diamondDetails));
+    }
+    if (productData.stoneDetails !== undefined) {
+      formData.append('stoneDetails', JSON.stringify(productData.stoneDetails));
+    }
+    if (productData.priceBreakup !== undefined) {
+      formData.append('priceBreakup', JSON.stringify(productData.priceBreakup));
     }
 
     // Append image files
@@ -355,6 +411,7 @@ class ApiService {
     if (productData.karatId) formData.append('karatId', productData.karatId.toString());
     if (productData.weight) formData.append('weight', productData.weight.toString());
     if (productData.stock !== undefined) formData.append('stock', productData.stock.toString());
+    if (productData.fixedPrice !== undefined) formData.append('fixedPrice', productData.fixedPrice === null ? '' : productData.fixedPrice.toString());
     formData.append('featured', productData.featured.toString());
     formData.append('isActive', (productData.isActive !== false).toString());
     formData.append('keepExistingImages', keepExisting.toString());
@@ -373,6 +430,31 @@ class ApiService {
     if (productData.certification) formData.append('certification', productData.certification);
     if (productData.tags && productData.tags.length > 0) {
       formData.append('tags', JSON.stringify(productData.tags));
+    }
+
+    if (productData.availableColors !== undefined) {
+      formData.append('availableColors', JSON.stringify(productData.availableColors));
+    }
+    if (productData.defaultColor) formData.append('defaultColor', productData.defaultColor);
+    if (productData.availablePurities !== undefined) {
+      formData.append('availablePurities', JSON.stringify(productData.availablePurities));
+    }
+    if (productData.defaultPurity) formData.append('defaultPurity', productData.defaultPurity);
+    if (productData.sizeMin !== undefined && productData.sizeMin !== null) {
+      formData.append('sizeMin', String(productData.sizeMin));
+    }
+    if (productData.sizeMax !== undefined && productData.sizeMax !== null) {
+      formData.append('sizeMax', String(productData.sizeMax));
+    }
+    if (productData.sizeUnit) formData.append('sizeUnit', productData.sizeUnit);
+    if (productData.diamondDetails !== undefined) {
+      formData.append('diamondDetails', JSON.stringify(productData.diamondDetails));
+    }
+    if (productData.stoneDetails !== undefined) {
+      formData.append('stoneDetails', JSON.stringify(productData.stoneDetails));
+    }
+    if (productData.priceBreakup !== undefined) {
+      formData.append('priceBreakup', JSON.stringify(productData.priceBreakup));
     }
 
     // Append image files
@@ -597,6 +679,22 @@ class ApiService {
       body: JSON.stringify({ goldPrice, silverPrice }),
     });
     return response;
+  }
+
+  async getPriceUpdateStatus(): Promise<any> {
+    return await apiRequest('/price-update/status');
+  }
+
+  async getPriceUpdateHistory(limit = 50): Promise<any> {
+    return await apiRequest(`/price-update/history?limit=${limit}`);
+  }
+
+  async runPriceUpdate(): Promise<any> {
+    return await apiRequest('/price-update/run', { method: 'POST', body: JSON.stringify({}) });
+  }
+
+  async updatePriceUpdateSettings(payload: { enabled?: boolean; importDutyPercent?: number; gstOnMetalPercent?: number; metalPriceApiKey?: string }): Promise<any> {
+    return await apiRequest('/price-update/settings', { method: 'PUT', body: JSON.stringify(payload) });
   }
 
   // Settings methods

@@ -373,7 +373,7 @@ export default function PaymentSecurity() {
                 <li>• Enable 2-factor authentication if available</li>
                 <li>• Keep your devices and antivirus software updated</li>
                 <li>• Use secure, private Wi-Fi networks</li>
-                <li>• Save our official website: www.jewelcart.com</li>
+                <li>• Save our official website: www.jewelcart.shop</li>
                 <li>• Verify transaction SMS/emails are from official sources</li>
               </ul>
             </div>
@@ -437,7 +437,7 @@ export default function PaymentSecurity() {
               <li>If deducted but order not confirmed, wait 30 minutes for auto-reversal</li>
               <li>Try a different payment method</li>
               <li>Contact your bank if issue persists</li>
-              <li>Contact us at payment@jewelcart.com for assistance</li>
+              <li>Contact us at info@jewelcart.shop for assistance</li>
             </ol>
           </div>
         </CardContent>
@@ -483,8 +483,8 @@ export default function PaymentSecurity() {
             Questions or concerns about payment security?
           </p>
           <div className="space-y-2 text-gray-700">
-            <p><strong>Payment Support:</strong> payment@jewelcart.com</p>
-            <p><strong>Customer Care:</strong> +91 98765 43210</p>
+            <p><strong>Payment Support:</strong> info@jewelcart.shop</p>
+            <p><strong>Customer Care:</strong> +91-9023002331</p>
             <p><strong>Hours:</strong> 24/7 for payment issues</p>
           </div>
           <div className="mt-4 p-3 bg-blue-50 rounded-lg">

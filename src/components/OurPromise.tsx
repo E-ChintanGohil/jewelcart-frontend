@@ -41,7 +41,7 @@ const OurPromise = () => {
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-black mb-4">Our Promise</h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            We're committed to providing you with the finest jewelry experience
+            Quality You Can Trust. Prices You'll Love.
           </p>
         </div>
 

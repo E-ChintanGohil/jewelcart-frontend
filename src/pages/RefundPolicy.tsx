@@ -127,7 +127,7 @@ export default function RefundPolicy() {
                 <div className="flex-1">
                   <h4 className="font-semibold text-gray-900 mb-1">Contact Us</h4>
                   <p className="text-gray-700 text-sm">
-                    Email us at returns@jewelcart.com or call +91 98765 43210 within 30 days of
+                    Email us at info@jewelcart.shop or call +91-9023002331 within 30 days of
                     delivery. Provide your order number and reason for return.
                   </p>
                 </div>
@@ -169,8 +169,7 @@ export default function RefundPolicy() {
                 <div className="flex-1">
                   <h4 className="font-semibold text-gray-900 mb-1">Ship the Item</h4>
                   <p className="text-gray-700 text-sm mb-2">
-                    Ship to: Jewelcart Returns, 123 Jewelry Street, Zaveri Bazaar, Mumbai,
-                    Maharashtra 400002
+                    Ship to: Jewelcart Returns, 61 Thakorbaug Market, Nr. Sardar Patel Seva Samaj, Navrangpura, Ahmedabad 380009
                   </p>
                   <p className="text-gray-700 text-sm">
                     We recommend using insured, trackable shipping. You are responsible for
@@ -296,7 +295,7 @@ export default function RefundPolicy() {
           <div>
             <h3 className="font-semibold text-gray-900 mb-2">4.2 Size Exchanges</h3>
             <p className="text-gray-700 text-sm">
-              For ring sizing issues, please contact us at support@jewelcart.com. We may offer
+              For ring sizing issues, please contact us at info@jewelcart.shop. We may offer
               complimentary resizing for certain products purchased within the last 30 days.
             </p>
           </div>
@@ -321,7 +320,7 @@ export default function RefundPolicy() {
             <ul className="space-y-2 text-gray-700 text-sm">
               <li className="flex items-start gap-2">
                 <div className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-2 flex-shrink-0"></div>
-                <span>Email photos of the damage to returns@jewelcart.com</span>
+                <span>Email photos of the damage to info@jewelcart.shop</span>
               </li>
               <li className="flex items-start gap-2">
                 <div className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-2 flex-shrink-0"></div>
@@ -406,9 +405,9 @@ export default function RefundPolicy() {
             Our customer service team is here to help with your return:
           </p>
           <div className="space-y-2 text-gray-700">
-            <p><strong>Returns Email:</strong> returns@jewelcart.com</p>
-            <p><strong>Customer Support:</strong> support@jewelcart.com</p>
-            <p><strong>Phone:</strong> +91 98765 43210</p>
+            <p><strong>Returns Email:</strong> info@jewelcart.shop</p>
+            <p><strong>Customer Support:</strong> info@jewelcart.shop</p>
+            <p><strong>Phone:</strong> +91-9023002331</p>
             <p><strong>Hours:</strong> Monday to Saturday, 10:00 AM - 8:00 PM IST</p>
           </div>
           <p className="text-gray-700 text-sm mt-4">

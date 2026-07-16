@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/currency';
 import { CheckCircle, Package, Truck, Clock, Download, ArrowRight } from 'lucide-react';
+import { apiService } from '@/lib/apiService';
+import { useToast } from '@/hooks/use-toast';
 
 interface OrderDetails {
   orderId: number;
@@ -16,7 +18,21 @@ interface OrderDetails {
 export default function OrderSuccess() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadInvoice = async () => {
+    if (!orderDetails?.orderId) return;
+    setIsDownloading(true);
+    try {
+      await apiService.downloadInvoice(orderDetails.orderId, 'customer');
+    } catch (err: any) {
+      toast({ title: 'Download failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   useEffect(() => {
     const state = location.state;
@@ -219,7 +235,7 @@ export default function OrderSuccess() {
             <div className="bg-green-50 p-4 rounded-lg">
               <h4 className="font-semibold text-green-900 mb-2">Customer Support</h4>
               <p className="text-green-800 text-sm">
-                Need help? Contact us at support@jewelcart.com or call +91 98765 43210
+                Need help? Contact us at info@jewelcart.shop or call +91-9023002331
               </p>
             </div>
           </CardContent>
@@ -230,10 +246,11 @@ export default function OrderSuccess() {
           <Button
             variant="outline"
             className="flex items-center gap-2"
-            onClick={() => window.print()}
+            onClick={handleDownloadInvoice}
+            disabled={isDownloading || !orderDetails?.orderId}
           >
             <Download className="w-4 h-4" />
-            Download Receipt
+            {isDownloading ? 'Preparing...' : 'Download Invoice'}
           </Button>
 
           <Link to="/profile">

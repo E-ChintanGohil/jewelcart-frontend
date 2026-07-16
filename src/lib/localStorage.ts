@@ -150,9 +150,7 @@ class LocalStorageService {
   private static instance: LocalStorageService;
   
   private constructor() {
-    this.initializeSettings();
-    this.initializeSampleData();
-    this.initializeProducts();
+    // Legacy localStorage init removed — all data comes from API now
   }
 
   public static getInstance(): LocalStorageService {
@@ -200,8 +198,8 @@ class LocalStorageService {
         siteDescription: 'Premium Jewelry Collection',
         logo: '',
         contact: {
-          email: 'info@jewelcart.com',
-          phone: '+91 98765 43210',
+          email: 'info@jewelcart.shop',
+          phone: '+91-9023002331',
           address: '123 Jewelry Street, Mumbai, India'
         },
         goldPrice: 5500,
@@ -226,7 +224,7 @@ class LocalStorageService {
           id: uuidv4(),
           name: 'Rings',
           description: 'Engagement rings, wedding bands, and fashion rings',
-          image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500&h=300&fit=crop',
+          image: '/placeholder.svg',
           status: 'active',
           createdAt: new Date().toISOString()
         },
@@ -234,7 +232,7 @@ class LocalStorageService {
           id: uuidv4(),
           name: 'Necklaces',
           description: 'Beautiful necklaces for every occasion',
-          image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&h=300&fit=crop',
+          image: '/placeholder.svg',
           status: 'active',
           createdAt: new Date().toISOString()
         },
@@ -242,7 +240,7 @@ class LocalStorageService {
           id: uuidv4(),
           name: 'Earrings',
           description: 'Elegant earrings to complement any look',
-          image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=500&h=300&fit=crop',
+          image: '/placeholder.svg',
           status: 'active',
           createdAt: new Date().toISOString()
         },
@@ -250,7 +248,7 @@ class LocalStorageService {
           id: uuidv4(),
           name: 'Bracelets',
           description: 'Stylish bracelets and bangles',
-          image: 'https://images.unsplash.com/photo-1603561596112-6a132309c6d2?w=500&h=300&fit=crop',
+          image: '/placeholder.svg',
           status: 'active',
           createdAt: new Date().toISOString()
         }
@@ -284,7 +282,7 @@ class LocalStorageService {
           firstName: 'John',
           lastName: 'Doe',
           email: 'john.doe@email.com',
-          phone: '+91 98765 43210',
+          phone: '+91-9023002331',
           address: {
             street: '123 Main St',
             city: 'Mumbai',
@@ -321,8 +319,8 @@ class LocalStorageService {
           basePrice: 25000,
           price: this.calculateProductPrice(goldMaterial?.id || '', goldMaterial?.karats.find(k => k.value === '18K')?.id || '', 3.2, 25000),
           images: [
-            "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=500&h=500&fit=crop",
-            "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=500&h=500&fit=crop"
+            "/placeholder.svg",
+            "/placeholder.svg"
           ],
           category: "Rings",
           tags: ["engagement", "diamond", "luxury"],
@@ -345,7 +343,7 @@ class LocalStorageService {
           basePrice: 5000,
           price: this.calculateProductPrice(silverMaterial?.id || '', silverMaterial?.karats.find(k => k.value === '925 Sterling')?.id || '', 15.5, 5000),
           images: [
-            "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=500&h=500&fit=crop"
+            "/placeholder.svg"
           ],
           category: "Necklaces",
           tags: ["chain", "silver", "everyday"],

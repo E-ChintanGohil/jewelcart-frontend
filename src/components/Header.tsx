@@ -19,112 +19,91 @@ interface MegaMenuCategory {
 	commonTypes: string[];
 	priceRanges: { label: string; min?: number; max?: number }[];
 	metals: string[];
+	gemstones?: string[];
+	occasions?: string[];
 }
+
+const standardPriceRanges = [
+	{ label: "Below \u20B910,000", max: 10000 },
+	{ label: "\u20B910k - 20k", min: 10000, max: 20000 },
+	{ label: "\u20B920k - 50k", min: 20000, max: 50000 },
+	{ label: "\u20B950k - 1L", min: 50000, max: 100000 },
+	{ label: "\u20B91L+", min: 100000 },
+];
+const standardMetals = ["Gold", "White Gold", "Rose Gold", "Platinum", "Silver"];
+const standardGemstones = ["Diamond", "Ruby", "Sapphire", "Emerald", "Pearl"];
 
 const megaCategories: MegaMenuCategory[] = [
 	{
 		slug: "rings",
 		label: "Rings",
-		popularTypes: ["Engagement", "Couple Bands", "Office Wear", "Stackable", "Slider"],
-		commonTypes: ["Diamond", "Plain Gold", "Gemstone", "Solitaire", "Cocktail", "Pearl", "Platinum", "For Men", "For Gift"],
-		priceRanges: [
-			{ label: "Below \u20B910,000", max: 10000 },
-			{ label: "\u20B910k - 20k", min: 10000, max: 20000 },
-			{ label: "\u20B920k - 30k", min: 20000, max: 30000 },
-			{ label: "\u20B930k - 40k", min: 30000, max: 40000 },
-			{ label: "\u20B940k - 50k", min: 40000, max: 50000 },
-			{ label: "\u20B950,000+", min: 50000 },
-		],
-		metals: ["Diamond", "Gold", "White Gold", "Rose Gold", "Platinum"],
+		popularTypes: ["Engagement", "Wedding Bands", "Solitaire", "Cocktail", "Stackable"],
+		commonTypes: ["Daily Wear", "Office Wear", "Couple Bands", "Promise Rings", "Statement", "Mens Rings"],
+		priceRanges: standardPriceRanges,
+		metals: standardMetals,
+		gemstones: standardGemstones,
+		occasions: ["Engagement", "Wedding", "Anniversary", "Birthday", "Gifting"],
 	},
 	{
 		slug: "earrings",
 		label: "Earrings",
 		popularTypes: ["Studs", "Hoops", "Drops", "Jhumkas", "Chandeliers"],
-		commonTypes: ["Diamond", "Plain Gold", "Gemstone", "Solitaire", "Cocktail", "Pearl", "Platinum", "For Men", "For Gift"],
-		priceRanges: [
-			{ label: "Below \u20B910,000", max: 10000 },
-			{ label: "\u20B910k - 20k", min: 10000, max: 20000 },
-			{ label: "\u20B920k - 30k", min: 20000, max: 30000 },
-			{ label: "\u20B930k - 40k", min: 30000, max: 40000 },
-			{ label: "\u20B940k - 50k", min: 40000, max: 50000 },
-			{ label: "\u20B950,000+", min: 50000 },
-		],
-		metals: ["Diamond", "Gold", "White Gold", "Rose Gold", "Platinum"],
+		commonTypes: ["Daily Wear", "Office Wear", "Bali", "Ear Cuffs", "Sui Dhaga", "Mens Studs"],
+		priceRanges: standardPriceRanges,
+		metals: standardMetals,
+		gemstones: standardGemstones,
+		occasions: ["Wedding", "Festive", "Casual", "Office", "Gifting"],
 	},
 	{
 		slug: "pendants",
 		label: "Pendants",
 		popularTypes: ["Solitaire", "Heart", "Religious", "Initial", "Everyday"],
-		commonTypes: ["Diamond", "Plain Gold", "Gemstone", "Solitaire", "Cocktail", "Pearl", "Platinum", "For Men", "For Gift"],
-		priceRanges: [
-			{ label: "Below \u20B910,000", max: 10000 },
-			{ label: "\u20B910k - 20k", min: 10000, max: 20000 },
-			{ label: "\u20B920k - 30k", min: 20000, max: 30000 },
-			{ label: "\u20B930k - 40k", min: 30000, max: 40000 },
-			{ label: "\u20B940k - 50k", min: 40000, max: 50000 },
-			{ label: "\u20B950,000+", min: 50000 },
-		],
-		metals: ["Diamond", "Gold", "White Gold", "Rose Gold", "Platinum"],
+		commonTypes: ["Mangalsutra Pendant", "Kids Pendant", "Designer", "Statement", "Two-tone", "Mens Pendant"],
+		priceRanges: standardPriceRanges,
+		metals: standardMetals,
+		gemstones: standardGemstones,
+		occasions: ["Anniversary", "Birthday", "Festive", "Casual", "Gifting"],
 	},
 	{
 		slug: "bracelets",
 		label: "Bracelets",
-		popularTypes: ["Chain", "Charm", "Cuff", "Tennis", "Bangles"],
-		commonTypes: ["Diamond", "Plain Gold", "Gemstone", "Solitaire", "Cocktail", "Pearl", "Platinum", "For Men", "For Gift"],
-		priceRanges: [
-			{ label: "Below \u20B910,000", max: 10000 },
-			{ label: "\u20B910k - 20k", min: 10000, max: 20000 },
-			{ label: "\u20B920k - 30k", min: 20000, max: 30000 },
-			{ label: "\u20B930k - 40k", min: 30000, max: 40000 },
-			{ label: "\u20B940k - 50k", min: 40000, max: 50000 },
-			{ label: "\u20B950,000+", min: 50000 },
-		],
-		metals: ["Diamond", "Gold", "White Gold", "Rose Gold", "Platinum"],
+		popularTypes: ["Tennis", "Chain", "Charm", "Cuff", "Adjustable"],
+		commonTypes: ["Daily Wear", "Designer", "Slim", "Statement", "Kids", "Mens Bracelet"],
+		priceRanges: standardPriceRanges,
+		metals: standardMetals,
+		gemstones: standardGemstones,
+		occasions: ["Anniversary", "Birthday", "Casual", "Office", "Gifting"],
 	},
 	{
 		slug: "necklaces",
 		label: "Necklaces",
 		popularTypes: ["Choker", "Chain", "Layered", "Statement", "Mangalsutra"],
-		commonTypes: ["Diamond", "Plain Gold", "Gemstone", "Solitaire", "Cocktail", "Pearl", "Platinum", "For Men", "For Gift"],
-		priceRanges: [
-			{ label: "Below \u20B910,000", max: 10000 },
-			{ label: "\u20B910k - 20k", min: 10000, max: 20000 },
-			{ label: "\u20B920k - 30k", min: 20000, max: 30000 },
-			{ label: "\u20B930k - 40k", min: 30000, max: 40000 },
-			{ label: "\u20B940k - 50k", min: 40000, max: 50000 },
-			{ label: "\u20B950,000+", min: 50000 },
-		],
-		metals: ["Diamond", "Gold", "White Gold", "Rose Gold", "Platinum"],
+		commonTypes: ["Daily Wear", "Bridal", "Long", "Pearl Strand", "Beaded", "Two-tone"],
+		priceRanges: standardPriceRanges,
+		metals: standardMetals,
+		gemstones: standardGemstones,
+		occasions: ["Wedding", "Anniversary", "Festive", "Casual", "Gifting"],
 	},
 	{
 		slug: "bangles",
 		label: "Bangles",
 		popularTypes: ["Traditional", "Modern", "Stackable", "Kada", "Designer"],
-		commonTypes: ["Diamond", "Plain Gold", "Gemstone", "Solitaire", "Cocktail", "Pearl", "Platinum", "For Men", "For Gift"],
-		priceRanges: [
-			{ label: "Below \u20B910,000", max: 10000 },
-			{ label: "\u20B910k - 20k", min: 10000, max: 20000 },
-			{ label: "\u20B920k - 30k", min: 20000, max: 30000 },
-			{ label: "\u20B930k - 40k", min: 30000, max: 40000 },
-			{ label: "\u20B940k - 50k", min: 40000, max: 50000 },
-			{ label: "\u20B950,000+", min: 50000 },
-		],
-		metals: ["Diamond", "Gold", "White Gold", "Rose Gold", "Platinum"],
+		commonTypes: ["Daily Wear", "Bridal", "Antique", "Filigree", "Kids", "Mens Kada"],
+		priceRanges: standardPriceRanges,
+		metals: standardMetals,
+		gemstones: standardGemstones,
+		occasions: ["Wedding", "Festive", "Daily", "Office", "Gifting"],
 	},
 ];
 
 const simpleNavLinks = [
-	{ label: "Solitaires", href: "/solitaire" },
 	{ label: "All Jewellery", href: "/shop" },
-	{ label: "Gifts", href: "/shop?category=gifts" },
-	{ label: "Offers", href: "/offers" },
 ];
 
 // ---------- Helpers ----------
 
 function typeHref(slug: string, type: string) {
-	return `/products/${slug}?type=${encodeURIComponent(type)}`;
+	return `/products/${slug}?type=${encodeURIComponent(type.toLowerCase())}`;
 }
 
 function priceHref(slug: string, range: { min?: number; max?: number }) {
@@ -135,7 +114,7 @@ function priceHref(slug: string, range: { min?: number; max?: number }) {
 }
 
 function metalHref(slug: string, metal: string) {
-	return `/products/${slug}?metal=${encodeURIComponent(metal)}`;
+	return `/products/${slug}?metal=${encodeURIComponent(metal.toLowerCase())}`;
 }
 
 // ---------- Sub-components ----------
@@ -147,58 +126,87 @@ const colHeadingClass =
 
 function MegaMenuPanel({ cat }: { cat: MegaMenuCategory }) {
 	return (
-		<div className="w-[820px] p-6 bg-white border border-gray-100 shadow-xl rounded-lg">
-			<div className="grid grid-cols-4 gap-8">
-				{/* Col 1: Category-specific popular types */}
+		<div className="w-[1000px] p-6 bg-white border border-gray-100 shadow-xl rounded-lg">
+			<div className="grid grid-cols-5 gap-6">
+				{/* Col 1: Popular */}
 				<div>
-					<h4 className={colHeadingClass}>Popular {cat.label}</h4>
+					<h4 className={colHeadingClass}>Popular</h4>
 					<ul className="space-y-0.5">
 						{cat.popularTypes.map((t) => (
 							<li key={t}>
 								<Link to={typeHref(cat.slug, t)} className={linkClass}>
-									{t} {cat.label}
+									{t}
 								</Link>
 							</li>
 						))}
 					</ul>
 				</div>
 
-				{/* Col 2: Common types */}
+				{/* Col 2: Shop By Style */}
 				<div>
-					<h4 className={colHeadingClass}>Shop By Type</h4>
+					<h4 className={colHeadingClass}>Shop By Style</h4>
 					<ul className="space-y-0.5">
 						{cat.commonTypes.map((t) => (
 							<li key={t}>
 								<Link to={typeHref(cat.slug, t)} className={linkClass}>
-									{t} {cat.label}
+									{t}
 								</Link>
 							</li>
 						))}
 					</ul>
 				</div>
 
-				{/* Col 3: By Price Range */}
+				{/* Col 3: By Metal */}
 				<div>
-					<h4 className={colHeadingClass}>By Price Range</h4>
+					<h4 className={colHeadingClass}>By Metal</h4>
+					<ul className="space-y-0.5">
+						{cat.metals.map((m) => (
+							<li key={m}>
+								<Link to={metalHref(cat.slug, m)} className={linkClass}>
+									{m}
+								</Link>
+							</li>
+						))}
+					</ul>
+
+					{cat.gemstones && cat.gemstones.length > 0 && (
+						<>
+							<h4 className={`${colHeadingClass} mt-5`}>By Gemstone</h4>
+							<ul className="space-y-0.5">
+								{cat.gemstones.map((g) => (
+									<li key={g}>
+										<Link to={typeHref(cat.slug, g)} className={linkClass}>
+											{g}
+										</Link>
+									</li>
+								))}
+							</ul>
+						</>
+					)}
+				</div>
+
+				{/* Col 4: By Occasion */}
+				<div>
+					<h4 className={colHeadingClass}>By Occasion</h4>
+					<ul className="space-y-0.5">
+						{(cat.occasions || []).map((o) => (
+							<li key={o}>
+								<Link to={typeHref(cat.slug, o)} className={linkClass}>
+									{o}
+								</Link>
+							</li>
+						))}
+					</ul>
+				</div>
+
+				{/* Col 5: By Price */}
+				<div>
+					<h4 className={colHeadingClass}>By Price</h4>
 					<ul className="space-y-0.5">
 						{cat.priceRanges.map((r) => (
 							<li key={r.label}>
 								<Link to={priceHref(cat.slug, r)} className={linkClass}>
 									{r.label}
-								</Link>
-							</li>
-						))}
-					</ul>
-				</div>
-
-				{/* Col 4: By Metals & Stones */}
-				<div>
-					<h4 className={colHeadingClass}>By Metals &amp; Stones</h4>
-					<ul className="space-y-0.5">
-						{cat.metals.map((m) => (
-							<li key={m}>
-								<Link to={metalHref(cat.slug, m)} className={linkClass}>
-									{m} {cat.label}
 								</Link>
 							</li>
 						))}
@@ -457,7 +465,7 @@ const Header = () => {
 			</div>
 
 			{/* Desktop Navigation Bar */}
-			<nav className="max-lg:hidden border-t border-gray-100" aria-label="Main navigation">
+			<nav className="max-lg:hidden border-t border-gray-100 relative z-50" aria-label="Main navigation">
 				<div className="mx-auto max-w-[1232px] w-full px-4">
 					<div className="flex items-center justify-center gap-x-1">
 						<NavigationMenu className="static">

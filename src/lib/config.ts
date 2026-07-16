@@ -2,13 +2,13 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localho
 export const UPLOADS_BASE_URL = import.meta.env.VITE_UPLOADS_BASE_URL || 'http://localhost:5011';
 
 const categoryPlaceholders: Record<string, string> = {
-  rings: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80',
-  necklaces: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=600&q=80',
-  earrings: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=600&q=80',
-  bracelets: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=600&q=80',
-  pendants: 'https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?w=600&q=80',
-  bangles: 'https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=600&q=80',
-  default: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=600&q=80',
+  rings: '/placeholder.svg',
+  necklaces: '/placeholder.svg',
+  earrings: '/placeholder.svg',
+  bracelets: '/placeholder.svg',
+  pendants: '/placeholder.svg',
+  bangles: '/placeholder.svg',
+  default: '/placeholder.svg',
 };
 
 export function resolveImageUrl(src?: string | object | null): string | null {

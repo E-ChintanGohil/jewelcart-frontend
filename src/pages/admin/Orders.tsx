@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Search, Eye, Edit, Package, Truck, CheckCircle, XCircle, Download } from 'lucide-react';
+import { Search, Eye, Edit, Package, Truck, CheckCircle, XCircle, Download, Loader2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/currency';
 import { useToast } from '@/hooks/use-toast';
 
@@ -20,6 +20,18 @@ const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [invoiceLoadingId, setInvoiceLoadingId] = useState<string | number | null>(null);
+
+  const handleDownloadInvoice = async (orderId: string | number) => {
+    setInvoiceLoadingId(orderId);
+    try {
+      await apiService.downloadInvoice(orderId, 'staff');
+    } catch (err: any) {
+      toast({ title: 'Download failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setInvoiceLoadingId(null);
+    }
+  };
   const { toast } = useToast();
 
   useEffect(() => {
@@ -287,10 +299,23 @@ const Orders = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={invoiceLoadingId === order.id}
+                            onClick={() => handleDownloadInvoice(order.id)}
+                            title="Download invoice"
+                          >
+                            {invoiceLoadingId === order.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Download className="h-4 w-4" />
+                            )}
+                          </Button>
                           <Dialog>
                             <DialogTrigger asChild>
-                              <Button 
-                                variant="outline" 
+                              <Button
+                                variant="outline"
                                 size="sm"
                                 onClick={() => setSelectedOrder(order)}
                               >

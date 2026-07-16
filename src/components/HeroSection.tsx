@@ -10,7 +10,7 @@ const HeroSection = () => {
 		{/* <section className="relative">
 			<div className="absolute inset-0 top-0">
 				<img
-					src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=1920&q=80"
+					src="/placeholder.svg"
 					alt="Luxury Jewelry Collection"
 					className="w-full h-full object-cover"
 				/>
@@ -81,8 +81,8 @@ const HeroSection = () => {
 								<div className="space-y-12">
 									<div className="space-y-5">
 										<Badge variant="secondary" className="font-normal bg-white/20 text-white border-white/30 hover:bg-white/20">Limited Time Offer</Badge>
-										<h1 className="text-5xl lg:text-6xl font-bold leading-tight text-white">Diamonds<br/>that tell a story</h1>
-										<p className="font-light text-xl font-sans text-white max-w-lg">Discover our exquisite collection of handcrafted jewelry, where each piece tells a unique story of elegance and timeless beauty.</p>
+										<h1 className="text-5xl lg:text-6xl font-bold leading-tight text-white">Affordable Luxury,<br/>Delivered with Trust</h1>
+										<p className="font-light text-xl font-sans text-white max-w-lg">Gold. Silver. Diamonds. Crafted for every celebration. Shop authentic jewellery with trusted quality, transparent pricing, and fast delivery across India.</p>
 									</div>
 									<div className="flex flex-wrap gap-4">
 										<div className="bg-white/90 rounded-lg p-4">
@@ -120,8 +120,8 @@ const HeroSection = () => {
 								<div className="space-y-12">
 									<div className="space-y-5">
 										<Badge variant="secondary" className="font-normal bg-white/20 text-white border-white/30 hover:bg-white/20">Limited Time Offer</Badge>
-										<h1 className="text-5xl lg:text-6xl font-bold leading-tight text-white">Diamonds<br/>that tell a story</h1>
-										<p className="font-light text-xl font-sans text-gray-200 max-w-lg">Discover our exquisite collection of handcrafted jewelry, where each piece tells a unique story of elegance and timeless beauty.</p>
+										<h1 className="text-5xl lg:text-6xl font-bold leading-tight text-white">Affordable Luxury,<br/>Delivered with Trust</h1>
+										<p className="font-light text-xl font-sans text-gray-200 max-w-lg">Gold. Silver. Diamonds. Crafted for every celebration. Wear your story and shine every day.</p>
 									</div>
 								</div>
 							</div>
@@ -143,8 +143,8 @@ const HeroSection = () => {
 								<div className="space-y-12">
 									<div className="space-y-5">
 										<Badge variant="secondary" className="font-normal bg-brandgold/20 text-brandblue border-brandblue/30">Limited Time Offer</Badge>
-										<h1 className="text-5xl lg:text-6xl font-bold leading-tight text-brandblue">Diamonds<br/>that tell a story</h1>
-										<p className="font-light text-xl font-sans text-brandblue max-w-lg">Discover our exquisite collection of handcrafted jewelry, where each piece tells a unique story of elegance and timeless beauty.</p>
+										<h1 className="text-5xl lg:text-6xl font-bold leading-tight text-brandblue">Affordable Luxury,<br/>Delivered with Trust</h1>
+										<p className="font-light text-xl font-sans text-brandblue max-w-lg">Gold. Silver. Diamonds. Crafted for every celebration. Shop authentic jewellery with trusted quality and honest pricing.</p>
 									</div>
 									<div className="flex flex-wrap gap-4">
 										<div className="bg-white/90 rounded-lg p-4">

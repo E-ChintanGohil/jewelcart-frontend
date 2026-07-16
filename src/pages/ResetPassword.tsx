@@ -4,10 +4,9 @@ import { apiService } from '@/lib/apiService';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 const ResetPassword = () => {
   const [searchParams] = useSearchParams();
@@ -24,15 +23,13 @@ const ResetPassword = () => {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-elegant p-4">
-        <Card className="w-full max-w-md shadow-elegant">
-          <CardContent className="pt-6 text-center">
-            <p className="text-muted-foreground mb-4">Invalid or missing reset link.</p>
-            <Link to="/forgot-password" className="text-primary hover:underline text-sm">
-              Request a new link
-            </Link>
-          </CardContent>
-        </Card>
+      <div className="min-h-[60vh] flex items-center justify-center px-6 py-16 bg-white">
+        <div className="w-full max-w-sm text-center">
+          <p className="text-gray-500 mb-4">Invalid or missing reset link.</p>
+          <Link to="/forgot-password" className="text-brandgold font-medium hover:underline text-sm">
+            Request a new link
+          </Link>
+        </div>
       </div>
     );
   }
@@ -64,67 +61,79 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-elegant p-4">
-      <Card className="w-full max-w-md shadow-elegant">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-primary">Choose New Password</CardTitle>
-          <CardDescription>Enter a new password for your account</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
+    <div className="min-h-[60vh] flex items-center justify-center px-6 py-16 bg-white">
+      <div className="w-full max-w-sm">
+        <Link
+          to="/login"
+          className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-brandgold transition-colors mb-8"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          Back to sign in
+        </Link>
 
-            <div className="space-y-2">
-              <Label htmlFor="password">New Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="At least 6 characters"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold text-brandblue">New password</h1>
+          <p className="mt-1.5 text-sm text-gray-500">
+            Choose a new password for your account
+          </p>
+        </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="space-y-1.5">
+            <Label htmlFor="password" className="text-xs font-medium uppercase tracking-wider text-gray-500">
+              New Password
+            </Label>
+            <div className="relative">
               <Input
-                id="confirmPassword"
+                id="password"
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Repeat your new password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="At least 6 characters"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
+                className="h-11 border-gray-200 bg-gray-50/50 focus:bg-white focus:border-brandgold transition-colors pr-10"
               />
+              <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
+          </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Resetting...' : 'Reset Password'}
-            </Button>
+          <div className="space-y-1.5">
+            <Label htmlFor="confirmPassword" className="text-xs font-medium uppercase tracking-wider text-gray-500">
+              Confirm Password
+            </Label>
+            <Input
+              id="confirmPassword"
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Repeat your new password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              className="h-11 border-gray-200 bg-gray-50/50 focus:bg-white focus:border-brandgold transition-colors"
+            />
+          </div>
 
-            <div className="text-center">
-              <Link to="/login" className="text-sm text-primary hover:underline">
-                Back to Sign In
-              </Link>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+          <Button
+            type="submit"
+            className="w-full h-11 bg-brandblue hover:bg-brandblue/90 text-white font-medium tracking-wide"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Resetting...' : 'Reset Password'}
+          </Button>
+        </form>
+      </div>
     </div>
   );
 };

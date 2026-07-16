@@ -4,9 +4,8 @@ import { apiService } from '@/lib/apiService';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, ArrowLeft } from 'lucide-react';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -30,61 +29,71 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-elegant p-4">
-      <Card className="w-full max-w-md shadow-elegant">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-primary">Reset Password</CardTitle>
-          <CardDescription>
+    <div className="min-h-[60vh] flex items-center justify-center px-6 py-16 bg-white">
+      <div className="w-full max-w-sm">
+        <Link
+          to="/login"
+          className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-brandgold transition-colors mb-8"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          Back to sign in
+        </Link>
+
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold text-brandblue">Reset password</h1>
+          <p className="mt-1.5 text-sm text-gray-500">
             Enter your email and we'll send you a reset link
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {submitted ? (
-            <div className="space-y-4">
-              <Alert className="border-green-200 bg-green-50">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <AlertDescription className="text-green-800">
-                  If that email is registered, a reset link has been sent. Check your inbox.
-                </AlertDescription>
+          </p>
+        </div>
+
+        {submitted ? (
+          <div className="space-y-6">
+            <Alert className="border-green-200 bg-green-50">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-800">
+                If that email is registered, a reset link has been sent. Check your inbox.
+              </AlertDescription>
+            </Alert>
+            <Link
+              to="/login"
+              className="inline-flex items-center text-sm text-brandgold font-medium hover:underline"
+            >
+              Back to Sign In
+            </Link>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
               </Alert>
-              <div className="text-center">
-                <Link to="/login" className="text-sm text-primary hover:underline font-medium">
-                  Back to Sign In
-                </Link>
-              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-xs font-medium uppercase tracking-wider text-gray-500">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="h-11 border-gray-200 bg-gray-50/50 focus:bg-white focus:border-brandgold transition-colors"
+              />
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
 
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Sending...' : 'Send Reset Link'}
-              </Button>
-
-              <div className="text-center">
-                <Link to="/login" className="text-sm text-primary hover:underline">
-                  Back to Sign In
-                </Link>
-              </div>
-            </form>
-          )}
-        </CardContent>
-      </Card>
+            <Button
+              type="submit"
+              className="w-full h-11 bg-brandblue hover:bg-brandblue/90 text-white font-medium tracking-wide"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Sending...' : 'Send Reset Link'}
+            </Button>
+          </form>
+        )}
+      </div>
     </div>
   );
 };

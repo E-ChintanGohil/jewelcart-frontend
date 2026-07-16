@@ -7,7 +7,7 @@ const ShopByGender = () => {
     {
       id: 1,
       title: "Women's Jewellery",
-      image: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=400&q=80",
+      image: "/placeholder.svg",
       description: "Elegant and sophisticated pieces for women",
       link: "/collections/women",
       featured: true
@@ -15,7 +15,7 @@ const ShopByGender = () => {
     {
       id: 2,
       title: "Men's Jewellery",
-      image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=800&q=80",
+      image: "/placeholder.svg",
       description: "Bold and refined accessories for men",
       link: "/collections/men",
       featured: false
@@ -23,7 +23,7 @@ const ShopByGender = () => {
     {
       id: 3,
       title: "Kids Jewellery",
-      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&q=80",
+      image: "/placeholder.svg",
       description: "Delicate and safe pieces for children",
       link: "/collections/kids",
       featured: false
@@ -31,7 +31,7 @@ const ShopByGender = () => {
     {
       id: 4,
       title: "Unisex Collection",
-      image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&q=80",
+      image: "/placeholder.svg",
       description: "Versatile pieces for everyone",
       link: "/collections/unisex",
       featured: false
