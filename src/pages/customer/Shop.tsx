@@ -1,32 +1,37 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import SEO from '@/components/SEO';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { apiService } from '@/lib/apiService';
 import { formatCurrency } from '@/lib/currency';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { getProductImageUrl } from '@/lib/config';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2, ShoppingCart, Heart, X } from 'lucide-react';
+import { Loader2, ShoppingCart, Heart, X, Search } from 'lucide-react';
 
 interface Product {
   id: string | number;
   name: string;
   calculatedPrice?: number;
+  calculated_price?: number;
+  base_price?: number;
   price?: number;
   categoryName?: string;
   category?: string;
   imageUrl?: string;
   image_url?: string;
+  primary_image?: string;
   description?: string;
   stockQuantity?: number;
   stock?: number;
   stock_quantity?: number;
   in_stock?: boolean;
   isActive?: boolean;
+  is_featured?: boolean;
+  material_name?: string;
+  weight?: number;
 }
 
 interface Category {
@@ -47,33 +52,24 @@ export default function Shop() {
     const loadData = async () => {
       try {
         const [productsData, categoriesData] = await Promise.all([
-          apiService.getProducts(),
+          apiService.getProducts({ limit: 1000 }),
           apiService.getCategories()
         ]);
-
-        // Handle different response structures
-        const products = productsData.products || productsData;
-        const categories = categoriesData.categories || categoriesData;
-
-        setProducts(products);
-        setCategories(categories);
+        setProducts(productsData.products || productsData);
+        setCategories(categoriesData.categories || categoriesData);
       } catch (error) {
         console.error('Failed to load shop data:', error);
       } finally {
         setIsLoading(false);
       }
     };
-
     loadData();
   }, []);
 
   const filteredProducts = products.filter(product => {
-    // Filter by category if selected
     if (selectedCategory && (product.categoryName || product.category) !== selectedCategory) {
       return false;
     }
-
-    // Filter by search query if provided
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       return (
@@ -83,134 +79,135 @@ export default function Shop() {
         (product.category && product.category.toLowerCase().includes(query))
       );
     }
-
     return true;
   });
 
-  const featuredProducts = products.filter(p => p.isActive !== false).slice(0, 8);
-
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-6 w-6 animate-spin text-brandgold" />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="bg-white">
       <SEO
         title={searchQuery ? `Search: ${searchQuery} - Jewelcart` : "Shop Jewelry Online - Rings, Necklaces, Earrings & More | Jewelcart"}
-        description={searchQuery 
-          ? `Search results for "${searchQuery}" at Jewelcart. Find the perfect jewelry piece from our exquisite collection.`
-          : "Shop our complete collection of handcrafted jewelry online. Browse rings, necklaces, earrings, bracelets, and more. Free shipping on orders above ₹1,00,000. Secure payment options available."
+        description={searchQuery
+          ? `Search results for "${searchQuery}" at Jewelcart.`
+          : "Shop our complete collection of handcrafted jewelry online."
         }
         image="/og-image.jpg"
-        keywords={searchQuery 
-          ? `${searchQuery}, jewelry search, find jewelry`
-          : "shop jewelry online, buy jewelry, jewelry store, rings, necklaces, earrings, bracelets, jewelry shopping, online jewelry store"
-        }
       />
-      {/* Hero Section */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          {searchQuery ? `Search Results for "${searchQuery}"` : 'Exquisite Jewelry Collection'}
-        </h1>
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-          {searchQuery
-            ? `Found ${filteredProducts.length} product${filteredProducts.length !== 1 ? 's' : ''} matching your search`
-            : 'Discover our handcrafted pieces made with precious metals and finest gemstones'
-          }
-        </p>
-      </div>
 
-      {/* Category Filter */}
-      <div className="mb-8">
-        <div className="flex flex-wrap gap-2 justify-center">
-          <Button
-            variant={selectedCategory === '' ? 'default' : 'outline'}
-            onClick={() => setSelectedCategory('')}
-            className="mb-2"
-          >
-            All Categories
-          </Button>
-          {categories.map((category) => (
-            <Button
-              key={category.id}
-              variant={selectedCategory === category.name ? 'default' : 'outline'}
-              onClick={() => setSelectedCategory(category.name)}
-              className="mb-2"
-            >
-              {category.name}
-            </Button>
-          ))}
+      {/* Page header */}
+      <div className="border-b border-gray-100">
+        <div className="container mx-auto px-4 py-8">
+          {searchQuery ? (
+            <div className="flex items-center gap-3">
+              <Search className="w-5 h-5 text-gray-400" />
+              <div>
+                <h1 className="text-2xl font-semibold text-brandblue">
+                  Results for "{searchQuery}"
+                </h1>
+                <p className="text-sm text-gray-500 mt-0.5">
+                  {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-baseline justify-between">
+              <h1 className="text-2xl font-semibold text-brandblue">All Jewellery</h1>
+              <p className="text-sm text-gray-500">{filteredProducts.length} products</p>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Featured Section */}
-      {selectedCategory === '' && (
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-            Featured Products
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} featured />
-            ))}
+      {/* Category strip */}
+      {!searchQuery && (
+        <div className="border-b border-gray-100 bg-gray-50/50">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center gap-6 py-3 overflow-x-auto no-scrollbar">
+              <button
+                onClick={() => setSelectedCategory('')}
+                className={`shrink-0 pb-1 text-xs font-medium uppercase tracking-wider transition-colors border-b-2 ${
+                  selectedCategory === ''
+                    ? 'border-brandblue text-brandblue'
+                    : 'border-transparent text-gray-400 hover:text-brandblue'
+                }`}
+              >
+                All
+              </button>
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.name)}
+                  className={`shrink-0 pb-1 text-xs font-medium uppercase tracking-wider transition-colors border-b-2 ${
+                    selectedCategory === cat.name
+                      ? 'border-brandblue text-brandblue'
+                      : 'border-transparent text-gray-400 hover:text-brandblue'
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      {/* Product Grid */}
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-          {searchQuery
-            ? 'Search Results'
-            : selectedCategory
-              ? `${selectedCategory} Collection`
-              : 'All Products'
-          }
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+      {/* Product grid */}
+      <div className="container mx-auto px-4 py-8">
+        {filteredProducts.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-gray-400 text-lg">No products found.</p>
+            {selectedCategory && (
+              <button
+                onClick={() => setSelectedCategory('')}
+                className="mt-3 text-sm text-brandgold hover:underline"
+              >
+                Clear filter
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8">
+            {filteredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </div>
-
-      {filteredProducts.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">
-            No products found in this category.
-          </p>
-        </div>
-      )}
     </div>
   );
 }
 
-interface ProductCardProps {
-  product: Product;
-  featured?: boolean;
-}
-
-function ProductCard({ product, featured = false }: ProductCardProps) {
+function ProductCard({ product }: { product: Product }) {
   const { addToCart, isInCart, removeByProductId } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { toast } = useToast();
   const navigate = useNavigate();
   const wishlisted = isInWishlist(product.id);
   const inCart = isInCart(product.id);
+  const price = product.calculated_price ?? product.calculatedPrice ?? product.base_price ?? product.price ?? 0;
+  const stock = product.stock ?? product.stockQuantity ?? product.stock_quantity ?? 0;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const stock = product.stock ?? product.stockQuantity ?? product.stock_quantity ?? 0;
     if (stock <= 0 && !product.in_stock) {
       toast({ title: "Out of stock", description: "This product is out of stock", variant: "destructive" });
       return;
     }
-    addToCart(product);
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price,
+      primary_image: product.primary_image,
+      category: product.category || product.categoryName,
+    });
   };
 
   const handleRemoveFromCart = (e: React.MouseEvent) => {
@@ -219,93 +216,85 @@ function ProductCard({ product, featured = false }: ProductCardProps) {
     removeByProductId(product.id);
   };
 
-  const handleGoToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    navigate('/cart');
-  };
-
-  const handleToggleWishlist = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    toggleWishlist(product);
-  };
-
   return (
-    <Card className={`group hover:shadow-lg transition-all duration-300 ${featured ? 'border-amber-200' : ''}`}>
-      <CardContent className="p-0">
-        <div className="relative overflow-hidden">
-          {featured && (
-            <Badge className="absolute top-2 left-2 z-10 bg-amber-500">
-              Featured
-            </Badge>
-          )}
-          <img
-            src={getProductImageUrl(product)}
-            alt={product.name}
-            className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
-          />
-          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-            <div className="transform translate-y-4 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300 space-x-2">
-              {inCart ? (
-                <>
-                  <Button
-                    size="sm"
-                    className="bg-amber-600 text-white hover:bg-amber-700"
-                    onClick={handleGoToCart}
-                  >
-                    <ShoppingCart className="h-4 w-4 mr-1" /> Go to Cart
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="bg-red-500 text-white hover:bg-red-600"
-                    onClick={handleRemoveFromCart}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  size="sm"
-                  className="bg-white text-black hover:bg-gray-100"
-                  onClick={handleAddToCart}
-                >
-                  <ShoppingCart className="h-4 w-4" />
-                </Button>
-              )}
-              <Button size="sm" variant="outline" className="bg-white border-white hover:bg-gray-100" onClick={handleToggleWishlist}>
-                <Heart className={`h-4 w-4 ${wishlisted ? 'fill-red-500 text-red-500' : ''}`} />
+    <Link to={`/product/${product.id}`} className="group">
+      <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
+        <img
+          src={getProductImageUrl(product)}
+          alt={product.name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        />
+
+        {/* Wishlist button — always visible */}
+        <button
+          className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm hover:bg-white transition-colors"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleWishlist(product);
+          }}
+        >
+          <Heart className={`w-3.5 h-3.5 ${wishlisted ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
+        </button>
+
+        {/* Cart action — bottom overlay on hover */}
+        <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+          {inCart ? (
+            <div className="flex gap-1.5">
+              <Button
+                size="sm"
+                className="flex-1 h-8 bg-brandblue hover:bg-brandblue/90 text-white text-xs"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  navigate('/cart');
+                }}
+              >
+                <ShoppingCart className="w-3 h-3 mr-1" />
+                Go to Cart
+              </Button>
+              <Button
+                size="sm"
+                className="h-8 w-8 p-0 bg-red-500 hover:bg-red-600 text-white"
+                onClick={handleRemoveFromCart}
+              >
+                <X className="w-3 h-3" />
               </Button>
             </div>
-          </div>
-        </div>
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-2">
-            <Badge variant="secondary" className="text-xs">
-              {product.categoryName || product.category}
-            </Badge>
-          </div>
-          <Link to={`/product/${product.id}`}>
-            <h3 className="font-semibold text-gray-900 mb-2 hover:text-amber-600 transition-colors">
-              {product.name}
-            </h3>
-          </Link>
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-            {product.description}
-          </p>
-          <div className="flex items-center justify-between">
-            <span className="text-lg font-bold text-amber-600">
-              {formatCurrency(product.calculatedPrice || product.price || 0)}
-            </span>
-            <Badge
-              variant={(product.stock ?? product.stockQuantity ?? product.stock_quantity ?? 0) > 0 || product.in_stock ? "default" : "destructive"}
-              className="text-xs"
+          ) : (
+            <Button
+              size="sm"
+              className="w-full h-8 bg-white/95 backdrop-blur-sm hover:bg-white text-brandblue text-xs font-medium"
+              onClick={handleAddToCart}
             >
-              {(product.stock ?? product.stockQuantity ?? product.stock_quantity ?? 0) > 0 || product.in_stock ? 'In Stock' : 'Out of Stock'}
-            </Badge>
-          </div>
+              <ShoppingCart className="w-3 h-3 mr-1" />
+              Add to Cart
+            </Button>
+          )}
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Out of stock overlay */}
+        {stock <= 0 && !product.in_stock && (
+          <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
+            <span className="text-xs font-medium uppercase tracking-wider text-gray-600 bg-white px-3 py-1 rounded-full">
+              Sold out
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Product info */}
+      <div className="mt-3 space-y-1">
+        <p className="text-[11px] uppercase tracking-wider text-gray-400">
+          {product.categoryName || product.category}
+        </p>
+        <h3 className="text-sm font-medium text-brandblue leading-snug group-hover:text-brandgold transition-colors">
+          {product.name}
+        </h3>
+        <p className="text-sm font-semibold text-black">
+          {formatCurrency(price)}
+        </p>
+      </div>
+    </Link>
   );
 }
