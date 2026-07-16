@@ -12,7 +12,7 @@ export default function Certifications() {
         </p>
       </div>
 
-      {/* BIS Hallmark */}
+      {/* BIS Hallmark — commented out for now (products not hallmarked yet)
       <Card className="mb-8">
         <CardHeader>
           <CardTitle className="flex items-center gap-3">
@@ -43,6 +43,7 @@ export default function Certifications() {
           </div>
         </CardContent>
       </Card>
+      */}
 
       {/* Diamond Certificates */}
       <Card className="mb-8">
@@ -154,20 +155,22 @@ export default function Certifications() {
         <CardContent className="space-y-3">
           <p className="text-gray-800">You can verify the authenticity of certificates:</p>
           <ul className="space-y-2 text-gray-700 text-sm">
+            {/* BIS Hallmark verification — commented out for now (products not hallmarked yet)
             <li className="flex items-start gap-2">
               <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
               <span><strong>BIS Hallmark:</strong> Visit www.bis.gov.in for verification</span>
             </li>
+            */}
             <li className="flex items-start gap-2">
               <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
               <span><strong>Diamond Certificates:</strong> Use certificate number on GIA/IGI/SGL websites</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="h-4 w-4 text-green-600 mt-0.5" />
-              <span><strong>Jewelcart Verification:</strong> Email verify@jewelcart.com with certificate details</span>
+              <span><strong>Jewelcart Verification:</strong> Email info@jewelcart.shop with certificate details</span>
             </li>
           </ul>
-          <p className="text-gray-700 text-sm mt-4"><strong>Questions?</strong> Contact support@jewelcart.com | +91 98765 43210</p>
+          <p className="text-gray-700 text-sm mt-4"><strong>Questions?</strong> Contact info@jewelcart.shop | +91-9023002331</p>
         </CardContent>
       </Card>
     </div>

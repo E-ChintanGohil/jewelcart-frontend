@@ -5,6 +5,7 @@ import { MapPin, Calendar, Phone, Award } from "lucide-react";
 
 const JewelCartExperience = () => {
   const experiences = [
+    /* Physical store — commented out for now (no physical store yet)
     {
       id: 1,
       icon: MapPin,
@@ -13,6 +14,7 @@ const JewelCartExperience = () => {
       action: "Find Store",
       link: "/stores"
     },
+    */
     {
       id: 2,
       icon: Calendar,
@@ -76,11 +78,11 @@ const JewelCartExperience = () => {
           })}
         </div>
 
-        {/* Featured Banner */}
+        {/* Featured Banner — physical store, commented out for now (no physical store yet)
         <div className="relative overflow-hidden rounded-2xl bg-brandblue">
           <div className="absolute inset-0">
             <img
-              src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200&q=80"
+              src="/placeholder.svg"
               alt="JewelCart Store Interior"
               className="w-full h-full object-cover opacity-20"
             />
@@ -103,10 +105,10 @@ const JewelCartExperience = () => {
                 <Link to="/stores">Find Nearest Store</Link>
               </Button>
               
-              <Button 
+              <Button
                 asChild
-                variant="outline" 
-                size="lg" 
+                variant="outline"
+                size="lg"
                 className="border-white text-white hover:bg-white hover:text-brandblue"
               >
                 <Link to="/consultation">Book Consultation</Link>
@@ -114,6 +116,7 @@ const JewelCartExperience = () => {
             </div>
           </div>
         </div>
+        */}
       </div>
     </section>
   );

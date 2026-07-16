@@ -26,11 +26,11 @@ export default function FAQ() {
         },
         {
           question: 'Can I modify my order after placing it?',
-          answer: 'You can modify your order within 30 minutes of placement by contacting customer support at +91 98765 43210. Once the order enters processing, modifications are not possible, but you can cancel and place a new order.'
+          answer: 'You can modify your order within 30 minutes of placement by contacting customer support at +91-9023002331. Once the order enters processing, modifications are not possible, but you can cancel and place a new order.'
         },
         {
           question: 'Do you accept orders over phone?',
-          answer: "Yes! Call us at +91 98765 43210 (10 AM - 8 PM, Mon-Sat) and our team will assist you with placing orders over the phone."
+          answer: "Yes! Call us at +91-9023002331 (10 AM - 8 PM, Mon-Sat) and our team will assist you with placing orders over the phone."
         },
         {
           question: 'Is there a minimum order value?',
@@ -88,7 +88,7 @@ export default function FAQ() {
         },
         {
           question: 'Do you ship internationally?',
-          answer: 'Currently, we only ship within India. International shipping will be available soon. For special requests, email international@jewelcart.com.'
+          answer: 'Currently, we only ship within India. International shipping will be available soon. For special requests, email info@jewelcart.shop.'
         },
         {
           question: 'How can I track my order?',
@@ -115,7 +115,7 @@ export default function FAQ() {
         },
         {
           question: 'How do I return an item?',
-          answer: "Step 1: Contact us at returns@jewelcart.com within 30 days. Step 2: Get Return Authorization Number (RAN). Step 3: Pack securely with RAN and invoice. Step 4: Ship to our address using insured, trackable service. Step 5: We'll inspect and process refund within 3-5 days."
+          answer: "Step 1: Contact us at info@jewelcart.shop within 30 days. Step 2: Get Return Authorization Number (RAN). Step 3: Pack securely with RAN and invoice. Step 4: Ship to our address using insured, trackable service. Step 5: We'll inspect and process refund within 3-5 days."
         },
         {
           question: 'How long does refund take?',
@@ -127,7 +127,7 @@ export default function FAQ() {
         },
         {
           question: 'What if I receive a damaged item?',
-          answer: "Contact us immediately within 48 hours at returns@jewelcart.com with photos. We'll provide a prepaid return label and offer replacement or full refund including shipping. Processing is expedited (1-3 business days)."
+          answer: "Contact us immediately within 48 hours at info@jewelcart.shop with photos. We'll provide a prepaid return label and offer replacement or full refund including shipping. Processing is expedited (1-3 business days)."
         }
       ]
     },
@@ -137,8 +137,8 @@ export default function FAQ() {
       title: 'Products & Quality',
       questions: [
         {
-          question: 'Are your products hallmarked?',
-          answer: 'Yes, all gold and silver jewelry is BIS hallmarked as per Indian standards. Hallmark certification is included with every order.'
+          question: 'How do you ensure product quality and purity?',
+          answer: 'Every piece is crafted from genuine gold and silver, and the exact purity (karat) is clearly mentioned on each product. Our transparent, weight-based pricing reflects the true metal value.'
         },
         {
           question: 'Do diamonds come with certificates?',
@@ -150,15 +150,15 @@ export default function FAQ() {
         },
         {
           question: 'Can I customize jewelry?',
-          answer: 'Yes! We offer custom jewelry design services. Contact us at custom@jewelcart.com or call +91 98765 43210 to discuss your requirements. Custom designs typically take 2-4 weeks.'
+          answer: 'Yes! We offer custom jewelry design services. Contact us at info@jewelcart.shop or call +91-9023002331 to discuss your requirements. Custom designs typically take 2-4 weeks.'
         },
         {
           question: 'How do I know the jewelry is authentic?',
-          answer: 'All jewelry comes with: BIS hallmark for gold/silver, Authenticity certificate, Purchase invoice, Gemstone certificates (if applicable), Warranty card'
+          answer: 'All jewelry comes with: Authenticity certificate, Purchase invoice, Gemstone certificates (if applicable), and a Warranty card.'
         },
         {
           question: 'Do you offer jewelry resizing?',
-          answer: 'Yes, we offer ring resizing services. For jewelry purchased from us, contact support@jewelcart.com. For items within 30 days of purchase, resizing may be complimentary depending on the design.'
+          answer: 'Yes, we offer ring resizing services. For jewelry purchased from us, contact info@jewelcart.shop. For items within 30 days of purchase, resizing may be complimentary depending on the design.'
         }
       ]
     },
@@ -181,11 +181,11 @@ export default function FAQ() {
         },
         {
           question: 'How do I contact customer support?',
-          answer: 'Email: support@jewelcart.com | Phone: +91 98765 43210 | WhatsApp: +91 98765 43210 | Hours: Monday-Saturday, 10 AM - 8 PM IST. We respond within 24 hours.'
+          answer: 'Email: info@jewelcart.shop | Phone: +91-9023002331 | WhatsApp: +91-9023002331 | Hours: Monday-Saturday, 10 AM - 8 PM IST. We respond within 24 hours.'
         },
         {
           question: 'Do you have a physical store?',
-          answer: 'Yes! Visit our showroom at: 123 Jewelry Street, Zaveri Bazaar, Mumbai, Maharashtra 400002. Timing: Mon-Sat 10 AM - 8 PM, Sun 11 AM - 7 PM.'
+          answer: 'We currently operate online only, so you can shop with us anytime from anywhere in India. For any help, reach us at info@jewelcart.shop or +91-9023002331 (Mon-Sat, 10 AM - 8 PM IST).'
         },
         {
           question: 'How can I track my refund status?',
@@ -315,8 +315,8 @@ export default function FAQ() {
           </p>
           <p className="text-gray-700">
             Try different keywords or contact our support team at{' '}
-            <a href="mailto:support@jewelcart.com" className="text-amber-600 hover:underline">
-              support@jewelcart.com
+            <a href="mailto:info@jewelcart.shop" className="text-amber-600 hover:underline">
+              info@jewelcart.shop
             </a>
           </p>
         </Card>
@@ -340,16 +340,16 @@ export default function FAQ() {
             <div className="p-6 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-100 shadow-lg">
               <h4 className="font-light text-gray-900 mb-4 text-lg tracking-wide">Contact <span className="font-serif italic">Support</span></h4>
               <div className="space-y-2 text-sm text-gray-700 font-light">
-                <p><span className="text-gray-900">Email:</span> support@jewelcart.com</p>
-                <p><span className="text-gray-900">Phone:</span> +91 98765 43210</p>
-                <p><span className="text-gray-900">WhatsApp:</span> +91 98765 43210</p>
+                <p><span className="text-gray-900">Email:</span> info@jewelcart.shop</p>
+                <p><span className="text-gray-900">Phone:</span> +91-9023002331</p>
+                <p><span className="text-gray-900">WhatsApp:</span> +91-9023002331</p>
               </div>
             </div>
             <div className="p-6 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-100 shadow-lg">
               <h4 className="font-light text-gray-900 mb-4 text-lg tracking-wide">Business <span className="font-serif italic">Hours</span></h4>
               <div className="space-y-2 text-sm text-gray-700 font-light">
                 <p>Monday - Saturday: 10:00 AM - 8:00 PM</p>
-                <p>Sunday: 11:00 AM - 7:00 PM</p>
+                <p>Sunday: Closed</p>
                 <p>Response time: Within 24 hours</p>
               </div>
             </div>

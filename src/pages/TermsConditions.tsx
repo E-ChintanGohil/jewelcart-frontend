@@ -35,7 +35,7 @@ export default function TermsConditions() {
             <div>
               <h3 className="font-light text-amber-900 mb-3 tracking-wide text-xl">Important <span className="font-serif italic">Notice</span></h3>
               <p className="text-amber-800 leading-relaxed font-light">
-                By accessing and using www.jewelcart.com ("Website"), you accept and agree to be bound
+                By accessing and using www.jewelcart.shop ("Website"), you accept and agree to be bound
                 by these Terms and Conditions. If you do not agree with any part of these terms,
                 please do not use our website or services.
               </p>
@@ -58,9 +58,8 @@ export default function TermsConditions() {
           <div>
             <h3 className="font-light text-gray-900 mb-3 tracking-wide text-lg">1.1 About <span className="font-serif italic">Jewelcart</span></h3>
             <p className="text-gray-700 text-sm leading-relaxed font-light">
-              Jewelcart is operated by Jewelcart Private Limited, a company registered under the
-              Companies Act in India. Our registered office is at 123 Jewelry Street, Zaveri Bazaar,
-              Mumbai, Maharashtra 400002, India.
+              JewelCart is operated by BVM Enterprise, a proprietorship firm based in India,
+              founded by Bhushan M Soni. Our place of business is at 61 Thakorbaug Market, Nr. Sardar Patel Seva Samaj, Navrangpura, Ahmedabad 380009, Gujarat, India.
             </p>
           </div>
           <div>
@@ -68,7 +67,7 @@ export default function TermsConditions() {
             <ul className="space-y-3 text-gray-700 text-sm">
               <li className="flex items-start gap-3 font-light leading-relaxed">
                 <div className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-2 flex-shrink-0"></div>
-                <span><span className="text-gray-900">"We"</span>, <span className="text-gray-900">"Us"</span>, <span className="text-gray-900">"Our"</span> refers to Jewelcart Private Limited</span>
+                <span><span className="text-gray-900">"We"</span>, <span className="text-gray-900">"Us"</span>, <span className="text-gray-900">"Our"</span> refers to BVM Enterprise</span>
               </li>
               <li className="flex items-start gap-3 font-light leading-relaxed">
                 <div className="w-1.5 h-1.5 bg-amber-500 rounded-full mt-2 flex-shrink-0"></div>
@@ -224,9 +223,9 @@ export default function TermsConditions() {
           <div>
             <h3 className="font-light text-gray-900 mb-3 tracking-wide text-lg">3.4 Jewelry Certification</h3>
             <p className="text-gray-700 text-sm leading-relaxed font-light">
-              All gold and silver jewelry is hallmarked as per BIS standards. Diamond jewelry above
-              specified carat weight comes with certification from recognized gemological institutes
-              (GIA, IGI, or SGL).
+              The purity (karat) of every gold and silver piece is clearly stated on the product.
+              Diamond jewelry above specified carat weight comes with certification from recognized
+              gemological institutes (GIA, IGI, or SGL).
             </p>
           </div>
         </CardContent>
@@ -370,7 +369,7 @@ export default function TermsConditions() {
           <div>
             <h3 className="font-light text-gray-900 mb-3 tracking-wide text-lg">7.3 Trademarks</h3>
             <p className="text-gray-700 text-sm leading-relaxed font-light">
-              "Jewelcart" and our logo are trademarks of Jewelcart Private Limited. You may not
+              "Jewelcart" and our logo are trademarks of BVM Enterprise. You may not
               use our trademarks without our prior written consent.
             </p>
           </div>
@@ -446,7 +445,7 @@ export default function TermsConditions() {
             <h3 className="font-light text-gray-900 mb-3 tracking-wide text-lg">10.2 Jurisdiction</h3>
             <p className="text-gray-700 text-sm leading-relaxed font-light">
               Any disputes arising out of or related to these terms shall be subject to the
-              exclusive jurisdiction of the courts in Mumbai, Maharashtra, India.
+              exclusive jurisdiction of the courts in Ahmedabad, Gujarat, India.
             </p>
           </div>
           <div>
@@ -524,10 +523,10 @@ export default function TermsConditions() {
             If you have questions about these Terms and Conditions, please contact us:
           </p>
           <div className="space-y-2 text-gray-700 font-light">
-            <p><span className="text-gray-900">Company Name:</span> Jewelcart Private Limited</p>
-            <p><span className="text-gray-900">Email:</span> legal@jewelcart.com</p>
-            <p><span className="text-gray-900">Phone:</span> +91 98765 43210</p>
-            <p><span className="text-gray-900">Address:</span> 123 Jewelry Street, Zaveri Bazaar, Mumbai, Maharashtra 400002, India</p>
+            <p><span className="text-gray-900">Company Name:</span> BVM Enterprise</p>
+            <p><span className="text-gray-900">Email:</span> info@jewelcart.shop</p>
+            <p><span className="text-gray-900">Phone:</span> +91-9023002331</p>
+            <p><span className="text-gray-900">Address:</span> 61 Thakorbaug Market, Nr. Sardar Patel Seva Samaj, Navrangpura, Ahmedabad 380009, Gujarat, India</p>
           </div>
           <p className="text-gray-700 text-sm mt-4 font-light">
             Business Hours: Monday to Saturday, 10:00 AM - 8:00 PM IST

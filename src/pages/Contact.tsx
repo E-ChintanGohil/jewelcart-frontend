@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SEO from '@/components/SEO';
+import apiService from '@/lib/apiService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +10,7 @@ import {
   MapPin,
   Phone,
   Mail,
-  Clock,
+  Instagram,
   MessageCircle,
   Send
 } from 'lucide-react';
@@ -25,6 +26,28 @@ export default function Contact() {
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Contact details are managed from the admin Settings panel; these are fallbacks.
+  const [contact, setContact] = useState({
+    phone: '+91-9023002331',
+    email: 'info@jewelcart.shop',
+    address: '61 Thakorbaug Market, Nr. Sardar Patel Seva Samaj\nNavrangpura, Ahmedabad 380009\nGujarat, India',
+    instagram: 'https://www.instagram.com/jewelcart.shop',
+  });
+
+  useEffect(() => {
+    apiService.getSettings().then((s: any) => {
+      if (!s) return;
+      setContact(prev => ({
+        phone: s.contact_phone || prev.phone,
+        email: s.contact_email || prev.email,
+        address: s.contact_address || prev.address,
+        instagram: s.contact_instagram || prev.instagram,
+      }));
+    }).catch(() => {});
+  }, []);
+
+  const instagramHandle = contact.instagram.replace(/\/+$/, '').split('/').pop();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -57,40 +80,32 @@ export default function Contact() {
   };
 
   const contactInfo = [
+    /* Physical showroom — commented out for now (no physical store yet)
     {
       icon: <MapPin className="h-6 w-6 text-amber-500" />,
       title: "Visit Our Showroom",
-      content: [
-        "123 Jewelry Street, Zaveri Bazaar",
-        "Mumbai, Maharashtra 400002",
-        "India"
-      ]
+      content: contact.address.split('\n').filter(Boolean)
     },
+    */
     {
       icon: <Phone className="h-6 w-6 text-amber-500" />,
       title: "Call Us",
       content: [
-        "+91 98765 43210",
-        "+91 22 1234 5678",
-        "Toll Free: 1800 123 4567"
+        contact.phone
       ]
     },
     {
       icon: <Mail className="h-6 w-6 text-amber-500" />,
       title: "Email Us",
       content: [
-        "info@jewelcart.com",
-        "orders@jewelcart.com",
-        "support@jewelcart.com"
+        contact.email
       ]
     },
     {
-      icon: <Clock className="h-6 w-6 text-amber-500" />,
-      title: "Store Hours",
+      icon: <Instagram className="h-6 w-6 text-amber-500" />,
+      title: "Follow Us",
       content: [
-        "Monday - Saturday: 10:00 AM - 8:00 PM",
-        "Sunday: 11:00 AM - 7:00 PM",
-        "Holidays: 12:00 PM - 6:00 PM"
+        `@${instagramHandle} on Instagram`
       ]
     }
   ];
@@ -109,8 +124,8 @@ export default function Contact() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <SEO
-        title="Contact Jewelcart - Get in Touch | Jewelry Store Support & Inquiries"
-        description="Have questions about our jewelry or need assistance? Contact Jewelcart today! Email: info@jewelcart.com | Phone: +91 98765 43210 | Address: 123 Jewelry Street, Zaveri Bazaar, Mumbai. We're here to help!"
+        title="Contact JewelCart - Get in Touch | Jewellery Store Support & Inquiries"
+        description="Have questions about our jewellery or need assistance? Contact JewelCart today! Email: info@jewelcart.shop | Phone: +91-9023002331 | Address: 61 Thakorbaug Market, Navrangpura, Ahmedabad 380009. We're here to help!"
         image="/og-image.jpg"
         keywords="contact jewelcart, jewelry store contact, jewelry customer service, jewelry inquiries, jewelry support, jewelry store phone number, jewelry store email"
       />
@@ -180,7 +195,7 @@ export default function Contact() {
                       type="tel"
                       value={formData.phone}
                       onChange={handleInputChange}
-                      placeholder="+91 98765 43210"
+                      placeholder="+91-9023002331"
                     />
                   </div>
                   <div>
@@ -276,7 +291,7 @@ export default function Contact() {
         </div>
       </div>
 
-      {/* Map Section */}
+      {/* Map Section — physical showroom, commented out for now (no physical store yet)
       <div className="mt-16">
         <Card className="border border-gray-100 shadow-xl bg-white/50 backdrop-blur-sm">
           <CardHeader className="border-b border-gray-100">
@@ -290,12 +305,13 @@ export default function Contact() {
                 </div>
                 <p className="text-lg font-light mb-2">Interactive Map</p>
                 <p className="text-sm font-light mb-3">Map integration would be implemented here</p>
-                <p className="text-xs font-light">123 Jewelry Street, Zaveri Bazaar, Mumbai 400002</p>
+                <p className="text-xs font-light">{contact.address.split('\n').filter(Boolean).join(', ')}</p>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
+      */}
 
       {/* FAQ Section */}
       <div className="mt-16">

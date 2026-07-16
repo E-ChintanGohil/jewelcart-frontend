@@ -77,7 +77,7 @@ export default function ShippingPolicy() {
             <h3 className="font-light text-gray-900 mb-3 tracking-wide text-lg">1.2 International Shipping</h3>
             <p className="text-gray-700 text-sm leading-relaxed font-light">
               Currently, we only ship within India. International shipping will be available soon.
-              Please contact us at international@jewelcart.com for special requests.
+              Please contact us at info@jewelcart.shop for special requests.
             </p>
           </div>
 
@@ -229,24 +229,7 @@ export default function ShippingPolicy() {
         </CardHeader>
         <CardContent className="space-y-6 pt-6">
           <p className="text-gray-700 text-sm">
-            We partner with India's most trusted courier services to ensure safe delivery:
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-3 border rounded-lg text-center">
-              <p className="font-semibold text-gray-900">Blue Dart</p>
-            </div>
-            <div className="p-3 border rounded-lg text-center">
-              <p className="font-semibold text-gray-900">FedEx</p>
-            </div>
-            <div className="p-3 border rounded-lg text-center">
-              <p className="font-semibold text-gray-900">DHL</p>
-            </div>
-            <div className="p-3 border rounded-lg text-center">
-              <p className="font-semibold text-gray-900">DTDC</p>
-            </div>
-          </div>
-          <p className="text-gray-700 text-sm">
-            The shipping partner is selected based on your location to ensure fastest and safest delivery.
+            We ship through reputed, fully-insured courier services, chosen based on your location to ensure the fastest and safest delivery. The courier and tracking details for your order are shared with you once it is dispatched.
           </p>
         </CardContent>
       </Card>
@@ -449,7 +432,7 @@ export default function ShippingPolicy() {
             <h3 className="font-light text-gray-900 mb-3 tracking-wide text-lg">8.2 Lost or Damaged Shipments</h3>
             <p className="text-gray-700 text-sm leading-relaxed font-light">
               All shipments are fully insured. If your package is lost or damaged in transit,
-              please contact us immediately at support@jewelcart.com. We will file a claim with
+              please contact us immediately at info@jewelcart.shop. We will file a claim with
               the courier and provide a replacement or full refund within 7-10 business days.
             </p>
           </div>
@@ -474,9 +457,9 @@ export default function ShippingPolicy() {
             Questions about shipping or delivery? We're here to help:
           </p>
           <div className="space-y-2 text-gray-700 font-light">
-            <p><span className="text-gray-900">Shipping Support:</span> shipping@jewelcart.com</p>
-            <p><span className="text-gray-900">Customer Care:</span> +91 98765 43210</p>
-            <p><span className="text-gray-900">WhatsApp:</span> +91 98765 43210</p>
+            <p><span className="text-gray-900">Shipping Support:</span> info@jewelcart.shop</p>
+            <p><span className="text-gray-900">Customer Care:</span> +91-9023002331</p>
+            <p><span className="text-gray-900">WhatsApp:</span> +91-9023002331</p>
             <p><span className="text-gray-900">Hours:</span> Monday to Saturday, 10:00 AM - 8:00 PM IST</p>
           </div>
           <p className="text-gray-700 text-sm mt-4 font-light">
