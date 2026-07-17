@@ -8,6 +8,7 @@ export interface CartItem {
   name: string;
   price: number;
   quantity: number;
+  stock?: number; // max available — cart quantity can never exceed this
   image_url?: string;
   imageUrl?: string;
   category?: string;
@@ -25,6 +26,9 @@ interface CartContextType {
     image_url?: string;
     category?: string;
     categoryName?: string;
+    stock?: number;
+    stockQuantity?: number;
+    stock_quantity?: number;
   }, quantity?: number) => void;
   removeFromCart: (itemId: string) => void;
   removeByProductId: (productId: string | number) => void;
@@ -93,27 +97,37 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     categoryName?: string;
   }, quantity: number = 1) => {
     const price = product.calculatedPrice || product.price || 0;
+    const stock = product.stockQuantity ?? product.stock ?? product.stock_quantity ?? Infinity;
     const existingItemIndex = items.findIndex(item => item.productId === product.id);
 
     if (existingItemIndex > -1) {
-      // Item already exists, increase quantity
+      // Item already exists — increase, but never above available stock
+      const current = items[existingItemIndex];
+      const cap = current.stock ?? stock;
+      const newQty = Math.min(cap, current.quantity + quantity);
+      if (newQty === current.quantity) {
+        toast({ title: "Maximum available", description: `Only ${cap} of ${product.name} in stock.` });
+        return;
+      }
       setItems(prevItems => {
         const newItems = [...prevItems];
-        newItems[existingItemIndex].quantity += quantity;
+        newItems[existingItemIndex] = { ...newItems[existingItemIndex], quantity: newQty, stock: cap };
         return newItems;
       });
       toast({
         title: "Item updated in cart",
-        description: `Increased quantity of ${product.name} by ${quantity}`,
+        description: `Increased quantity of ${product.name}`,
       });
     } else {
-      // New item, add to cart
+      // New item, add to cart (capped at stock)
+      const qty = Math.min(quantity, stock);
       const newCartItem: CartItem = {
         id: `cart-${Date.now()}-${Math.random()}`,
         productId: product.id,
         name: product.name,
         price: price,
-        quantity: quantity,
+        quantity: qty,
+        stock: stock === Infinity ? undefined : stock,
         image_url: getProductImageUrl(product as any),
         category: product.category || product.categoryName,
       };
@@ -121,7 +135,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       setItems(prevItems => [...prevItems, newCartItem]);
       toast({
         title: "Added to cart",
-        description: `${quantity} x ${product.name} added to your cart`,
+        description: `${qty} x ${product.name} added to your cart`,
       });
     }
   };
@@ -149,9 +163,12 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     }
 
     setItems(prevItems =>
-      prevItems.map(item =>
-        item.id === itemId ? { ...item, quantity } : item
-      )
+      prevItems.map(item => {
+        if (item.id !== itemId) return item;
+        // Never exceed available stock
+        const capped = item.stock != null ? Math.min(quantity, item.stock) : quantity;
+        return { ...item, quantity: capped };
+      })
     );
   };
 
