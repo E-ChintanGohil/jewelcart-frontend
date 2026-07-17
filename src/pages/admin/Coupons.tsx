@@ -20,6 +20,7 @@ interface Coupon {
   discountValue: number;
   minOrderAmount: number | null;
   maxUses: number | null;
+  oncePerCustomer: boolean;
   usedCount: number;
   expiresAt: string | null;
   isActive: boolean;
@@ -32,6 +33,7 @@ const emptyForm = {
   discountValue: '',
   minOrderAmount: '',
   maxUses: '',
+  oncePerCustomer: false,
   expiresAt: '',
   isActive: true,
 };
@@ -73,6 +75,7 @@ export default function Coupons() {
       discountValue: String(c.discountValue),
       minOrderAmount: c.minOrderAmount != null ? String(c.minOrderAmount) : '',
       maxUses: c.maxUses != null ? String(c.maxUses) : '',
+      oncePerCustomer: !!c.oncePerCustomer,
       expiresAt: c.expiresAt ? c.expiresAt.slice(0, 10) : '',
       isActive: c.isActive,
     });
@@ -92,6 +95,7 @@ export default function Coupons() {
         discountValue: parseFloat(form.discountValue),
         minOrderAmount: form.minOrderAmount ? parseFloat(form.minOrderAmount) : null,
         maxUses: form.maxUses ? parseInt(form.maxUses) : null,
+        oncePerCustomer: form.oncePerCustomer,
         expiresAt: form.expiresAt || null,
         isActive: form.isActive,
       };
@@ -292,6 +296,15 @@ export default function Coupons() {
                 value={form.expiresAt}
                 onChange={(e) => setForm({ ...form, expiresAt: e.target.value })}
               />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Switch
+                id="oncePerCustomer"
+                checked={form.oncePerCustomer}
+                onCheckedChange={(v) => setForm({ ...form, oncePerCustomer: v })}
+              />
+              <Label htmlFor="oncePerCustomer">One use per customer</Label>
             </div>
 
             <div className="flex items-center gap-3">
