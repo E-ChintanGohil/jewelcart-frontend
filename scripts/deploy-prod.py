@@ -1,16 +1,22 @@
 #!/usr/bin/env python3
 """
-Frontend deployment — uploads dist/ to cPanel via UAPI (HTTPS, port 2083).
+PROD frontend deployment — uploads dist/ to /public_html on cPanel via UAPI
+(HTTPS, port 2083). For STAGING use `npm run deploy` (scripts/deploy.py) instead.
 
 Why UAPI instead of FTPS: this server's Pure-FTPd advertises TLS but rejects
 AUTH TLS with 504 (broken cert/config). UAPI works on the same credentials.
 
 Usage:
-  npm run deploy            # builds + uploads
-  npm run deploy:upload     # uploads existing dist/
+  npx vite build --mode prod      # REQUIRED first — this script does not build
+  python3 scripts/deploy-prod.py  # uploads existing dist/
+
+This script uploads whatever is already in dist/, so it verifies the bundle
+targets the prod API (.env.prod) before uploading and aborts if it finds a
+staging build. See verify_prod_build().
 
 Reads credentials from .env.deploy (gitignored).
-Preserves .htaccess and .well-known/ on the server (SSL cert verification).
+/public_html also holds the other domains as subfolders, so only the files in
+DELETE_ONLY are ever removed — never a clean-all.
 """
 
 import os
@@ -58,7 +64,60 @@ PRESERVE = set()  # unused in prod mode
 if not all([CP_HOST, CP_USER, CP_PASS]):
     sys.exit("❌ Missing FTP_HOST/FTP_USER/FTP_PASS in .env.deploy")
 if not LOCAL_DIST.exists():
-    sys.exit(f"❌ {LOCAL_DIST} not found. Run `npm run build` first.")
+    sys.exit(f"❌ {LOCAL_DIST} not found. Run `npx vite build --mode prod` first.")
+
+# ─── Guard: refuse to upload a non-prod build ─────────────────────────────────
+# This script uploads whatever is already in dist/ — it does NOT build. Running
+# `npm run deploy` (staging) beforehand leaves a staging-pointed bundle there, and
+# uploading that would aim the LIVE store at the staging API and database.
+# So verify the bundle targets prod before anything touches /public_html.
+SCAN_SUFFIXES = {".js", ".html", ".css", ".json", ".txt", ".map"}
+
+def expected_prod_api() -> str:
+    """Read the prod API origin from .env.prod so this never hardcodes a host."""
+    env_prod = load_env(ROOT / ".env.prod")
+    url = env_prod.get("VITE_API_BASE_URL", "")
+    if not url:
+        sys.exit("❌ VITE_API_BASE_URL missing from .env.prod — cannot verify the build.")
+    parts = urllib.parse.urlsplit(url)
+    return f"{parts.scheme}://{parts.netloc}"
+
+def verify_prod_build(dist: Path):
+    prod_origin = expected_prod_api()
+    prod_host = urllib.parse.urlsplit(prod_origin).netloc
+    offenders, prod_hits = [], 0
+
+    for path in sorted(dist.rglob("*")):
+        if not path.is_file() or path.suffix.lower() not in SCAN_SUFFIXES:
+            continue
+        text = path.read_text(encoding="utf-8", errors="ignore")
+        # Any staging host that is not the prod host itself
+        for host in ("staging-api.jewelcart.shop", "staging.jewelcart.shop"):
+            if host in text and host != prod_host:
+                offenders.append((path.relative_to(dist), host))
+        prod_hits += text.count(prod_origin)
+
+    if offenders:
+        print(f"\n❌ REFUSING TO DEPLOY — dist/ contains staging references:")
+        for rel, host in offenders:
+            print(f"     {rel} → {host}")
+        sys.exit(
+            "\n   This looks like the STAGING build. Uploading it would point the live\n"
+            "   store at the staging API and database.\n"
+            "   Rebuild for prod first:  npx vite build --mode prod\n"
+        )
+
+    if prod_hits == 0:
+        sys.exit(
+            f"\n❌ REFUSING TO DEPLOY — no reference to {prod_origin} found in dist/.\n"
+            f"   The bundle does not target the prod API.\n"
+            f"   Rebuild for prod first:  npx vite build --mode prod\n"
+        )
+
+    print(f"  build verified: targets {prod_origin}, no staging references.")
+
+print(f"→ Verifying dist/ is a PROD build…")
+verify_prod_build(LOCAL_DIST)
 
 # ─── HTTP helpers (Basic auth, ignore self-signed cert) ───────────────────────
 ssl_ctx = ssl.create_default_context()
@@ -220,4 +279,4 @@ for entry in sorted(final, key=lambda e: e.get("file", "")):
     is_dir = entry.get("type") == "dir"
     print(f"    {name}{'/' if is_dir else ''}")
 
-print(f"\n✓ Deployed to https://staging.jewelcart.shop")
+print(f"\n✓ Deployed to https://www.jewelcart.shop")
