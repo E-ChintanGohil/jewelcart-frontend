@@ -46,10 +46,14 @@ export default function Shop() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
   const searchQuery = searchParams.get('search') || '';
 
   useEffect(() => {
     const loadData = async () => {
+      setIsLoading(true);
+      setLoadError(false);
       try {
         const [productsData, categoriesData] = await Promise.all([
           apiService.getProducts({ limit: 1000 }),
@@ -59,12 +63,13 @@ export default function Shop() {
         setCategories(categoriesData.categories || categoriesData);
       } catch (error) {
         console.error('Failed to load shop data:', error);
+        setLoadError(true);
       } finally {
         setIsLoading(false);
       }
     };
     loadData();
-  }, []);
+  }, [reloadKey]);
 
   const filteredProducts = products.filter(product => {
     if (selectedCategory && (product.categoryName || product.category) !== selectedCategory) {
@@ -86,6 +91,23 @@ export default function Shop() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <Loader2 className="h-6 w-6 animate-spin text-brandgold" />
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
+        <p className="text-lg font-medium text-brandblue">We couldn't load the collection.</p>
+        <p className="mt-1 text-sm text-gray-500">
+          Something went wrong on our side. Please try again in a moment.
+        </p>
+        <Button
+          className="mt-5 bg-brandblue hover:bg-brandblue/90 text-white"
+          onClick={() => setReloadKey((k) => k + 1)}
+        >
+          Try again
+        </Button>
       </div>
     );
   }
