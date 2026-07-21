@@ -12,6 +12,7 @@ import { useWishlist } from '@/contexts/WishlistContext';
 import { getProductImageUrl } from '@/lib/config';
 import { useToast } from '@/hooks/use-toast';
 import ProductFilters, { FilterState } from '@/components/ProductFilters';
+import { productPath } from '@/lib/slug';
 
 const ProductListing = () => {
   const { addToCart, isInCart, removeByProductId } = useCart();
@@ -214,7 +215,7 @@ const ProductListing = () => {
                   const wishlisted = isInWishlist(product.id);
 
                   return (
-                    <Link key={product.id} to={`/product/${product.id}`} className="group">
+                    <Link key={product.id} to={productPath(product.id, product.name)} className="group">
                       <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
                         <img
                           src={getProductImageUrl(product)}

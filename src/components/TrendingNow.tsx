@@ -6,6 +6,7 @@ import { TrendingUp } from "lucide-react";
 import { apiService } from "@/lib/apiService";
 import { getProductImageUrl } from "@/lib/config";
 import { formatCurrency } from "@/lib/currency";
+import { productPath } from '@/lib/slug';
 
 const TrendingNow = () => {
 	const [products, setProducts] = useState<any[]>([]);
@@ -47,7 +48,7 @@ const TrendingNow = () => {
 				) : (
 					<div className="grid grid-cols-2 md:grid-cols-4 gap-6">
 						{products.map((product) => (
-							<Link key={product.id} to={`/product/${product.id}`}>
+							<Link key={product.id} to={productPath(product.id, product.name)}>
 								<div className="group cursor-pointer">
 									<div className="relative overflow-hidden rounded-lg bg-white shadow-md border border-gray-200 hover:shadow-lg transition-all duration-300">
 										<div className="aspect-square overflow-hidden">

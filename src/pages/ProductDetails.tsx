@@ -9,6 +9,7 @@ import { formatCurrency } from '@/lib/currency';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { resolveImageUrl, getProductImageUrl } from '@/lib/config';
+import { productPath, parseProductId } from '@/lib/slug';
 
 const imgUrl = (src?: string | null) =>
   resolveImageUrl(src) || getProductImageUrl({});
@@ -21,7 +22,8 @@ const COLOR_SWATCHES: Record<string, { label: string; bg: string; ring: string }
 };
 
 const ProductDetails = () => {
-  const { id } = useParams();
+  const { id: idParam } = useParams();
+  const id = parseProductId(idParam);
   const { addToCart, isInCart, removeByProductId } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const navigate = useNavigate();
@@ -66,6 +68,16 @@ const ProductDetails = () => {
     loadProduct();
   }, [id]);
 
+  // Canonicalize the URL: if we arrived via a plain id or a stale slug, replace
+  // it with the current name-slug form so both users and Google see one clean URL.
+  useEffect(() => {
+    if (!product) return;
+    const canonical = productPath(product.id, product.name);
+    if (idParam && `/product/${idParam}` !== canonical) {
+      navigate(canonical, { replace: true });
+    }
+  }, [product, idParam, navigate]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -101,6 +113,8 @@ const ProductDetails = () => {
         title={`${product.name} - ${product.categoryName || 'Jewelry'} | Jewelcart`}
         description={product.description || `Buy ${product.name} from Jewelcart.`}
         image={product.imageUrl || product.image_url || "/og-image.jpg"}
+        type="product"
+        url={`${import.meta.env.VITE_SITE_URL || 'https://www.jewelcart.shop'}${productPath(product.id, product.name)}`}
       />
 
       {/* Breadcrumb */}
@@ -478,7 +492,7 @@ const ProductDetails = () => {
             <h2 className="text-lg font-semibold text-brandblue mb-6">You may also like</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-8">
               {similarProducts.map((similar) => (
-                <Link key={similar.id} to={`/product/${similar.id}`} className="group">
+                <Link key={similar.id} to={productPath(similar.id, similar.name)} className="group">
                   <div className="aspect-square overflow-hidden rounded-lg bg-gray-100">
                     <img
                       src={imgUrl(similar.primary_image || (similar.images && similar.images[0]) || similar.imageUrl || similar.image_url)}

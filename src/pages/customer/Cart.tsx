@@ -6,6 +6,7 @@ import { formatCurrency } from '@/lib/currency';
 import { useCart } from '@/contexts/CartContext';
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight, Lock } from 'lucide-react';
 import { getProductImageUrl } from '@/lib/config';
+import { productPath } from '@/lib/slug';
 
 export default function Cart() {
   const { items: cartItems, updateQuantity, removeFromCart, getTotalPrice } = useCart();
@@ -60,7 +61,7 @@ export default function Cart() {
               >
                 {/* Product */}
                 <div className="col-span-2 md:col-span-1 flex items-center gap-4">
-                  <Link to={`/product/${item.productId}`} className="flex-shrink-0">
+                  <Link to={productPath(item.productId, item.name)} className="flex-shrink-0">
                     <img
                       src={item.image_url || getProductImageUrl({ category: item.category })}
                       alt={item.name}
@@ -70,7 +71,7 @@ export default function Cart() {
                   <div className="min-w-0">
                     <p className="text-[11px] uppercase tracking-wider text-gray-400">{item.category}</p>
                     <Link
-                      to={`/product/${item.productId}`}
+                      to={productPath(item.productId, item.name)}
                       className="text-sm font-medium text-brandblue hover:text-brandgold transition-colors leading-snug line-clamp-1"
                     >
                       {item.name}

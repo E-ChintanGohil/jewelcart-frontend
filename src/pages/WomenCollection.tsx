@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Heart, ShoppingCart } from 'lucide-react';
 import { formatCurrency } from '@/lib/currency';
 import { Link } from 'react-router-dom';
+import { productPath } from '@/lib/slug';
 
 const WomenCollection = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -45,7 +46,7 @@ const WomenCollection = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {products.map((product) => (
-              <Link key={product.id} to={`/product/${product.id}`}>
+              <Link key={product.id} to={productPath(product.id, product.name)}>
                 <Card className="group cursor-pointer hover:shadow-elegant transition-all duration-300 hover:-translate-y-2 bg-white border-gray-200">
                   <div className="relative aspect-square overflow-hidden rounded-t-lg">
                     <img

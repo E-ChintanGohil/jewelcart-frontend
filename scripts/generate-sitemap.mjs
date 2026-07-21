@@ -40,6 +40,21 @@ const STATIC_PAGES = [
   { path: '/payment-security', changefreq: 'yearly', priority: '0.3' },
 ];
 
+// Mirror of src/lib/slug.ts — product URLs are name-slug + id.
+const slugify = (text) =>
+  String(text)
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80);
+
+const productPath = (id, name) => {
+  const slug = name ? slugify(name) : '';
+  return slug ? `/product/${slug}-${id}` : `/product/${id}`;
+};
+
 const xmlEscape = (s) =>
   String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;').replace(/'/g, '&apos;');
@@ -59,6 +74,7 @@ async function getProducts() {
     .filter((p) => p && p.id != null)
     .map((p) => ({
       id: p.id,
+      name: p.name || '',
       lastmod: (p.updated_at || p.updatedAt || '').slice(0, 10) || todayISO(),
     }));
 }
@@ -93,7 +109,7 @@ async function main() {
   const entries = [
     ...STATIC_PAGES.map((p) => urlEntry({ ...p, lastmod: today })),
     ...products.map((p) =>
-      urlEntry({ path: `/product/${p.id}`, lastmod: p.lastmod, changefreq: 'weekly', priority: '0.8' })
+      urlEntry({ path: productPath(p.id, p.name), lastmod: p.lastmod, changefreq: 'weekly', priority: '0.8' })
     ),
   ];
 

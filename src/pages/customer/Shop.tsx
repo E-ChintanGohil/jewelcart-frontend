@@ -10,6 +10,7 @@ import { useWishlist } from '@/contexts/WishlistContext';
 import { getProductImageUrl } from '@/lib/config';
 import { useToast } from '@/components/ui/use-toast';
 import { Loader2, ShoppingCart, Heart, X, Search } from 'lucide-react';
+import { productPath } from '@/lib/slug';
 
 interface Product {
   id: string | number;
@@ -239,7 +240,7 @@ function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <Link to={`/product/${product.id}`} className="group">
+    <Link to={productPath(product.id, product.name)} className="group">
       <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
         <img
           src={getProductImageUrl(product)}
