@@ -107,8 +107,9 @@ const Products = () => {
         description: formData.description,
         categoryId: parseInt(categories.find(c => c.name === formData.category)?.id || '1'),
         stock: parseInt(formData.stock),
-        // Fixed-price products carry no weight/making charge; send 0 and the fixed price
-        weight: formData.isFixedPrice ? 0 : parseFloat(formData.weight),
+        // Weight is real product data — always send it, fixed-price or not. Fixed price
+        // only means the price is set directly and the metal-rate cron leaves it alone.
+        weight: parseFloat(formData.weight) || 0,
         materialId: parseInt(formData.materialId),
         karatId: parseInt(formData.karatId),
         gemstone: formData.gemstone || undefined,
@@ -547,7 +548,8 @@ const Products = () => {
                 </div>
               </div>
 
-              {/* Fixed-price toggle: one set price, ignores weight & the metal-rate cron */}
+              {/* Fixed-price toggle: price is set directly and the metal-rate cron skips it.
+                  Weight is still entered, stored and shown (product page + invoice). */}
               <div className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 bg-gray-50">
                 <input
                   type="checkbox"
@@ -557,7 +559,7 @@ const Products = () => {
                   className="h-4 w-4"
                 />
                 <Label htmlFor="isFixedPrice" className="cursor-pointer">
-                  Fixed price &mdash; set one price directly (no weight, not affected by metal-rate updates)
+                  Fixed price &mdash; set one price directly (not affected by metal-rate updates)
                 </Label>
               </div>
 
@@ -643,20 +645,20 @@ const Products = () => {
               )}
 
               <div className="grid grid-cols-2 gap-4">
-                {!formData.isFixedPrice && (
-                  <div className="space-y-2">
-                    <Label htmlFor="weight">Weight (g)</Label>
-                    <Input
-                      id="weight"
-                      name="weight"
-                      type="number"
-                      step="0.1"
-                      value={formData.weight}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                )}
+                <div className="space-y-2">
+                  <Label htmlFor="weight">Weight (g)</Label>
+                  <Input
+                    id="weight"
+                    name="weight"
+                    type="number"
+                    step="0.1"
+                    value={formData.weight}
+                    onChange={handleInputChange}
+                    // Weight drives the price for weight-based products, so it's required
+                    // there. For fixed-price it's still stored and shown (page + invoice).
+                    required={!formData.isFixedPrice}
+                  />
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="stock">Stock</Label>
                   <Input
