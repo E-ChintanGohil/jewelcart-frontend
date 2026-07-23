@@ -366,7 +366,7 @@ const ProductDetails = () => {
             <div className="mt-8 pt-6 border-t border-gray-100 flex flex-wrap gap-6">
               <div className="flex items-center gap-2 text-xs text-gray-400">
                 <Truck className="w-3.5 h-3.5" />
-                <span>Free shipping over &#8377;1,00,000</span>
+                <span>Free shipping in Gujarat, or over &#8377;1,00,000</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-gray-400">
                 <RotateCcw className="w-3.5 h-3.5" />

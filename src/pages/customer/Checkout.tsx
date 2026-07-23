@@ -97,7 +97,13 @@ export default function Checkout() {
   };
 
   const subtotal = getTotalPrice();
-  const shipping = subtotal > 100000 ? 0 : 2000;
+  // Free shipping within Gujarat (home state), or on orders over ₹1,00,000.
+  // State is free-typed, so normalise before matching (handles case/spacing and the
+  // common "Gujrat" spelling).
+  const shipState = (addresses.find(a => a.id === selectedAddress)?.state || '')
+    .toLowerCase().replace(/[^a-z]/g, '');
+  const isGujarat = shipState === 'gujarat' || shipState === 'gujrat';
+  const shipping = (isGujarat || subtotal > 100000) ? 0 : 2000;
   const tax = subtotal * 0.03;
   const couponDiscount = appliedCoupon?.discountAmount ?? 0;
   const total = subtotal + shipping + tax - couponDiscount;
@@ -574,7 +580,13 @@ export default function Checkout() {
                 <span className="font-bold text-amber-600">{formatCurrency(total)}</span>
               </div>
 
-              {shipping > 0 && (
+              {isGujarat ? (
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <p className="text-sm text-green-800">
+                    Free shipping to Gujarat applied.
+                  </p>
+                </div>
+              ) : shipping > 0 && (
                 <div className="bg-amber-50 p-3 rounded-lg">
                   <p className="text-sm text-amber-800">
                     Add {formatCurrency(100000 - subtotal)} more for free shipping!
@@ -589,7 +601,7 @@ export default function Checkout() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Truck className="h-4 w-4 text-blue-600" />
-                  <span>Free shipping over ₹1,00,000</span>
+                  <span>Free shipping in Gujarat, or on orders over ₹1,00,000</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Shield className="h-4 w-4 text-purple-600" />
