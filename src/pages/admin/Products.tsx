@@ -45,9 +45,10 @@ const Products = () => {
     // Active = visible/purchasable on the storefront. Turn off to hide a product.
     isActive: true,
     basePrice: '',
-    // Fixed-price mode: one set price used everywhere, ignores weight & metal-rate cron
+    // Fixed-price mode: price = ratePerGram × weight, not affected by the metal-rate cron
     isFixedPrice: false,
     fixedPrice: '',
+    ratePerGram: '',
     // Phase 1: color & purity
     availableColors: ['yellow'] as string[],
     defaultColor: 'yellow',
@@ -118,7 +119,12 @@ const Products = () => {
         certification: formData.certification || undefined,
         featured: formData.featured,
         basePrice: formData.isFixedPrice ? 0 : parseFloat(formData.basePrice),
-        fixedPrice: formData.isFixedPrice ? parseFloat(formData.fixedPrice) : null,
+        // Fixed price = rate/gram × weight. Send both the rate (for the invoice) and
+        // the computed fixed price (used everywhere else).
+        ratePerGram: formData.isFixedPrice ? (parseFloat(formData.ratePerGram) || 0) : null,
+        fixedPrice: formData.isFixedPrice
+          ? Math.round((parseFloat(formData.ratePerGram) || 0) * (parseFloat(formData.weight) || 0))
+          : null,
         tags: [],
         isActive: formData.isActive,
         // Phase 1: color & purity
@@ -241,7 +247,8 @@ const Products = () => {
   // Calculate price in real-time
   const calculatePrice = () => {
     if (formData.isFixedPrice) {
-      setCalculatedPrice(parseFloat(formData.fixedPrice) || 0);
+      // Fixed price = rate/gram × weight
+      setCalculatedPrice(Math.round((parseFloat(formData.ratePerGram) || 0) * (parseFloat(formData.weight) || 0)));
       return;
     }
     if (!formData.materialId || !formData.karatId || !formData.weight || !formData.basePrice) {
@@ -275,7 +282,7 @@ const Products = () => {
   // Effect to recalculate price when form values change
   useEffect(() => {
     calculatePrice();
-  }, [formData.materialId, formData.karatId, formData.weight, formData.basePrice, formData.isFixedPrice, formData.fixedPrice, materials]);
+  }, [formData.materialId, formData.karatId, formData.weight, formData.basePrice, formData.isFixedPrice, formData.fixedPrice, formData.ratePerGram, materials]);
 
   const resetForm = () => {
     setFormData({
@@ -293,6 +300,7 @@ const Products = () => {
       basePrice: '',
       isFixedPrice: false,
       fixedPrice: '',
+      ratePerGram: '',
       availableColors: ['yellow'],
       defaultColor: 'yellow',
       availablePurities: [],
@@ -394,6 +402,10 @@ const Products = () => {
         basePrice: basePriceValue?.toString() || '',
         isFixedPrice: (fp.is_fixed_price ?? (fp.fixed_price != null)) || false,
         fixedPrice: fp.fixed_price != null ? fp.fixed_price.toString() : '',
+        // Rate for fixed-price products: use the stored rate, else derive from price/weight
+        ratePerGram: (fp.rate_per_gram ?? fp.ratePerGram) != null
+          ? (fp.rate_per_gram ?? fp.ratePerGram).toString()
+          : (fp.fixed_price != null && fp.weight ? Math.round((fp.fixed_price / fp.weight) * 100) / 100 : '').toString(),
         availableColors: fp.availableColors || fp.available_colors || ['yellow'],
         defaultColor: fp.defaultColor || fp.default_color || 'yellow',
         availablePurities: fp.availablePurities || fp.available_purities || [],
@@ -569,17 +581,23 @@ const Products = () => {
 
               {formData.isFixedPrice && (
                 <div className="space-y-2">
-                  <Label htmlFor="fixedPrice">Fixed Price (₹)</Label>
+                  <Label htmlFor="ratePerGram">Rate (₹/gram)</Label>
                   <Input
-                    id="fixedPrice"
-                    name="fixedPrice"
+                    id="ratePerGram"
+                    name="ratePerGram"
                     type="number"
                     step="0.01"
-                    value={formData.fixedPrice}
+                    value={formData.ratePerGram}
                     onChange={handleInputChange}
-                    placeholder="Final selling price"
+                    placeholder="e.g. 450"
                     required
                   />
+                  <p className="text-xs text-gray-500">
+                    Price = Rate × Weight
+                    {formData.ratePerGram && formData.weight
+                      ? ` = ₹${Math.round((parseFloat(formData.ratePerGram) || 0) * (parseFloat(formData.weight) || 0)).toLocaleString('en-IN')}`
+                      : ''}. Shown as the per-gram rate on the invoice.
+                  </p>
                 </div>
               )}
 
