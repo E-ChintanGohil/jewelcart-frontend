@@ -42,6 +42,8 @@ const Products = () => {
     gemstone: '',
     certification: '',
     featured: false,
+    // Active = visible/purchasable on the storefront. Turn off to hide a product.
+    isActive: true,
     basePrice: '',
     // Fixed-price mode: one set price used everywhere, ignores weight & metal-rate cron
     isFixedPrice: false,
@@ -118,7 +120,7 @@ const Products = () => {
         basePrice: formData.isFixedPrice ? 0 : parseFloat(formData.basePrice),
         fixedPrice: formData.isFixedPrice ? parseFloat(formData.fixedPrice) : null,
         tags: [],
-        isActive: true,
+        isActive: formData.isActive,
         // Phase 1: color & purity
         availableColors: formData.availableColors,
         defaultColor: formData.defaultColor || undefined,
@@ -287,6 +289,7 @@ const Products = () => {
       gemstone: '',
       certification: '',
       featured: false,
+      isActive: true,
       basePrice: '',
       isFixedPrice: false,
       fixedPrice: '',
@@ -387,6 +390,7 @@ const Products = () => {
         gemstone: fullProduct.gemstone || '',
         certification: fullProduct.certification || '',
         featured: fullProduct.featured || false,
+        isActive: (fullProduct.isActive ?? fullProduct.is_active) !== false,
         basePrice: basePriceValue?.toString() || '',
         isFixedPrice: (fp.is_fixed_price ?? (fp.fixed_price != null)) || false,
         fixedPrice: fp.fixed_price != null ? fp.fixed_price.toString() : '',
@@ -695,7 +699,7 @@ const Products = () => {
                 </div>
               </div>
 
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-6">
                 <div className="flex items-center space-x-2">
                   <Switch
                     id="featured"
@@ -703,6 +707,14 @@ const Products = () => {
                     onCheckedChange={(checked) => setFormData(prev => ({ ...prev, featured: checked }))}
                   />
                   <Label htmlFor="featured">Featured Product</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="isActive"
+                    checked={formData.isActive}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isActive: checked }))}
+                  />
+                  <Label htmlFor="isActive">Active {formData.isActive ? '(visible on site)' : '(hidden from site)'}</Label>
                 </div>
               </div>
 
