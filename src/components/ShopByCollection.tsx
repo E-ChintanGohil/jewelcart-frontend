@@ -121,11 +121,11 @@ const StaticHoverSlider = () => {
 									to={`/products/${(category.name || '').toLowerCase()}`}
 									className="group relative snap-start min-w-[85%] sm:min-w-[50%] px-2 lg:min-w-[25%] h-[350px]"
 								>
-									<div className="relative h-full rounded-2xl overflow-hidden">
+									<div className="relative h-full rounded-2xl overflow-hidden bg-neutral-100">
 										<img
 											src={getCategoryImage(category)}
 											alt={category.name}
-											className="w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-110"
+											className="w-full h-full object-contain transition-transform duration-[800ms] ease-out group-hover:scale-105"
 										/>
 										{/* Always-on gradient */}
 										<div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
@@ -192,11 +192,11 @@ const ShopByCollection = () => {
 							<Link key={category.id} to={`/products/${(category.name || '').toLowerCase()}`}>
 								<div className="group cursor-pointer">
 									<div className="relative overflow-hidden rounded-xl">
-										<div className="aspect-[4/3] overflow-hidden">
+										<div className="aspect-[4/3] overflow-hidden bg-neutral-100">
 											<img
 												src={getCategoryImage(category)}
 												alt={category.name}
-												className="w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-110"
+												className="w-full h-full object-contain transition-transform duration-[800ms] ease-out group-hover:scale-105"
 											/>
 											<div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
 										</div>

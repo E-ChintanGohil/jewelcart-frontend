@@ -52,7 +52,7 @@ const ShopByCategory = () => {
                 <img
                   src={getCategoryImage(category)}
                   alt={category.name}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-[800ms] ease-out group-hover:scale-110"
+                  className="absolute inset-0 w-full h-full object-contain transition-transform duration-[800ms] ease-out group-hover:scale-105"
                   loading="lazy"
                 />
 
