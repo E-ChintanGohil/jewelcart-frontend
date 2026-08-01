@@ -140,24 +140,13 @@ export default function Cart() {
                   <span className="font-medium text-black">{formatCurrency(subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Shipping</span>
-                  <span className="font-medium text-gray-400">Calculated at checkout</span>
-                </div>
-                <div className="flex justify-between">
                   <span className="text-gray-500">Tax (3%)</span>
                   <span className="font-medium text-black">{formatCurrency(tax)}</span>
                 </div>
               </div>
 
-              <p className="text-xs text-gray-400">
-                Shipping depends on your delivery address. Free in Gujarat, or on orders over{' '}
-                {formatCurrency(100000)}.
-              </p>
-
               <div className="border-t border-gray-200 pt-4 flex justify-between">
-                <span className="text-sm font-semibold text-brandblue">
-                  Total <span className="font-normal text-gray-400">(excl. shipping)</span>
-                </span>
+                <span className="text-sm font-semibold text-brandblue">Total</span>
                 <span className="text-lg font-semibold text-black">{formatCurrency(total)}</span>
               </div>
 

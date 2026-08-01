@@ -535,16 +535,14 @@ export default function Checkout() {
                 <span className="text-gray-600">Subtotal ({cartItems.reduce((acc, item) => acc + item.quantity, 0)} items)</span>
                 <span className="font-semibold">{formatCurrency(subtotal)}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Shipping</span>
-                {hasAddress ? (
+              {hasAddress && (
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Shipping</span>
                   <span className="font-semibold">
                     {shipping === 0 ? 'Free' : formatCurrency(shipping)}
                   </span>
-                ) : (
-                  <span className="text-sm text-gray-400">Add address to calculate</span>
-                )}
-              </div>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-gray-600">Tax (3%)</span>
                 <span className="font-semibold">{formatCurrency(tax)}</span>
@@ -583,19 +581,11 @@ export default function Checkout() {
 
               <Separator />
               <div className="flex justify-between text-lg">
-                <span className="font-bold">
-                  Total{!hasAddress && <span className="ml-1 text-sm font-normal text-gray-400">(excl. shipping)</span>}
-                </span>
+                <span className="font-bold">Total</span>
                 <span className="font-bold text-amber-600">{formatCurrency(total)}</span>
               </div>
 
-              {!hasAddress ? (
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <p className="text-sm text-gray-600">
-                    Shipping is added once you select a delivery address.
-                  </p>
-                </div>
-              ) : isGujarat ? (
+              {!hasAddress ? null : isGujarat ? (
                 <div className="bg-green-50 p-3 rounded-lg">
                   <p className="text-sm text-green-800">
                     Free shipping to Gujarat applied.
