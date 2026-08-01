@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Search, User, LogOut, ShoppingCart, Heart } from "lucide-react";
+import { Menu, X, Search, User, LogOut, ShoppingCart, Heart, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -103,6 +103,16 @@ const megaCategories: MegaMenuCategory[] = [
 const simpleNavLinks = [
 	{ label: "All Jewellery", href: "/shop" },
 ];
+
+/**
+ * Seasonal spotlight link, shown first in the nav.
+ * Set to null once the season is over to remove it everywhere.
+ */
+const spotlightNav: { slug: string; label: string; badge: string } | null = {
+	slug: "rakhi",
+	label: "Rakhi",
+	badge: "New",
+};
 
 // ---------- Helpers ----------
 
@@ -227,6 +237,37 @@ function MegaMenuPanel({ cat }: { cat: MegaMenuCategory }) {
 				</Link>
 			</div>
 		</div>
+	);
+}
+
+// ---------- Seasonal spotlight link ----------
+
+function SpotlightLink({
+	item,
+	className = "",
+	onClick,
+}: {
+	item: { slug: string; label: string; badge: string };
+	className?: string;
+	onClick?: () => void;
+}) {
+	return (
+		<Link
+			to={`/products/${item.slug}`}
+			onClick={onClick}
+			aria-label={`${item.label} — ${item.badge} collection`}
+			className={`group relative inline-flex items-center gap-1.5 overflow-hidden rounded-full px-4 py-2 text-xs font-medium uppercase tracking-wider text-white bg-[linear-gradient(110deg,#9a6b0d_0%,#e0b552_50%,#9a6b0d_100%)] shadow-[0_2px_10px_-3px_rgba(154,107,13,0.75)] transition-shadow duration-3s hover:shadow-[0_4px_16px_-3px_rgba(154,107,13,0.95)] ${className}`}
+		>
+			<Sparkles className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+			<span>{item.label}</span>
+			<span className="rounded-full bg-white/25 px-1.5 py-0.5 text-[10px] leading-none tracking-normal">
+				{item.badge}
+			</span>
+			<span
+				aria-hidden="true"
+				className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/3 bg-white/35 blur-[2px] animate-shine motion-reduce:hidden"
+			/>
+		</Link>
 	);
 }
 
@@ -472,6 +513,10 @@ const Header = () => {
 			<nav className="max-lg:hidden border-t border-gray-100 relative z-50" aria-label="Main navigation">
 				<div className="mx-auto max-w-[1232px] w-full px-4">
 					<div className="flex items-center justify-center gap-x-1">
+						{spotlightNav && (
+							<SpotlightLink item={spotlightNav} className="mr-2 my-1.5" />
+						)}
+
 						<NavigationMenu className="static">
 							<NavigationMenuList className="space-x-0">
 								{megaCategories.map((cat) => (
@@ -532,6 +577,16 @@ const Header = () => {
 							<Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
 						</div>
 					</form>
+
+					{spotlightNav && (
+						<div className="px-4 pt-1 pb-3">
+							<SpotlightLink
+								item={spotlightNav}
+								className="w-full justify-center py-2.5"
+								onClick={() => setIsMenuOpen(false)}
+							/>
+						</div>
+					)}
 
 					<Accordion type="single" collapsible className="w-full">
 						{megaCategories.map((cat, i) => (

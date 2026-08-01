@@ -80,7 +80,8 @@ export default {
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'slideDown': 'slideDown 0.35s ease-out'
+				'slideDown': 'slideDown 0.35s ease-out',
+				'shine': 'shine 4.5s ease-in-out infinite'
 			},
 			keyframes: {
 				'accordion-down': {
@@ -105,6 +106,14 @@ export default {
 					},
 					to: {
 						transform: 'translateY(0)'
+					}
+				},
+				'shine': {
+					'0%': {
+						transform: 'translateX(-130%) skewX(-20deg)'
+					},
+					'55%, 100%': {
+						transform: 'translateX(330%) skewX(-20deg)'
 					}
 				}
 			},
