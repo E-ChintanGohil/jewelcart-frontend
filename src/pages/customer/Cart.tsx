@@ -13,9 +13,10 @@ export default function Cart() {
   const navigate = useNavigate();
 
   const subtotal = getTotalPrice();
-  const shipping = subtotal > 100000 ? 0 : 2000;
+  // Shipping depends on the delivery address (free in Gujarat), so it is only
+  // known at checkout once an address is picked. Cart shows subtotal + tax only.
   const tax = subtotal * 0.03;
-  const total = subtotal + shipping + tax;
+  const total = subtotal + tax;
 
   if (cartItems.length === 0) {
     return (
@@ -140,9 +141,7 @@ export default function Cart() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Shipping</span>
-                  <span className={`font-medium ${shipping === 0 ? 'text-green-600' : 'text-black'}`}>
-                    {shipping === 0 ? 'Free' : formatCurrency(shipping)}
-                  </span>
+                  <span className="font-medium text-gray-400">Calculated at checkout</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Tax (3%)</span>
@@ -150,14 +149,15 @@ export default function Cart() {
                 </div>
               </div>
 
-              {shipping > 0 && (
-                <p className="text-xs text-gray-400">
-                  Add {formatCurrency(100000 - subtotal)} more for free shipping
-                </p>
-              )}
+              <p className="text-xs text-gray-400">
+                Shipping depends on your delivery address. Free in Gujarat, or on orders over{' '}
+                {formatCurrency(100000)}.
+              </p>
 
               <div className="border-t border-gray-200 pt-4 flex justify-between">
-                <span className="text-sm font-semibold text-brandblue">Total</span>
+                <span className="text-sm font-semibold text-brandblue">
+                  Total <span className="font-normal text-gray-400">(excl. shipping)</span>
+                </span>
                 <span className="text-lg font-semibold text-black">{formatCurrency(total)}</span>
               </div>
 

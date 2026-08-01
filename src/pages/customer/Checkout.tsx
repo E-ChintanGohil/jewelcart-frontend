@@ -103,10 +103,13 @@ export default function Checkout() {
   const shipState = (addresses.find(a => a.id === selectedAddress)?.state || '')
     .toLowerCase().replace(/[^a-z]/g, '');
   const isGujarat = shipState === 'gujarat' || shipState === 'gujrat';
+  // Shipping is only known once a delivery address is chosen — until then it is
+  // left out of the summary instead of showing a guess.
+  const hasAddress = Boolean(selectedAddress);
   const shipping = (isGujarat || subtotal > 100000) ? 0 : 2000;
   const tax = subtotal * 0.03;
   const couponDiscount = appliedCoupon?.discountAmount ?? 0;
-  const total = subtotal + shipping + tax - couponDiscount;
+  const total = subtotal + (hasAddress ? shipping : 0) + tax - couponDiscount;
 
   const handleApplyCoupon = async () => {
     if (!couponInput.trim()) return;
@@ -534,9 +537,13 @@ export default function Checkout() {
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Shipping</span>
-                <span className="font-semibold">
-                  {shipping === 0 ? 'Free' : formatCurrency(shipping)}
-                </span>
+                {hasAddress ? (
+                  <span className="font-semibold">
+                    {shipping === 0 ? 'Free' : formatCurrency(shipping)}
+                  </span>
+                ) : (
+                  <span className="text-sm text-gray-400">Add address to calculate</span>
+                )}
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Tax (3%)</span>
@@ -576,11 +583,19 @@ export default function Checkout() {
 
               <Separator />
               <div className="flex justify-between text-lg">
-                <span className="font-bold">Total</span>
+                <span className="font-bold">
+                  Total{!hasAddress && <span className="ml-1 text-sm font-normal text-gray-400">(excl. shipping)</span>}
+                </span>
                 <span className="font-bold text-amber-600">{formatCurrency(total)}</span>
               </div>
 
-              {isGujarat ? (
+              {!hasAddress ? (
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="text-sm text-gray-600">
+                    Shipping is added once you select a delivery address.
+                  </p>
+                </div>
+              ) : isGujarat ? (
                 <div className="bg-green-50 p-3 rounded-lg">
                   <p className="text-sm text-green-800">
                     Free shipping to Gujarat applied.
