@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { localStorageService, Product, Category, Material } from '@/lib/localStorage';
 import apiService from '@/lib/apiService';
 import { UPLOADS_BASE_URL } from '@/lib/config';
@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { formatCurrency } from '@/lib/currency';
-import { Plus, Edit, Trash2, Search, Image as ImageIcon, Star } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Image as ImageIcon, Star, PackageX, PackageCheck, ChevronLeft, ChevronRight } from 'lucide-react';
 import ImageUpload from '@/components/admin/ImageUpload';
 
 const Products = () => {
@@ -22,6 +22,17 @@ const Products = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [materials, setMaterials] = useState<Material[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  // Search runs on the server (all products), not on the loaded page — debounced
+  // so typing doesn't fire a request per keystroke.
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(false);
+  const [stockProduct, setStockProduct] = useState<Product | null>(null);
+  const [stockInput, setStockInput] = useState('');
+  const [isSavingStock, setIsSavingStock] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [calculatedPrice, setCalculatedPrice] = useState<number>(0);
@@ -71,34 +82,64 @@ const Products = () => {
     priceBreakup: [] as { label: string; amount: string }[],
   });
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadProducts = useCallback(async () => {
+    setIsLoadingProducts(true);
     try {
-      // Load from API
-      const productsResponse = await apiService.getAdminProducts();
-      setProducts(productsResponse.products || []);
+      const response = await apiService.getAdminProducts({
+        page,
+        limit: pageSize,
+        search: debouncedSearch || undefined,
+      });
+      setProducts(response.products || []);
+      const pagination = response.pagination || {};
+      setTotalProducts(pagination.total ?? (response.products?.length || 0));
+      setTotalPages(pagination.totalPages ?? 1);
+    } catch (error) {
+      console.error('Error loading products:', error);
+      toast({
+        title: "Error loading products",
+        description: "Failed to load products from server. Please try again.",
+        variant: "destructive",
+      });
+      setProducts(localStorageService.getProducts());
+    } finally {
+      setIsLoadingProducts(false);
+    }
+  }, [page, pageSize, debouncedSearch, toast]);
 
+  const loadReferenceData = useCallback(async () => {
+    try {
       const categoriesResponse = await apiService.getCategories();
       setCategories(categoriesResponse || []);
 
       const materialsResponse = await apiService.getMaterials();
       setMaterials(materialsResponse || []);
     } catch (error) {
-      console.error('Error loading data:', error);
-      toast({
-        title: "Error loading data",
-        description: "Failed to load data from server. Please try again.",
-        variant: "destructive",
-      });
-      // Fallback to localStorage if API fails
-      setProducts(localStorageService.getProducts());
+      console.error('Error loading reference data:', error);
       setCategories(localStorageService.getCategories());
       setMaterials(localStorageService.getMaterials());
     }
-  };
+  }, []);
+
+  // Reload the list whenever the page, page size or (debounced) search changes.
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
+
+  useEffect(() => {
+    loadReferenceData();
+  }, [loadReferenceData]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery.trim());
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Kept for the create/edit/delete handlers — refresh the current page in place.
+  const loadData = () => loadProducts();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -469,11 +510,49 @@ const Products = () => {
     }));
   };
 
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const openStockDialog = (product: Product) => {
+    setStockProduct(product);
+    setStockInput(String(product.stock ?? 0));
+  };
+
+  // One place for every stock change: type a number, or use the sold out /
+  // available shortcuts. Sold out = stock 0 (product stays listed, shows
+  // "Out of Stock"); Active/Inactive is the separate hide-it control.
+  const saveStock = async (quantity: number) => {
+    if (!stockProduct) return;
+    if (!Number.isInteger(quantity) || quantity < 0) {
+      toast({
+        title: "Invalid quantity",
+        description: "Stock must be 0 or a positive whole number.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSavingStock(true);
+    try {
+      await apiService.updateProductStock(stockProduct.id, quantity, 'set');
+      setStockProduct(null);
+      await loadProducts();
+      toast({
+        title: quantity === 0 ? "Marked sold out" : "Stock updated",
+        description: quantity === 0
+          ? `${stockProduct.name} is now sold out.`
+          : `${stockProduct.name} stock set to ${quantity}.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update stock. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingStock(false);
+    }
+  };
+
+  const rangeStart = totalProducts === 0 ? 0 : (page - 1) * pageSize + 1;
+  const rangeEnd = Math.min(page * pageSize, totalProducts);
 
 
   return (
@@ -1146,7 +1225,21 @@ const Products = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredProducts.map((product) => {
+              {isLoadingProducts && products.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                    Loading products...
+                  </TableCell>
+                </TableRow>
+              )}
+              {!isLoadingProducts && products.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                    {debouncedSearch ? `No products match "${debouncedSearch}".` : 'No products yet.'}
+                  </TableCell>
+                </TableRow>
+              )}
+              {products.map((product) => {
                 // Handle both imageUrl and primary_image from API response
                 const imageUrl = (product as any).primary_image || (product as any).imageUrl || product.imageUrl;
 
@@ -1177,9 +1270,13 @@ const Products = () => {
                   <TableCell>{product.category}</TableCell>
                   <TableCell>{formatCurrency(product.price)}</TableCell>
                   <TableCell>
-                    <Badge variant={product.stock < 5 ? "destructive" : "secondary"}>
-                      {product.stock}
-                    </Badge>
+                    {product.stock === 0 ? (
+                      <Badge variant="destructive">Sold out</Badge>
+                    ) : (
+                      <Badge variant={product.stock < 5 ? "destructive" : "secondary"}>
+                        {product.stock}
+                      </Badge>
+                    )}
                   </TableCell>
                   <TableCell>
                   <Badge variant={product.isActive ? "default" : "secondary"}>
@@ -1191,6 +1288,18 @@ const Products = () => {
                       <Button
                         variant="ghost"
                         size="sm"
+                        title={product.stock === 0 ? 'Mark available / set stock' : 'Mark sold out / set stock'}
+                        onClick={() => openStockDialog(product)}
+                        className={product.stock === 0 ? 'text-green-600 hover:text-green-700' : ''}
+                      >
+                        {product.stock === 0
+                          ? <PackageCheck className="h-4 w-4" />
+                          : <PackageX className="h-4 w-4" />}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        title="Edit product"
                         onClick={() => handleEdit(product)}
                       >
                         <Edit className="h-4 w-4" />
@@ -1210,8 +1319,118 @@ const Products = () => {
 
             </TableBody>
           </Table>
+
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4">
+            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+              <span>
+                {totalProducts === 0
+                  ? 'No products'
+                  : `Showing ${rangeStart}-${rangeEnd} of ${totalProducts}`}
+              </span>
+              <Select
+                value={String(pageSize)}
+                onValueChange={(value) => { setPageSize(Number(value)); setPage(1); }}
+              >
+                <SelectTrigger className="w-28 h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="20">20 / page</SelectItem>
+                  <SelectItem value="50">50 / page</SelectItem>
+                  <SelectItem value="100">100 / page</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page <= 1 || isLoadingProducts}
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Previous
+              </Button>
+              <span className="text-sm text-muted-foreground px-2">
+                Page {page} of {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={page >= totalPages || isLoadingProducts}
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              >
+                Next
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
+
+      {/* Stock / sold-out dialog */}
+      <Dialog open={stockProduct !== null} onOpenChange={(open) => !open && setStockProduct(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Update stock</DialogTitle>
+            <DialogDescription>
+              {stockProduct?.name} — currently {stockProduct?.stock === 0 ? 'sold out' : `${stockProduct?.stock} in stock`}.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="stockQuantity">Stock quantity</Label>
+              <Input
+                id="stockQuantity"
+                type="number"
+                min="0"
+                step="1"
+                value={stockInput}
+                onChange={(e) => setStockInput(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Set to 0 to mark the product sold out. It stays listed on the store and shows "Out of Stock".
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {stockProduct?.stock === 0 ? (
+                <Button
+                  variant="outline"
+                  disabled={isSavingStock}
+                  onClick={() => saveStock(Math.max(1, parseInt(stockInput) || 1))}
+                  className="text-green-700"
+                >
+                  <PackageCheck className="h-4 w-4 mr-2" />
+                  Mark available
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  disabled={isSavingStock}
+                  onClick={() => saveStock(0)}
+                  className="text-red-600"
+                >
+                  <PackageX className="h-4 w-4 mr-2" />
+                  Mark sold out
+                </Button>
+              )}
+              <div className="flex-1" />
+              <Button variant="ghost" disabled={isSavingStock} onClick={() => setStockProduct(null)}>
+                Cancel
+              </Button>
+              <Button
+                disabled={isSavingStock}
+                onClick={() => saveStock(parseInt(stockInput))}
+              >
+                {isSavingStock ? 'Saving...' : 'Save'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

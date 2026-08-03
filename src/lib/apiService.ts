@@ -781,7 +781,7 @@ class ApiService {
     return response.stats;
   }
 
-  async updateProductStock(id: string, quantity: number, operation: 'increase' | 'decrease'): Promise<number> {
+  async updateProductStock(id: string, quantity: number, operation: 'increase' | 'decrease' | 'set'): Promise<number> {
     const response = await apiRequest(`/products/${id}/stock`, {
       method: 'PUT',
       body: JSON.stringify({ quantity, operation }),
