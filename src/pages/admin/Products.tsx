@@ -1397,13 +1397,16 @@ const Products = () => {
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-2 min-w-0">
+            {/* Shortcut on its own row, then the normal cancel/save pair — three
+                buttons side by side don't fit the dialog width. */}
+            <div className="min-w-0 space-y-3">
               {stockProduct?.stock === 0 ? (
                 <Button
                   variant="outline"
+                  size="sm"
                   disabled={isSavingStock}
                   onClick={() => saveStock(Math.max(1, parseInt(stockInput) || 1))}
-                  className="text-green-700"
+                  className="w-full text-green-700"
                 >
                   <PackageCheck className="h-4 w-4 mr-2" />
                   Mark available
@@ -1411,15 +1414,16 @@ const Products = () => {
               ) : (
                 <Button
                   variant="outline"
+                  size="sm"
                   disabled={isSavingStock}
                   onClick={() => saveStock(0)}
-                  className="text-red-600"
+                  className="w-full text-red-600"
                 >
                   <PackageX className="h-4 w-4 mr-2" />
                   Mark sold out
                 </Button>
               )}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-end gap-2">
                 <Button variant="ghost" disabled={isSavingStock} onClick={() => setStockProduct(null)}>
                   Cancel
                 </Button>
