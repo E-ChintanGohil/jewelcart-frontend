@@ -1371,7 +1371,9 @@ const Products = () => {
 
       {/* Stock / sold-out dialog */}
       <Dialog open={stockProduct !== null} onOpenChange={(open) => !open && setStockProduct(null)}>
-        <DialogContent className="max-w-md">
+        {/* DialogContent is a grid, so its items must be able to shrink (min-w-0)
+            or a wide button row stretches the panel past its own background. */}
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Update stock</DialogTitle>
             <DialogDescription>
@@ -1379,8 +1381,8 @@ const Products = () => {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
-            <div className="space-y-2">
+          <div className="space-y-4 min-w-0">
+            <div className="space-y-2 min-w-0">
               <Label htmlFor="stockQuantity">Stock quantity</Label>
               <Input
                 id="stockQuantity"
@@ -1395,13 +1397,13 @@ const Products = () => {
               </p>
             </div>
 
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-2 min-w-0">
               {stockProduct?.stock === 0 ? (
                 <Button
                   variant="outline"
                   disabled={isSavingStock}
                   onClick={() => saveStock(Math.max(1, parseInt(stockInput) || 1))}
-                  className="text-green-700 whitespace-nowrap shrink-0"
+                  className="text-green-700"
                 >
                   <PackageCheck className="h-4 w-4 mr-2" />
                   Mark available
@@ -1411,13 +1413,13 @@ const Products = () => {
                   variant="outline"
                   disabled={isSavingStock}
                   onClick={() => saveStock(0)}
-                  className="text-red-600 whitespace-nowrap shrink-0"
+                  className="text-red-600"
                 >
                   <PackageX className="h-4 w-4 mr-2" />
                   Mark sold out
                 </Button>
               )}
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-2">
                 <Button variant="ghost" disabled={isSavingStock} onClick={() => setStockProduct(null)}>
                   Cancel
                 </Button>
