@@ -1424,7 +1424,7 @@ const Products = () => {
                 </Button>
               )}
               <div className="flex items-center justify-end gap-2">
-                <Button variant="ghost" disabled={isSavingStock} onClick={() => setStockProduct(null)}>
+                <Button variant="outline" disabled={isSavingStock} onClick={() => setStockProduct(null)}>
                   Cancel
                 </Button>
                 <Button
