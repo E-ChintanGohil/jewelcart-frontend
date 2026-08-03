@@ -1401,7 +1401,7 @@ const Products = () => {
                   variant="outline"
                   disabled={isSavingStock}
                   onClick={() => saveStock(Math.max(1, parseInt(stockInput) || 1))}
-                  className="text-green-700"
+                  className="text-green-700 whitespace-nowrap shrink-0"
                 >
                   <PackageCheck className="h-4 w-4 mr-2" />
                   Mark available
@@ -1411,13 +1411,13 @@ const Products = () => {
                   variant="outline"
                   disabled={isSavingStock}
                   onClick={() => saveStock(0)}
-                  className="text-red-600"
+                  className="text-red-600 whitespace-nowrap shrink-0"
                 >
                   <PackageX className="h-4 w-4 mr-2" />
                   Mark sold out
                 </Button>
               )}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <Button variant="ghost" disabled={isSavingStock} onClick={() => setStockProduct(null)}>
                   Cancel
                 </Button>
