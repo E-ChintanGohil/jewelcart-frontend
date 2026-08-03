@@ -1395,7 +1395,7 @@ const Products = () => {
               </p>
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex items-center justify-between gap-2">
               {stockProduct?.stock === 0 ? (
                 <Button
                   variant="outline"
@@ -1417,16 +1417,17 @@ const Products = () => {
                   Mark sold out
                 </Button>
               )}
-              <div className="flex-1" />
-              <Button variant="ghost" disabled={isSavingStock} onClick={() => setStockProduct(null)}>
-                Cancel
-              </Button>
-              <Button
-                disabled={isSavingStock}
-                onClick={() => saveStock(parseInt(stockInput))}
-              >
-                {isSavingStock ? 'Saving...' : 'Save'}
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" disabled={isSavingStock} onClick={() => setStockProduct(null)}>
+                  Cancel
+                </Button>
+                <Button
+                  disabled={isSavingStock}
+                  onClick={() => saveStock(parseInt(stockInput))}
+                >
+                  {isSavingStock ? 'Saving...' : 'Save'}
+                </Button>
+              </div>
             </div>
           </div>
         </DialogContent>
