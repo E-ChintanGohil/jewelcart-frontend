@@ -35,6 +35,9 @@ const Products = () => {
   const [isSavingStock, setIsSavingStock] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  // Duplicate/invalid SKU comes back from the server — shown on the field
+  // itself, since a toast disappears before the user can fix the value.
+  const [skuError, setSkuError] = useState<string | null>(null);
   const [calculatedPrice, setCalculatedPrice] = useState<number>(0);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [primaryImageUrl, setPrimaryImageUrl] = useState<string | null>(null);
@@ -45,6 +48,8 @@ const Products = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
+    // Blank on a new product means "let the backend generate one"
+    sku: '',
     category: '',
     stock: '',
     weight: '',
@@ -144,11 +149,15 @@ const Products = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
+    setSkuError(null);
 
     try {
       const productData: any = {
         name: formData.name,
         description: formData.description,
+        // Left blank, the field is omitted entirely so the backend generates a
+        // SKU on create and leaves the existing one untouched on edit.
+        sku: formData.sku.trim() || undefined,
         categoryId: parseInt(categories.find(c => c.name === formData.category)?.id || '1'),
         stock: parseInt(formData.stock),
         // Weight is real product data — always send it, fixed-price or not. Fixed price
@@ -271,6 +280,20 @@ const Products = () => {
         if (errorData.details && process.env.NODE_ENV === 'development') {
           errorDescription += `\n\nDetails: ${errorData.details}`;
         }
+
+        // Pin SKU problems to the field so the value stays on screen to correct.
+        // Two shapes reach here: our own { field: 'sku' } responses, and
+        // express-validator's { details: [{ path: 'sku', msg }] }.
+        const skuDetail = Array.isArray(errorData.details)
+          ? errorData.details.find((d: any) => (d.path || d.param) === 'sku')
+          : null;
+
+        if (errorData.field === 'sku') {
+          setSkuError(errorData.message || errorDescription);
+        } else if (skuDetail) {
+          setSkuError(skuDetail.msg);
+          errorDescription = skuDetail.msg;
+        }
       } else if (error.message) {
         errorDescription = error.message;
       }
@@ -329,6 +352,7 @@ const Products = () => {
     setFormData({
       name: '',
       description: '',
+      sku: '',
       category: '',
       stock: '',
       weight: '',
@@ -360,6 +384,7 @@ const Products = () => {
     });
     setCalculatedPrice(0);
     setEditingProduct(null);
+    setSkuError(null);
     setSelectedImages([]);
     setPrimaryImageUrl(null);
     setImagesToDelete([]);
@@ -424,6 +449,7 @@ const Products = () => {
       setPrimaryImageUrl(primaryImage?.imageUrl || null);
 
       setEditingProduct(fullProduct);
+      setSkuError(null);
       const fp: any = fullProduct;
       const dd = fp.diamondDetails || fp.diamond_details;
       const sd = fp.stoneDetails || fp.stone_details || [];
@@ -431,6 +457,7 @@ const Products = () => {
       setFormData({
         name: fullProduct.name,
         description: fullProduct.description,
+        sku: fullProduct.sku || '',
         category: fullProduct.category,
         stock: fullProduct.stock?.toString() || '',
         weight: fullProduct.weight?.toString() || '',
@@ -594,7 +621,31 @@ const Products = () => {
                   onChange={handleInputChange}
                   required
                 />
-                <p className="text-sm text-muted-foreground">SKU will be auto-generated based on category and material</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="sku">SKU</Label>
+                <Input
+                  id="sku"
+                  name="sku"
+                  value={formData.sku}
+                  onChange={(e) => {
+                    setSkuError(null);
+                    setFormData(prev => ({ ...prev, sku: e.target.value.toUpperCase() }));
+                  }}
+                  placeholder={editingProduct ? '' : 'Leave blank to generate automatically'}
+                  aria-invalid={!!skuError}
+                  className={skuError ? 'border-destructive focus-visible:ring-destructive' : ''}
+                />
+                {skuError ? (
+                  <p className="text-sm text-destructive">{skuError}</p>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    {editingProduct
+                      ? 'Must be unique. Clear it to keep the current SKU.'
+                      : 'Leave blank and one will be generated from the category and material.'}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">

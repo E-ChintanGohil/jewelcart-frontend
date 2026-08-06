@@ -336,6 +336,7 @@ class ApiService {
       formData.append('fixedPrice', productData.fixedPrice.toString());
     }
 
+    if (productData.sku) formData.append('sku', productData.sku);
     if (productData.gemstone) formData.append('gemstone', productData.gemstone);
     if (productData.certification) formData.append('certification', productData.certification);
     if (productData.tags && productData.tags.length > 0) {
@@ -426,6 +427,7 @@ class ApiService {
       formData.append('imagesToDelete', JSON.stringify(imagesToDelete));
     }
 
+    if (productData.sku) formData.append('sku', productData.sku);
     if (productData.gemstone) formData.append('gemstone', productData.gemstone);
     if (productData.certification) formData.append('certification', productData.certification);
     if (productData.tags && productData.tags.length > 0) {
