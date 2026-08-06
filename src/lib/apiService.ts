@@ -43,7 +43,12 @@ const apiRequest = async (
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error || `HTTP error! status: ${response.status}`);
+      // Carry the parsed body along, the same way the *WithImages methods do.
+      // Callers need `message` and `field` to show a useful error next to the
+      // offending input; a bare Error leaves them only the terse `error` code.
+      const error: any = new Error(data.error || `HTTP error! status: ${response.status}`);
+      error.response = { data, status: response.status };
+      throw error;
     }
 
     return data;
