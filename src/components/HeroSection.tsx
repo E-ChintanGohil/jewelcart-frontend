@@ -1,97 +1,101 @@
-
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "./ui/carousel";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import {
+	Carousel,
+	CarouselContent,
+	CarouselItem,
+	CarouselNext,
+	CarouselPrevious,
+	type CarouselApi,
+} from "./ui/carousel";
+
+/**
+ * Home hero banners.
+ * Artwork carries its own headline + CTA, so nothing is overlaid in code.
+ * Each slide has a separate desktop (2.4:1) and mobile (4:5) image.
+ */
+const banners = [
+	{
+		desktop: "/assets/images/banners/rakhi-desktop-1.jpg",
+		mobile: "/assets/images/banners/rakhi-mobile-1.jpg",
+		alt: "Bound by Love — shop your 925 silver Rakhi now",
+		href: "/products/rakhi",
+	},
+	{
+		desktop: "/assets/images/banners/rakhi-desktop-2.jpg",
+		mobile: "/assets/images/banners/rakhi-mobile-2.jpg",
+		alt: "Find your forever 925 Silver Rakhi",
+		href: "/products/rakhi",
+	},
+	{
+		desktop: "/assets/images/banners/rakhi-desktop-3.jpg",
+		mobile: "/assets/images/banners/rakhi-mobile-3.jpg",
+		alt: "925 Silver Rakhi collection",
+		href: "/products/rakhi",
+	},
+];
+
+const AUTOPLAY_MS = 5000;
 
 const HeroSection = () => {
+	const [api, setApi] = useState<CarouselApi>();
+	const [current, setCurrent] = useState(0);
+
+	useEffect(() => {
+		if (!api) return;
+		setCurrent(api.selectedScrollSnap());
+		const onSelect = () => setCurrent(api.selectedScrollSnap());
+		api.on("select", onSelect);
+		return () => {
+			api.off("select", onSelect);
+		};
+	}, [api]);
+
+	useEffect(() => {
+		if (!api) return;
+		const timer = setInterval(() => api.scrollNext(), AUTOPLAY_MS);
+		return () => clearInterval(timer);
+	}, [api]);
+
 	return (
-		<>
-		<Carousel className="w-full inline-block">
-			<CarouselContent>
-				<CarouselItem className="py-24 relative flex items-center w-full">
-					<div className="absolute inset-0 top-0 left-0 z-[5]">
-						<img
-							src="assets/images/spotlight4.jpg"
-							alt="Luxury Jewelry Collection"
-							className="w-full h-full object-cover"
-						/>
-						{/* <div className="absolute inset-0 bg-black/50" /> */}
-					</div>
-					<div className="w-full z-10 flex items-center h-full relative">
-						<div className="container max-md:px-5">
-							<div className="grid lg:grid-cols-2 items-center">
-								<div className="space-y-12">
-									<div className="space-y-5">
-										<Badge variant="secondary" className="font-normal bg-white/20 text-white border-white/30 hover:bg-white/20">Limited Time Offer</Badge>
-										<h1 className="text-5xl lg:text-6xl font-bold leading-tight text-white">Affordable Luxury,<br/>Delivered with Trust</h1>
-										<p className="font-light text-xl font-sans text-white max-w-lg">Gold. Silver. Diamonds. Crafted for every celebration. Shop authentic jewellery with trusted quality, transparent pricing, and fast delivery across India.</p>
-									</div>
-									<div className="flex flex-wrap gap-4">
-										<Link to="/shop"><Button variant="default" size="default" className="bg-brandgold uppercase hover:bg-brandblue">Shop Now</Button></Link>
-										<Link to="/shop"><Button variant="outline" size="default" className="hover:text-white hover:border-white uppercase">Our Collections</Button></Link>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</CarouselItem>
-				<CarouselItem className="py-24 relative flex items-center w-full">
-					<div className="absolute inset-0 top-0 left-0 z-[5]">
-						<img
-							src="assets/images/spotlight5.jpg"
-							alt="Luxury Jewelry Collection"
-							className="w-full h-full object-cover"
-						/>
-						{/* <div className="absolute inset-0 bg-black/50" /> */}
-					</div>
-					<div className="w-full z-10 flex items-center h-full relative">
-						<div className="container max-md:px-5">
-							<div className="grid lg:grid-cols-2 items-center">
-								<div className="space-y-12">
-									<div className="space-y-5">
-										<Badge variant="secondary" className="font-normal bg-white/20 text-white border-white/30 hover:bg-white/20">Limited Time Offer</Badge>
-										<h1 className="text-5xl lg:text-6xl font-bold leading-tight text-white">Affordable Luxury,<br/>Delivered with Trust</h1>
-										<p className="font-light text-xl font-sans text-gray-200 max-w-lg">Gold. Silver. Diamonds. Crafted for every celebration. Wear your story and shine every day.</p>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</CarouselItem>
-				<CarouselItem className="py-24 relative flex items-center w-full">
-					<div className="absolute inset-0 top-0 left-0 z-[5]">
-						<img
-							src="assets/images/spotlight3.jpg"
-							alt="Luxury Jewelry Collection"
-							className="w-full h-full object-cover"
-						/>
-						{/* <div className="absolute inset-0 bg-black/50" /> */}
-					</div>
-					<div className="w-full z-10 flex items-center h-full relative">
-						<div className="container max-md:px-5">
-							<div className="grid lg:grid-cols-2 items-center">
-								<div className="space-y-12">
-									<div className="space-y-5">
-										<Badge variant="secondary" className="font-normal bg-brandgold/20 text-brandblue border-brandblue/30">Limited Time Offer</Badge>
-										<h1 className="text-5xl lg:text-6xl font-bold leading-tight text-brandblue">Affordable Luxury,<br/>Delivered with Trust</h1>
-										<p className="font-light text-xl font-sans text-brandblue max-w-lg">Gold. Silver. Diamonds. Crafted for every celebration. Shop authentic jewellery with trusted quality and honest pricing.</p>
-									</div>
-									<div className="flex flex-wrap gap-4">
-										<Link to="/shop"><Button size="lg" className="bg-brandgold hover:bg-brandblue text-white uppercase">Shop Now</Button></Link>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</CarouselItem>
+		<Carousel className="w-full relative" opts={{ loop: true }} setApi={setApi}>
+			<CarouselContent className="ml-0">
+				{banners.map((banner, index) => (
+					<CarouselItem key={banner.desktop} className="pl-0 basis-full">
+						<Link to={banner.href} aria-label={banner.alt} className="block">
+							<picture>
+								<source media="(min-width: 768px)" srcSet={banner.desktop} />
+								<img
+									src={banner.mobile}
+									alt={banner.alt}
+									loading={index === 0 ? "eager" : "lazy"}
+									decoding="async"
+									className="block w-full h-auto aspect-[2250/2812] md:aspect-[5000/2083] object-cover"
+								/>
+							</picture>
+						</Link>
+					</CarouselItem>
+				))}
 			</CarouselContent>
-			<div className="absolute bottom-5 right-5 gap-2 w-full flex justify-end items-center">
-				<CarouselPrevious />
-				<CarouselNext />
+
+			<div className="absolute inset-x-0 bottom-4 md:bottom-5 flex items-center justify-center gap-2">
+				{banners.map((banner, index) => (
+					<button
+						key={banner.desktop}
+						type="button"
+						onClick={() => api?.scrollTo(index)}
+						aria-label={`Go to banner ${index + 1}`}
+						aria-current={current === index}
+						className={`h-2 rounded-full transition-all ${
+							current === index ? "w-6 bg-brandblue" : "w-2 bg-brandblue/40 hover:bg-brandblue/60"
+						}`}
+					/>
+				))}
 			</div>
+
+			<CarouselPrevious className="hidden md:inline-flex absolute left-5 top-1/2 -translate-y-1/2 shadow-md hover:bg-white" />
+			<CarouselNext className="hidden md:inline-flex absolute right-5 top-1/2 -translate-y-1/2 shadow-md hover:bg-white" />
 		</Carousel>
-		</>
 	);
 };
 
