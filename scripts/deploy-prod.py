@@ -124,16 +124,58 @@ ssl_ctx = ssl.create_default_context()
 ssl_ctx.check_hostname = False
 ssl_ctx.verify_mode = ssl.CERT_NONE
 
-import base64
-AUTH_HEADER = "Basic " + base64.b64encode(f"{CP_USER}:{CP_PASS}".encode()).decode()
+import urllib.error
+
 BASE_URL = f"https://{CP_HOST}:{CP_PORT}"
+
+
+def cpanel_login():
+    """Log in to cPanel and return (security_token, cookie_header).
+
+    The host stopped accepting HTTP Basic auth on /execute/* (401 Access Denied)
+    around 25 Aug 2026, so we do a normal session login and call UAPI under the
+    session security token, the same way the cPanel web UI does.
+    """
+    data = urllib.parse.urlencode({
+        "user": CP_USER,
+        "pass": CP_PASS,
+        "login_only": "1",
+    }).encode()
+    req = urllib.request.Request(
+        f"{BASE_URL}/login/?login_only=1",
+        data=data,
+        method="POST",
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+    )
+    try:
+        with urllib.request.urlopen(req, context=ssl_ctx, timeout=60) as resp:
+            payload = json.loads(resp.read().decode("utf-8", errors="replace"))
+            cookies = resp.headers.get_all("Set-Cookie") or []
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", errors="replace")[:200]
+        sys.exit(f"\u274c cPanel login failed (HTTP {e.code}): {body}")
+    except Exception as e:
+        sys.exit(f"\u274c cPanel login failed: {e}")
+
+    if payload.get("status") != 1 or not payload.get("security_token"):
+        sys.exit(f"\u274c cPanel login rejected: {payload.get('message') or payload}")
+
+    session = next((c.split(";", 1)[0] for c in cookies if c.startswith("cpsession=")), "")
+    if not session:
+        sys.exit("\u274c cPanel login succeeded but no cpsession cookie was returned.")
+    return payload["security_token"], session
+
+
+SECURITY_TOKEN, SESSION_COOKIE = cpanel_login()
+API_BASE = f"{BASE_URL}{SECURITY_TOKEN}"
+AUTH_HEADERS = {"Cookie": SESSION_COOKIE}
 
 def uapi(module: str, function: str, params: dict = None, method: str = "GET", data: bytes = None, content_type: str = None):
     """Call cPanel UAPI. Returns parsed JSON."""
-    url = f"{BASE_URL}/execute/{module}/{function}"
+    url = f"{API_BASE}/execute/{module}/{function}"
     if params and method == "GET":
         url += "?" + urllib.parse.urlencode(params)
-    headers = {"Authorization": AUTH_HEADER}
+    headers = dict(AUTH_HEADERS)
     if content_type:
         headers["Content-Type"] = content_type
     req = urllib.request.Request(url, data=data, method=method, headers=headers)
@@ -196,11 +238,11 @@ def upload_file(remote_dir: str, local_path: Path):
     data = b"".join(body_parts)
 
     req = urllib.request.Request(
-        f"{BASE_URL}/execute/Fileman/upload_files",
+        f"{API_BASE}/execute/Fileman/upload_files",
         data=data,
         method="POST",
         headers={
-            "Authorization": AUTH_HEADER,
+            **AUTH_HEADERS,
             "Content-Type": f"multipart/form-data; boundary={boundary}",
         },
     )
