@@ -108,11 +108,7 @@ const simpleNavLinks = [
  * Seasonal spotlight link, shown first in the nav.
  * Set to null once the season is over to remove it everywhere.
  */
-const spotlightNav: { slug: string; label: string; badge: string } | null = {
-	slug: "rakhi",
-	label: "Rakhi",
-	badge: "New",
-};
+const spotlightNav: { slug: string; label: string; badge: string } | null = null;
 
 // ---------- Helpers ----------
 
